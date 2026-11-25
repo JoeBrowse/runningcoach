@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skid Marks: a free running coach and gym tracker</title>
+<meta name="description" content="Skid Marks is a free running coach and gym tracker in one app. It plans your runs around your gym days and keeps your data on your phone.">
+<meta property="og:title" content="Skid Marks">
+<meta property="og:description" content="A free running coach and gym tracker. No account, no ads, no paywall.">
+<meta property="og:type" content="website">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="fonts.css">
+<style>
+  :root{
+    --bg:#15171A; --surface:#1C1F23; --raised:#23272C; --line:#2E3339;
+    --text:#F2F4F5; --dim:#9A9D9F; --accent:#FF6B1A; --ok:#5FB86B;
+    --amber:#E5B93E; --bad:#F26A6A;
+    --head:'Oswald',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --body:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);
+       -webkit-font-smoothing:antialiased;line-height:1.6}
+  img{max-width:100%;display:block}
+  a{color:var(--accent)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:var(--head);text-transform:uppercase;letter-spacing:.5px;
+           line-height:1.1;margin:0}
+  .eyebrow{font-family:var(--head);text-transform:uppercase;letter-spacing:2.5px;
+           font-size:12px;color:var(--accent)}
+
+  /* ---- hero ---- */
+  header{padding:72px 0 56px;border-bottom:1px solid var(--line)}
+  .hero{display:grid;grid-template-columns:1fr 300px;gap:56px;align-items:center}
+  h1{font-size:clamp(38px,6vw,62px);margin:14px 0 18px}
+  .lede{font-size:19px;color:var(--dim);max-width:30em;margin-bottom:12px}
+  .sub{font-size:15px;color:var(--dim);max-width:32em;margin-bottom:30px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .btn{display:inline-block;background:var(--accent);color:#1A1200;font-family:var(--head);
+       text-transform:uppercase;letter-spacing:.5px;font-size:15px;padding:15px 30px;
+       border-radius:13px;text-decoration:none}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .note{font-size:13px;color:var(--dim);margin-top:14px}
+  .phone{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--surface)}
+
+  /* ---- generic section ---- */
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:clamp(24px,3.4vw,34px);margin-bottom:10px}
+  .intro{color:var(--dim);max-width:44em;margin-bottom:36px}
+
+  /* ---- feature grid ---- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .card h3{font-size:16px;margin-bottom:8px}
+  .card p{margin:0;color:var(--dim);font-size:14.5px}
+
+  /* ---- screenshots ---- */
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
+  .shot figcaption{font-size:13.5px;color:var(--dim);margin-top:12px}
+  .shot img{border:1px solid var(--line);border-radius:16px}
+  figure{margin:0}
+
+  /* ---- readiness key ---- */
+  .key{display:flex;gap:20px;flex-wrap:wrap;margin-top:18px}
+  .key span{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+  /* ---- pricing ---- */
+  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;max-width:640px}
+  .plan{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .plan.lead{border-color:var(--accent);background:rgba(255,107,26,.07)}
+  .plan .name{font-family:var(--head);text-transform:uppercase;font-size:15px;letter-spacing:.5px}
+  .plan .price{font-family:var(--mono);font-size:26px;margin:10px 0 4px}
+  .plan .per{color:var(--dim);font-size:13px}
+  .badge{background:var(--accent);color:#1A1200;font-family:var(--head);font-size:10px;
+         text-transform:uppercase;letter-spacing:.5px;border-radius:5px;padding:3px 7px;margin-left:8px}
+
+  /* ---- privacy callout ---- */
+  .callout{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--ok);
+           border-radius:14px;padding:24px}
+  .callout ul{margin:12px 0 0;padding-left:20px;color:var(--dim)}
+  .callout li{margin-bottom:7px}
+
+  footer{padding:44px 0 60px;color:var(--dim);font-size:13.5px}
+  footer a{color:var(--dim)}
+  .fine{margin-top:18px;font-size:12.5px;opacity:.8;line-height:1.65}
+
+  @media(max-width:820px){
+    .hero{grid-template-columns:1fr;gap:36px}
+    .hero .phone{max-width:280px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hero">
+    <div>
+      <div class="eyebrow">Skid Marks</div>
+      <h1>A free running coach and gym tracker in one app</h1>
+      <p class="lede">Skid Marks plans your runs around your gym days. It changes the plan when life changes, and it tells you why.</p>
+      <p class="sub">All features are free. No account, no ads, no paywall. Your data stays on your phone.</p>
+      <div class="cta">
+        <a class="btn" href="https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk">Download for Android</a>
+        <a class="btn ghost" href="https://github.com/JoeBrowse/runningcoach">Source code</a>
+      </div>
+      <p class="note">Android test build (APK) · free · open source under GPL-3.0</p>
+    </div>
+    <div class="phone"><img src="screens/plan-today.png" alt="Plan mode: today's session with the warm-up and the start button"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Three modes, one week</h2>
+    <p class="intro">Use the switch at the top of the screen. Each session goes into one log, so you never log a session twice.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Plan</h3>
+        <p>Your master week. Run days and gym days are in one plan. Today's session, the week, a weekly review, races and goals.</p>
+      </div>
+      <div class="card">
+        <h3>Run</h3>
+        <p>The running coach. GPS recording with voice cues, warm-ups, live pace guidance, progress, zones and race prediction.</p>
+      </div>
+      <div class="card">
+        <h3>Lift</h3>
+        <p>The gym tracker, based on Iron Log. Log sets, follow programmes, see 1RM progress and which muscles have recovered.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What makes it different</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Gym days count</h3>
+        <p>A heavy leg day counts as a hard day. The plan keeps it away from quality runs and the long run. Before a race, lifting changes to maintenance.</p>
+      </div>
+      <div class="card">
+        <h3>Honest safety rules</h3>
+        <p>Weekly distance grows by 10% or less. Hard days never touch. About 80% of running is easy. The app checks the real plan, and tests check thousands of plans.</p>
+      </div>
+      <div class="card">
+        <h3>Changes with reasons</h3>
+        <p>Missed a run, ill, in pain, on holiday or back after a break? The app asks first. Then it shows each change and its reason. You can undo any change.</p>
+      </div>
+      <div class="card">
+        <h3>Any goal</h3>
+        <p>Run/walk to a first 5K, 5K to marathon, a 50K trail race, or no race at all: keep fit, faster 5K, build to 10K. A, B and C races, and recovery after each race.</p>
+      </div>
+      <div class="card">
+        <h3>Simple or Advanced</h3>
+        <p>Simple mode uses plain effort words and hides scores. Advanced mode shows the fitness score, zones, predictions and the fitness, fatigue and form chart.</p>
+      </div>
+      <div class="card">
+        <h3>Bring your history</h3>
+        <p>Import Strava and Garmin export files, and FIT, GPX and TCX files, many at once. Duplicates are skipped. Optional Intervals.icu link with your own key.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What it looks like</h2>
+    <p class="intro">These are real screens from the app, not mockups.</p>
+    <div class="shots">
+      <figure class="shot">
+        <img src="screens/run-home.png" alt="Run mode: today's run as a ribbon of steps with the go button">
+        <figcaption>Run mode. Today's run, the warm-up and one button to start.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screens/run-record.png" alt="A run in progress with a voice cue caption">
+        <figcaption>A run in progress. Each voice cue also shows as a caption.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screens/plan-week.png" alt="The master week with run days and gym days">
+        <figcaption>The master week. Run days and gym days are in one plan.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screens/run-progress.png" alt="Progress: fitness and fatigue, weekly distance and records">
+        <figcaption>Progress. The load values are information only.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screens/lift-home.png" alt="Lift home with the muscle readiness body map">
+        <figcaption>Lift mode. Runs and lift sessions both feed the readiness map.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screens/onboarding.png" alt="The first screen: who are you?">
+        <figcaption>The first screen. New runners answer three questions and need no race date.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="wrap">
+    <h2>Privacy is part of the design</h2>
+    <div class="callout">
+      <ul>
+        <li>There is no Skid Marks server and no account.</li>
+        <li>No analytics, no tracking and no ads.</li>
+        <li>The app connects to the internet only for links that you turn on: local weather (Open-Meteo) and Intervals.icu.</li>
+        <li>The app uses your location only while you record a run.</li>
+        <li>Strava data is shown only to you. The app never sends it to an AI.</li>
+        <li>Backups are plain JSON files that you can read.</li>
+      </ul>
+    </div>
+    <p class="note"><a href="privacy.html">Read the full privacy policy</a></p>
+  </div>
+</section>
+
+<section id="get">
+  <div class="wrap">
+    <h2>How to get it</h2>
+    <p class="intro">
+      Open the download link on your Android phone. Open the file. Allow your browser or file manager to install apps when Android asks.
+      This is a test build signed with a debug key, so Android shows a warning.
+    </p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk">Download the APK</a>
+      <a class="btn ghost" href="https://github.com/JoeBrowse/runningcoach/releases">All releases</a>
+    </div>
+    <p class="note">Skid Marks gives general training information. It is not medical advice. It cannot diagnose or predict injury. If something hurts, see a physio or a doctor.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Skid Marks: a free running coach and gym tracker.</div>
+    <div class="fine">
+      Free software under the GNU General Public License, version 3 or later. Lift mode is based on Iron Log.
+      The muscle map uses region data from body-muscles by Ivan Vulović (Apache License 2.0).
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

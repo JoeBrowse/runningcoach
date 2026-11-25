@@ -1,0 +1,96 @@
+# Builds the Skid Marks Android app (APK).
+#
+# Every push builds a debug APK and keeps it as a workflow artifact.
+# A push to main also publishes the APK on a GitHub Release, so the
+# latest build is always at:
+#   https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk
+#
+# The APK is signed with the Android debug key. It is a test build:
+# Android asks the user to allow apps from unknown sources.
+name: Android APK
+
+on:
+  push:
+    branches: ["main", "claude/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build the web app
+        run: npm run build
+
+      - name: Create the Android project
+        run: |
+          npx cap add android
+          node scripts/android-permissions.mjs
+
+      - name: Make the app icons and splash screens
+        run: npx @capacitor/assets generate --android || echo "Icon generation failed. The build uses the default icon."
+
+      - name: Copy the web app into the Android project
+        run: npx cap sync android
+
+      - name: Set the version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \".*\"/versionName \"$VERSION\"/" android/app/build.gradle
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Build the APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rename the APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk skid-marks.apk
+
+      - name: Keep the APK as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: skid-marks-apk
+          path: skid-marks.apk
+
+      - name: Publish the APK on a release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Skid Marks ${{ env.VERSION }} (build ${{ github.run_number }})
+          body: |
+            Test build of Skid Marks, made from commit ${{ github.sha }}.
+            Download skid-marks.apk and open it on an Android phone.
+            Android asks you to allow apps from unknown sources. This is a test build signed with a debug key.
+          files: skid-marks.apk
+          make_latest: true
