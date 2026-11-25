@@ -44,6 +44,7 @@ Tests: `node --test test/` (Node 22). The tests build more than 500 plans and ch
 - `gymDays`: `[{day, type: 'upper'|'lower'|'full'|'legs'|'other', intensity: 'heavy'|'light', note}]`.
 - `usesLift`: when true, the engine adds no strength sessions. The default is true when there are gym days.
 - `currentWeeklyKm`, `score`, `experience` (`new` | `some` | `experienced`), `races` (`[{date, distKm, priority: 'A'|'B'|'C', name}]`), `today`.
+- Habits from the run history (all optional, from `seedFromHistory`): `runsPerWeek`, `usualLongRunKm`, `longestRecentKm`, `peakWeekKm`. They shape week 1 only. A value that the user typed wins over the history (see `planOptions` in `src/plan/planState.js`).
 
 Plan fields: `weeks[]` (each with `n`, `startIso`, `kind`, `phase`, `cutback`, `targetKm`, `km`, `trainingKm`, `check`, `days[7]`), `races`, `warnings`, `conflicts` (gym clashes with a reason and a suggestion), `changesFromRules` (what the engine changed, with the reason and the dates), `gymAdvice` (`normal` | `maintenance` | `skip-heavy`, with a reason), `peakKm`, `limits`, `safety`.
 
@@ -53,7 +54,9 @@ Other plan functions: `todayWorkout(plan, iso)`, `weekOf(plan, iso)`, `allDays(p
 
 ### Rules that the engine keeps
 
-1. Week 1 is at most the current weekly distance + 10% (a small starter floor of 3 km a run day, at most 9 km, applies only below that, with a warning).
+1. Week 1 is at most the current weekly distance + 10% (a small starter floor of 3 km a run day, at most 9 km, applies only below that, with a warning). `week1Limit()` gives the limit, and the safety check uses the same function with `plan.settings`.
+   - New run days: when the plan has more run days than `runsPerWeek`, each new day starts as a short easy run (about 25 minutes at easy pace, 3 to 5 km, `newRunKmFor(paces)`). The usual runs keep their distance. Week 1 has no hard session. The week 1 limit is then the larger of current + 10% and current + the new short runs, but never more than current + 25% and never more than `peakWeekKm`.
+   - Long run: week 1 starts at about `usualLongRunKm` (not less), inside the caps: 3 hours or less, the goal cap, 32 km or less, `longestRecentKm` + 10%, and a safe share of the week. The long run stays the longest run of the week. `changesFromRules` gives the reason, also when a cap makes it shorter.
 2. Each week grows by 10% or less against the last normal week. Every 4th week is a cutback week. The taper follows the target. The peak is the largest normal training week. A week that is much larger than its 10% limit (for example after a race lowered the week before) is planned again at the limit. Cuts to fit a limit shrink the easy runs and the long run by the same share.
 3. No two hard days touch, also across week ends. No hard day before the long run. At most 1 hard session a week for new runners, 2 for others. Races count as hard sessions.
 4. The long run is the longest run of the week, about one third of the week or less (more with 2 or 3 run days), and 3 hours or less.
@@ -90,7 +93,9 @@ Also: `suggestDays(plan, iso, {today})` (safe days before the tap), `checkMove(p
 
 ## History, load and streak
 
-- `seedFromHistory(activities, today)`: best effort from the last 12 weeks (races and time trials first; no workouts, short reps or GPS faults), the 4-week and 12-week average distance, past peak weeks, and `runsUsed`.
+- `seedFromHistory(activities, today)`: best effort from the last 12 weeks (races and time trials first; no workouts, short reps or GPS faults), the 4-week and 12-week average distance (`avg4WeeksKm`, `avg12WeeksKm`), `peak12WeeksKm`, past peak weeks, `longestRecentKm`, and `runsUsed`.
+  - `currentWeeklyKm`: the 4-week average. When one low or empty week (for example a holiday) pulls it below the 12-week average, the value is the middle value of the last 6 weeks with a run, but not more than the 12-week average or 1.1 x the best of the last 4 weeks. When 3 or more of the last 4 weeks are nearly empty (a real break), the 4-week average stays. `weeklyKmSource` (`last4` | `steady` | `break`) and `weeklyKmNote` say which value and why.
+  - `runsPerWeek`: the middle value of the runs a week in the last 6 weeks with a run. `usualLongRunKm`: the middle value of each of those weeks' longest run.
 - `sessionLoad(a)` = RPE x minutes. RPE comes from `a.rpe`, else from heart rate (`avgHR`, `maxHR`, `restHR`), else from the session type. `sessionRpe(a)` gives the source.
 - `loadSeries(activities, days, today)`: `[{iso, load, fitness (42 days), fatigue (7 days), form}]`.
 - `easyHardSplit(activities, hr)`: easy and hard minutes, with `method` (`hr-zones`, `hr-average`, `session-type` or `mixed`).

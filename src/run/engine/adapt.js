@@ -260,7 +260,7 @@ export function adapt(plan, event, ctx = {}) {
     if (days <= 4) return finish(P, changes, { message: 'Welcome back. Carry on with the plan. Do not make up missed runs.' });
     if (days > 28) {
       const prevNormal = plan.weeks.filter((w) => w.check === 'normal' && w.startIso < today).at(-1);
-      const fresh = buildPlan({ ...plan.opts, today, startDate: undefined, currentWeeklyKm: round((prevNormal ? prevNormal.km : plan.limits.currentWeeklyKm) * (a.otherExercise ? 0.35 : 0.2), 1), score: Math.max(SCORE_MIN, round(plan.score - (days > 56 ? 3 : 2), 1)) });
+      const fresh = buildPlan({ ...plan.opts, usualLongRunKm: undefined, runsPerWeek: undefined, peakWeekKm: undefined, longestRecentKm: undefined, today, startDate: undefined, currentWeeklyKm: round((prevNormal ? prevNormal.km : plan.limits.currentWeeklyKm) * (a.otherExercise ? 0.35 : 0.2), 1), score: Math.max(SCORE_MIN, round(plan.score - (days > 56 ? 3 : 2), 1)) });
       return { plan: fresh, changes: [{ iso: today, before: plan.goalName, after: `${fresh.goalName} (new start)`, reason: `${days} days off. The plan starts again from your current level.` }], questions: [], needsAnswers: false, message: 'Welcome back. We made a new plan that starts from your current level.' };
     }
     if (days <= 10) {
