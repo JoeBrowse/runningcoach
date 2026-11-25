@@ -18,8 +18,8 @@ Apply this to documents, comments, commit messages and replies.
 
 ## Research files
 
-- Full report (tables for 37 apps, per-app insights, sources): `reports/Running coach app comparison.md`
-- Raw research notes: `research_notes/Running coach app comparison/`
+- Full report (tables for 37 apps, per-app insights, sources): `docs/research/report/Running coach app comparison.md`
+- Raw research notes: `docs/research/notes/Running coach app comparison/`
   - `dedicated_plan_apps.md`: Runna, Coopah, V.O2, McMillan, TrainAsONE, Campus Coach, Run With Hal, Marathon Handbook
   - `ai_coaching_apps.md`: HumanGO, Enduco, Athletica, AI Endurance, Kotcha, ChatGPT, WHOOP, Google, Garmin AI
   - `training_platforms.md`: Strava, TrainingPeaks, Final Surge, Intervals.icu, Stryd, Runalyze, SportTracks
