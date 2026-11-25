@@ -29,7 +29,7 @@ export function StartChoiceScreen({ hasActive, activeName, nextDayName, onContin
           <div style={iconWrap(false)}><Plus size={20} /></div>
           <div style={{ flex: 1 }}>
             <div style={title}>New Programme</div>
-            <div style={sub}>Pick a split, choose your exercises, follow it for weeks.</div>
+            <div style={sub}>Select a split and your exercises. Then follow the programme for weeks.</div>
           </div>
           <ChevronRight size={18} color={COLORS.textDim} />
         </button>
@@ -37,13 +37,13 @@ export function StartChoiceScreen({ hasActive, activeName, nextDayName, onContin
           <div style={iconWrap(false)}><Dumbbell size={20} /></div>
           <div style={{ flex: 1 }}>
             <div style={title}>Free Mode</div>
-            <div style={sub}>A one-off workout — build it however you like.</div>
+            <div style={sub}>A single workout. You choose the exercises.</div>
           </div>
           <ChevronRight size={18} color={COLORS.textDim} />
         </button>
         {hasActive && (
           <div style={{ color: COLORS.textDim, fontSize: 11.5, textAlign: "center", marginTop: 6, lineHeight: 1.5 }}>
-            Starting a new programme will archive your current one to Finished Programmes.
+            If you start a new programme, the app moves your current programme to Finished Programmes.
           </div>
         )}
       </div>

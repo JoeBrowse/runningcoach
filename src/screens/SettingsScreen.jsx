@@ -16,19 +16,19 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
   // together and called out in the tour so they aren't easy to miss.
   const optInItems = [
     { key: "showCues", label: "Exercise Cues", desc: "Show the hypertrophy tip under each exercise." },
-    { key: "showWarmups", label: "Warm-Up Suggestions", desc: "Suggest ramp-up sets before compound lifts." },
-    { key: "includeMobility", label: "Mobility Finisher", desc: "Add a mobility/stretch exercise to the end of every built workout." },
+    { key: "showWarmups", label: "Warm-Up Suggestions", desc: "Suggest warm-up sets that increase in weight before compound lifts." },
+    { key: "includeMobility", label: "Mobility Finisher", desc: "Add a mobility or stretch exercise at the end of each workout that the app builds." },
   ];
   const items = [
     { key: "showLastSet", label: "Last Top Set", desc: "Show your last top set for each exercise." },
-    { key: "showSetTicks", label: "Set Tick Boxes", desc: "Show the tick box beside every set and warm-up. Off is a cleaner list — what you type is still saved either way, but the rest timer stops starting itself." },
+    { key: "showSetTicks", label: "Set Tick Boxes", desc: "Show the tick box next to each set and warm-up. When this is off, the list is simpler. The app saves what you type in both cases. But the rest timer does not start automatically." },
     { key: "showBodyMap", label: "Muscle Readiness Map", desc: "Show the body diagram on the home screen." },
     // Auto-start, sound and vibration moved to Training Defaults, next to
     // the rest lengths themselves — the timer is one subject, not three
     // switches scattered down a list.
-    { key: "stravaShare", label: "Share to Strava", desc: "Add a share button when you finish a workout and on every past one. It builds your lifts into text, hands them to the share sheet, and opens Strava for you to paste into the activity." },
-    { key: "randomizeSelection", label: "Randomize Exercise Selection", desc: "Off: pick exercises in ranked order. On: shuffle for variety." },
-    { key: "showIntro", label: "Opening Animation", desc: "The geometric sequence when the app starts. Tap it to skip; turn it off here to go straight in. Skipped automatically if your phone is set to reduce motion." },
+    { key: "stravaShare", label: "Share to Strava", desc: "Add a share button at the end of each workout and on each past workout. The button puts your lifts into text and sends the text to the share sheet. Then it opens Strava. Paste the text into the activity." },
+    { key: "randomizeSelection", label: "Randomize Exercise Selection", desc: "Off: the app selects exercises in ranked order. On: the app selects them in random order for variety." },
+    { key: "showIntro", label: "Opening Animation", desc: "The app shows a geometric animation when it starts. Tap the animation to skip it. Turn this off to open the app without it. If your phone uses the reduce motion setting, the app skips it automatically." },
   ];
 
   const subscribed = isLicenseUnlocked(license);
@@ -39,7 +39,7 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
     <div>
       <TopBar title="Settings" onBack={onBack} />
       <div style={{ padding: "0 20px 8px", color: COLORS.textDim, fontSize: 13 }}>
-        Customize what shows up while you train.
+        Select what the app shows while you train.
       </div>
 
       <div data-tour="app-mode" style={{ padding: "0 20px 16px" }}>
@@ -75,7 +75,7 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
               Colour &amp; Display
             </span>
             <span style={{ display: "block", color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.4 }}>
-              Light or dark, colour schemes for colour blindness, and high contrast.
+              Light or dark theme, colour schemes for colour blindness, and high contrast.
             </span>
           </span>
           <ChevronRight size={16} color={COLORS.accent} style={{ flexShrink: 0 }} />
@@ -93,7 +93,7 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
               Training Defaults
             </span>
             <span style={{ display: "block", color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.4 }}>
-              Rest lengths and alerts, sets per exercise, RIR or RPE, recovery pace, and how far back history goes.
+              Rest times and alerts, sets per exercise, RIR or RPE, recovery pace and history length.
             </span>
           </span>
           <ChevronRight size={16} color={COLORS.accent} style={{ flexShrink: 0 }} />
@@ -115,7 +115,7 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
             onClick={onViewWhatsNew}
             style={{ width: "100%", marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "12px 0", color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 13, textTransform: "uppercase", letterSpacing: 0.5 }}
           >
-            <Sparkles size={14} color={COLORS.accent} /> What's New in {APP_VERSION}
+            <Sparkles size={14} color={COLORS.accent} /> What Is New in {APP_VERSION}
           </button>
         )}
         <button
@@ -136,8 +136,8 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
           </div>
           <div style={{ color: COLORS.textDim, fontSize: 12, marginBottom: 12 }}>
             {subscribed
-              ? "Iron Log is active on this device. Manage or cancel any time in Google Play — your workouts stay on your phone either way."
-              : "Start a free trial to unlock everything. Cancel any time in Google Play."}
+              ? "Iron Log is active on this device. You can manage or cancel your subscription at any time in Google Play. Your workouts stay on your phone in both cases."
+              : "Start a free trial to unlock all features. You can cancel at any time in Google Play."}
           </div>
           {!subscribed && (
             <button
@@ -205,8 +205,8 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
       <div style={{ padding: "0 20px 40px", textAlign: "center" }}>
         <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>Iron Log v{APP_VERSION}</div>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, marginTop: 6, opacity: 0.8, lineHeight: 1.5 }}>
-          Muscle map artwork from Body Muscles, © 2024 Ivan Vulović,
-          used under the Apache License 2.0.
+          The muscle map artwork is from Body Muscles, © 2024 Ivan Vulović.
+          Iron Log uses it under the Apache License 2.0.
           <br />
           github.com/vulovix/body-muscles
         </div>

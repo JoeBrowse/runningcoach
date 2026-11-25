@@ -291,28 +291,28 @@ export default function App() {
   async function handleBuy(planKey) {
     setPurchaseMsg("");
     if (!isNativeRuntime()) {
-      setPurchaseMsg("Subscribing only works in the installed app, not in a browser preview.");
+      setPurchaseMsg("You can subscribe only in the installed app. You cannot subscribe in a browser preview.");
       return;
     }
     setPurchaseBusy(true);
     const result = await subscribe(planKey);
     setPurchaseBusy(false);
-    if (!result.ok) setPurchaseMsg("That didn't go through. Please try again.");
+    if (!result.ok) setPurchaseMsg("The purchase did not complete. Try again.");
   }
 
   async function handleRestore() {
     setPurchaseMsg("");
     if (!isNativeRuntime()) {
-      setPurchaseMsg("Restore only works in the installed app, not in a browser preview.");
+      setPurchaseMsg("You can restore a purchase only in the installed app. You cannot restore it in a browser preview.");
       return;
     }
     setPurchaseBusy(true);
     const ok = await restorePurchases();
     setPurchaseBusy(false);
     if (ok && !isLicenseUnlocked(license)) {
-      setPurchaseMsg("No active subscription found for this Google account.");
+      setPurchaseMsg("The app found no active subscription for this Google account.");
     } else if (!ok) {
-      setPurchaseMsg("Couldn't restore — check your Google Play account and try again.");
+      setPurchaseMsg("The app could not restore your purchase. Check your Google Play account and try again.");
     }
   }
 
@@ -754,7 +754,7 @@ export default function App() {
             <BookOpen size={15} />
           </div>
           <div style={{ flex: 1, color: COLORS.text, fontSize: 12.5, lineHeight: 1.45 }}>
-            Lost, or looking for something specific? Check <b>Feature List</b> in Settings first — every feature, explained.
+            To find a feature, open <b>Feature List</b> in Settings. It explains every feature.
           </div>
           <button onClick={() => setShowFeatureListHint(false)} style={{ color: COLORS.textDim, background: "transparent", border: "none", flexShrink: 0 }}>
             <X size={16} />

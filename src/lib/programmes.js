@@ -187,24 +187,24 @@ export function buildGuidedDays(preset, exerciseCount, focusMuscles) {
 export function guidedRecommendations(experience, bodyweightKg) {
   const recs = [];
   if (experience === "new") {
-    recs.push({ title: "Rep Ranges", body: "Aim for 8–12 reps on most exercises. If you hit 12 clean reps and it still feels easy, add a little weight next session — that's how you'll know it's time to progress." });
-    recs.push({ title: "Rest Between Sets", body: "60–90 seconds between sets is plenty — enough to recover without losing the session's pace." });
-    recs.push({ title: "Focus On Form First", body: "In the first few months, learning each movement properly matters more than the weight on the bar. Small, steady increases beat big jumps." });
+    recs.push({ title: "Rep Ranges", body: "Do 8–12 reps on most exercises. If you do 12 reps with good form and it feels easy, add a little weight next session. This shows that you are ready to progress." });
+    recs.push({ title: "Rest Between Sets", body: "Rest for 60–90 seconds between sets. This is enough time to recover, and the session does not become slow." });
+    recs.push({ title: "Focus On Form First", body: "In the first few months, learn each movement correctly. This is more important than the weight on the bar. Add weight in small steps, not big jumps." });
   } else if (experience === "some") {
-    recs.push({ title: "Rep Ranges", body: "5–8 reps on your main compound lifts works well for strength; 10–15 on isolation work for size." });
-    recs.push({ title: "Rest Between Sets", body: "90–120 seconds on heavy compounds, 45–60 seconds on isolation work." });
-    recs.push({ title: "Progression", body: "Track your top set each session and aim to beat it — more weight or more reps — roughly every 1–2 weeks." });
+    recs.push({ title: "Rep Ranges", body: "For strength, do 5–8 reps on your main compound lifts. For muscle size, do 10–15 reps on isolation exercises." });
+    recs.push({ title: "Rest Between Sets", body: "Rest for 90–120 seconds on heavy compounds. Rest for 45–60 seconds on isolation exercises." });
+    recs.push({ title: "Progression", body: "Record your top set each session. Try to do better about every 1–2 weeks, with more weight or more reps." });
   } else {
-    recs.push({ title: "Rep Ranges", body: "Structure blocks around a goal — lower reps (3–6) for strength phases, higher (8–15) for hypertrophy phases." });
-    recs.push({ title: "Rest Between Sets", body: "2–3 minutes on your heaviest compounds is normal — don't rush the lifts that matter most." });
-    recs.push({ title: "Progression", body: "Watch weekly volume per muscle, not just weight on the bar — that's usually the lever with the most room left this far in." });
+    recs.push({ title: "Rep Ranges", body: "Plan each block for one goal. Use fewer reps (3–6) for strength phases. Use more reps (8–15) for hypertrophy phases." });
+    recs.push({ title: "Rest Between Sets", body: "Rest for 2–3 minutes on your heaviest compounds. This is normal. Do not rush your most important lifts." });
+    recs.push({ title: "Progression", body: "Monitor the weekly volume for each muscle, not only the weight on the bar. At your level, volume usually gives the most room for progress." });
   }
   if (bodyweightKg) {
     const lo = Math.round(bodyweightKg * 1.6);
     const hi = Math.round(bodyweightKg * 2.2);
-    recs.push({ title: "Protein Intake", body: `Based on your logged bodyweight (${Math.round(bodyweightKg)}kg), aim for roughly ${lo}–${hi}g of protein a day (1.6–2.2g per kg of bodyweight) to support recovery and growth.` });
+    recs.push({ title: "Protein Intake", body: `Your recorded bodyweight is ${Math.round(bodyweightKg)}kg. Eat about ${lo}–${hi}g of protein each day (1.6–2.2g per kg of bodyweight). This helps recovery and growth.` });
   } else {
-    recs.push({ title: "Protein Intake", body: "A well-supported target is 1.6–2.2g of protein per kg of bodyweight per day. Log your weight in Personal Info and this can be a precise number next time." });
+    recs.push({ title: "Protein Intake", body: "Research supports a target of 1.6–2.2g of protein per kg of bodyweight each day. Record your weight in Personal Info. Then the app can show an exact number." });
   }
   return recs;
 }

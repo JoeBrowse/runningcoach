@@ -108,7 +108,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
     <div style={{ paddingBottom: 40 }}>
       <TopBar title="Training Defaults" onBack={onBack} />
       <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13, lineHeight: 1.5 }}>
-        What the app assumes when you have not said otherwise. None of it changes anything you have already logged.
+        The app uses these values when you do not set different values. These settings do not change the data that you logged before.
       </div>
 
       <div style={{ padding: "0 20px 8px" }}>
@@ -117,7 +117,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
       <div style={group}>
         <StepperRow
           label="Compound Rest"
-          desc="Squats, presses, rows, pull-ups — anything working several muscles at once."
+          desc="Squats, presses, rows, pull-ups and other exercises that work several muscles at the same time."
           value={restSecondsFor({ type: "compound" }, settings)}
           display={formatTime(restSecondsFor({ type: "compound" }, settings))}
           onChange={(v) => set({ restCompound: v })}
@@ -127,7 +127,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
         />
         <StepperRow
           label="Isolation Rest"
-          desc="Curls, raises, extensions, calves — one muscle, one joint."
+          desc="Curls, raises, extensions, calf raises and other exercises that work one muscle with one joint."
           value={restSecondsFor({ type: "isolation" }, settings)}
           display={formatTime(restSecondsFor({ type: "isolation" }, settings))}
           onChange={(v) => set({ restIsolation: v })}
@@ -137,7 +137,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
         />
         <SettingsToggleRow
           label="Auto-Start Rest Timer"
-          desc="Start the countdown as soon as you tick a set off — or, with tick boxes hidden, as soon as you enter its reps."
+          desc="Start the countdown when you tick a set. If the tick boxes are hidden, start it when you enter the reps for a set."
           value={settings.autoRestTimer !== false}
           onToggle={() => set({ autoRestTimer: settings.autoRestTimer === false })}
         />
@@ -149,7 +149,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
         />
         <SettingsToggleRow
           label="Rest Timer Vibration"
-          desc="Buzz when it finishes. A gym is loud and a phone is usually in a pocket, so this is the half you feel."
+          desc="Vibrate the phone when the rest timer finishes. A gym is loud and your phone is usually in a pocket. You can feel the vibration when you cannot hear the beep."
           value={settings.restVibrate !== false}
           onToggle={() => set({ restVibrate: settings.restVibrate === false })}
         />
@@ -161,7 +161,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
       <div style={group}>
         <StepperRow
           label="Sets Per Exercise"
-          desc="How many empty rows an exercise opens with. You can always add or ignore more."
+          desc="The number of empty rows that a new exercise shows. You can add more rows or leave rows empty."
           value={num("startingSets", 1)}
           display={String(num("startingSets", 1))}
           onChange={(v) => set({ startingSets: v })}
@@ -174,7 +174,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
             Effort Scale
           </div>
           <div style={{ color: COLORS.textDim, fontSize: 11.5, marginTop: 2, marginBottom: 10, lineHeight: 1.4 }}>
-            Which way you count how hard a set was, on the circle beside every set in Advanced Mode. They are the same measurement from opposite ends, so this only changes the labels — nothing you have logged is rewritten, and switching back shows it all again unchanged.
+            Select how you record the effort of a set. In Advanced Mode, you record it on the circle next to each set. The two scales are the same measurement, counted from opposite ends. Thus this setting changes only the labels. The app does not change the data that you logged. If you change back, the app shows all of it again with no changes.
           </div>
           <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
             {EFFORT_SCALES.map((sc) => {
@@ -215,7 +215,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
             History Kept Per Exercise
           </div>
           <div style={{ color: COLORS.textDim, fontSize: 11.5, marginTop: 2, marginBottom: 10, lineHeight: 1.4 }}>
-            How many past sessions of a lift the progress chart and &ldquo;last time&rdquo; can see. Your workout history and calendar keep everything regardless — this is only the per-exercise list. Raising it takes effect as you log; lowering it trims on the next session of that lift.
+            The number of past sessions of a lift that the progress chart and &ldquo;last time&rdquo; can use. Your workout history and calendar keep all sessions. This setting controls only the list for each exercise. A higher value starts to apply when you log. A lower value removes old sessions from the list at the next session of that lift.
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             {HISTORY_DEPTHS.map((d) => {
@@ -245,7 +245,7 @@ export function TrainingScreen({ settings, onChange, onBack }) {
           onChange={(v) => set({ recoveryPace: v })}
         />
         <div style={{ color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.5 }}>
-          This scales the whole readiness map — chest still takes longer than side delts, and a hard set still costs more than an easy one. It only moves how quickly you personally get through those windows.
+          This setting changes the speed of the full readiness map. The chest still needs more time than the side delts. A hard set still needs more recovery than an easy set. The setting changes only how fast you go through these recovery times.
         </div>
       </div>
     </div>

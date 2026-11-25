@@ -28,7 +28,7 @@ export function SplitScreen({ onBack, onPick, onCopyPrevious, onOneRMSession }) 
               <div style={{ color: COLORS.accent, fontFamily: "'Oswald', sans-serif", fontSize: 16, textTransform: "uppercase", letterSpacing: 0.5 }}>
                 Copy Previous
               </div>
-              <div style={{ color: COLORS.textDim, fontSize: 12 }}>Redo a past workout exactly as logged</div>
+              <div style={{ color: COLORS.textDim, fontSize: 12 }}>Do a past workout again, exactly as you logged it</div>
             </div>
           </div>
           <ChevronRight size={20} color={COLORS.accent} />
@@ -53,14 +53,14 @@ export function SplitScreen({ onBack, onPick, onCopyPrevious, onOneRMSession }) 
               <div style={{ color: COLORS.accent, fontFamily: "'Oswald', sans-serif", fontSize: 16, textTransform: "uppercase", letterSpacing: 0.5 }}>
                 1RM Session
               </div>
-              <div style={{ color: COLORS.textDim, fontSize: 12 }}>Guided max attempt, built from your 1RM goals</div>
+              <div style={{ color: COLORS.textDim, fontSize: 12 }}>A guided maximum attempt, made from your 1RM goals</div>
             </div>
           </div>
           <ChevronRight size={20} color={COLORS.accent} />
         </button>
       </div>
       <div style={{ padding: "0 20px 4px", color: COLORS.textDim, fontSize: 11, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase" }}>
-        Or start fresh
+        Or start a new workout
       </div>
       <div style={{ padding: "10px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
         {Object.keys(SPLITS).map((split, idx) => (

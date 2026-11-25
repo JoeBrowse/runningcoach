@@ -28,14 +28,14 @@ export function CopyPreviousScreen({ onBack, onPick }) {
     <div>
       <TopBar title="Copy Previous" onBack={onBack} />
       <div style={{ padding: "0 20px 8px", color: COLORS.textDim, fontSize: 13 }}>
-        Pick a past workout to redo with the exact same exercises.
+        Select a past workout. The new workout uses the same exercises.
       </div>
       <div style={{ padding: "10px 20px 40px" }}>
         {loading ? (
           <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30 }}>Loading…</div>
         ) : sessions.length === 0 ? (
           <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30, fontSize: 13.5 }}>
-            No past workouts yet. Finish one first and it'll show up here.
+            There are no past workouts yet. Finish a workout. Then it shows here.
           </div>
         ) : (
           sessions.map((s) => {

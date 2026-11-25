@@ -38,7 +38,7 @@ export const RPE_OPTIONS = [
   { value: 3, label: "≤7", desc: "3 or more reps left" },
   { value: 2, label: "8", desc: "2 reps left" },
   { value: 1, label: "9", desc: "1 rep left" },
-  { value: 0, label: "10", desc: "Max effort — nothing left" },
+  { value: 0, label: "10", desc: "Maximum effort, no reps left" },
 ];
 
 export const EFFORT_SCALES = [
@@ -47,7 +47,7 @@ export const EFFORT_SCALES = [
     name: "RIR",
     full: "Reps in Reserve",
     options: RIR_OPTIONS,
-    desc: "How many reps you could still have done. 0 is failure.",
+    desc: "The number of reps that you could still do. 0 is failure.",
     sweep: "hardest to easiest",
   },
   {

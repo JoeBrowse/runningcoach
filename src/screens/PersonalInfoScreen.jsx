@@ -13,7 +13,7 @@ export function PersonalInfoScreen({ onBack }) {
     <div>
       <TopBar title="Personal Info" onBack={onBack} />
       <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13 }}>
-        Your weight, height, age and tape measurements. Weight is shared with the rest of the app for bodyweight-based calculations.
+        Your weight, height, age and body measurements. Other parts of the app use your weight for bodyweight calculations.
       </div>
       <div style={{ padding: "0 20px 40px" }}>
         <PersonalStatsPanel />

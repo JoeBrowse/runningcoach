@@ -49,7 +49,7 @@ export function SuggestedScreen({ onBack, onBuild }) {
     <div style={{ paddingBottom: 100 }}>
       <TopBar title="Train Ready Muscles" onBack={onBack} />
       <div style={{ padding: "0 20px 8px", color: COLORS.textDim, fontSize: 13 }}>
-        {loading ? "Checking muscle readiness…" : "We'll build this from whichever muscles are most recovered right now."}
+        {loading ? "Checking muscle readiness…" : "The app makes this workout from the muscles that have recovered the most."}
       </div>
 
       <div data-tour="suggested-options" style={{ padding: "16px 20px 0" }}>

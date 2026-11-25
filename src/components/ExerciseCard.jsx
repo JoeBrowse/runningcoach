@@ -23,7 +23,7 @@ function EffortTile({ value, onPick, open, onToggle, scale }) {
       <button
         onClick={() => setOpen(!open)}
         aria-label={sc.full}
-        title={current ? `${current.desc} — tap to change` : sc.full}
+        title={current ? `${current.desc}. Tap to change.` : sc.full}
         style={{
           width: 30,
           height: 30,
@@ -290,7 +290,7 @@ export function ExerciseCard({
           {showMethodPicker && (
             <div style={{ marginBottom: 8 }}>
               <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-                How are you loading it?
+                Select the equipment
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                 {methodOptions.map((opt) => {
@@ -368,7 +368,7 @@ export function ExerciseCard({
       {calisthenic && weightPromptAt !== null && lastLoadingWeight !== null && (
         <div style={{ background: COLORS.surfaceRaised, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
           <div style={{ color: COLORS.text, fontSize: 12.5, marginBottom: 8 }}>
-            Last {loading.toLowerCase()} session used{" "}
+            Your last {loading.toLowerCase()} session used{" "}
             <strong>{lastLoadingWeight}{settings.weightUnit}</strong>. Use it again?
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -438,7 +438,7 @@ export function ExerciseCard({
           <textarea
             autoFocus={noteOpen && !(meta.notes && meta.notes.length)}
             rows={2}
-            placeholder="Note — seat height, how it felt, anything worth remembering"
+            placeholder="Note: for example, seat height or how the set felt"
             value={meta.notes || ""}
             onChange={(e) => onMetaChange(ex.id, "notes", e.target.value)}
             onBlur={() => setNoteOpen(false)}
@@ -472,7 +472,7 @@ export function ExerciseCard({
             {last.brandMismatch ? (
               <>
                 <div style={{ color: COLORS.text, fontSize: 12.5, lineHeight: 1.45 }}>
-                  Not logged this way before.
+                  You have not logged this exercise this way before.
                 </div>
                 <div style={{ color: COLORS.textDim, fontSize: 11, marginTop: 4, fontFamily: "'JetBrains Mono', monospace" }}>
                   {last.date} ·{" "}
@@ -526,7 +526,7 @@ export function ExerciseCard({
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
                 {last.supersetWith && last.supersetWith.length > 0 && (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: hexToRgba(COLORS.accent, 0.12), border: `1px solid ${hexToRgba(COLORS.accent, 0.5)}`, borderRadius: 999, padding: "3px 9px", color: COLORS.accent, fontSize: 10.5 }}>
-                    <Sparkles size={11} /> Supersetted with {last.supersetWith.join(" & ")}
+                    <Sparkles size={11} /> In a superset with {last.supersetWith.join(" & ")}
                   </span>
                 )}
                 {last.dropSetCount > 0 && (
@@ -538,7 +538,7 @@ export function ExerciseCard({
             ) : null}
             {last.order > 1 && (
               <div style={{ color: COLORS.textDim, fontSize: 10.5, marginTop: 4, fontStyle: "italic" }}>
-                You hit this {ordinal(last.order)} last time.
+                You did this exercise {ordinal(last.order)} last time.
               </div>
             )}
           </div>
@@ -602,7 +602,7 @@ export function ExerciseCard({
             </div>
           ) : (
             <div style={{ color: COLORS.textDim, fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>
-              Start light and build up over 2-3 sets before your working weight.
+              Do 2-3 light sets before your working weight. Add weight on each set.
             </div>
           )}
         </div>
@@ -660,7 +660,7 @@ export function ExerciseCard({
               // Unloaded: there is no number to enter, and an empty box that
               // must stay empty is just a thing to wonder about.
               <div
-                title="Bodyweight — no added or assisted load"
+                title="Bodyweight. No added weight and no assistance."
                 style={{ width: 62, flexGrow: 0, flexShrink: 0, padding: "5px 6px", boxSizing: "border-box", textAlign: "center", borderRadius: 8, border: `1px solid ${COLORS.line}`, background: COLORS.surface, color: COLORS.textDim, fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}
               >
                 BW

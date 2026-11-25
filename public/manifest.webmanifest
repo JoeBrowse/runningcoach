@@ -1,7 +1,7 @@
 {
   "name": "Iron Log",
   "short_name": "Iron Log",
-  "description": "Offline-first gym workout tracker. No account, no cloud, no ads.",
+  "description": "A gym workout tracker that works offline. No account, no cloud and no ads.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

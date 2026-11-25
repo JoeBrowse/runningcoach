@@ -116,7 +116,7 @@ export function BodyMap({ dates }) {
   const detail = (() => {
     if (!selected) return "Tap a muscle to see recovery detail.";
     const entry = dates[selected];
-    if (!entry) return `${selected} — ready, no logged sessions yet.`;
+    if (!entry) return `${selected} — ready · no logged sessions`;
     const stage = recoveryStage(entry, selected);
     // "worked" rather than "trained" when nothing was aimed at this muscle —
     // being told your triceps need rest is confusing on a chest day otherwise.

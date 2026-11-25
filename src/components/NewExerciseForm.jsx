@@ -79,7 +79,7 @@ export function NewExerciseForm({ muscles, defaultMuscle, onSave, onCancel, init
       </div>
       {editing && (
         <div style={{ color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.45, marginBottom: 10 }}>
-          Your logged sets stay attached — this changes the exercise, not your history. Renaming it or moving it to another muscle updates every past workout to match.
+          Your logged sets stay with this exercise. This form changes the exercise, not your history. If you change the name or the muscle, the app updates all past workouts.
         </div>
       )}
       <input autoFocus type="text" placeholder="Exercise name" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
@@ -115,7 +115,7 @@ export function NewExerciseForm({ muscles, defaultMuscle, onSave, onCancel, init
             Also works (optional)
           </div>
           <div style={{ color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.45, marginBottom: 8 }}>
-            Muscles this hits indirectly. They get partial fatigue on the readiness map and half a set each in weekly volume.
+            Select the muscles that this exercise works indirectly. The readiness map shows partial fatigue for them. Weekly volume counts each set as half a set for them.
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {secondaryOptions.map((m) => {

@@ -23,22 +23,22 @@ import { COLORS, STAGE_COLORS } from "../theme.js";
 const LOAD_SOURCES = [
   {
     cite: "Foster C. Monitoring training in athletes with reference to overtraining syndrome. Med Sci Sports Exerc, 1998.",
-    what: "Session RPE — effort times duration as one training load.",
+    what: "Session RPE: effort multiplied by duration gives one training load value.",
     url: "https://pubmed.ncbi.nlm.nih.gov/9662690/",
   },
   {
     cite: "Gabbett TJ. The training—injury prevention paradox. Br J Sports Med, 2016;50:273–280.",
-    what: "Where the zones on the scale come from.",
+    what: "The source of the zones on the scale.",
     url: "https://pubmed.ncbi.nlm.nih.gov/26758673/",
   },
   {
     cite: "Williams S, West S, Cross MJ, Stokes KA. Better way to determine the acute:chronic workload ratio? Br J Sports Med, 2017;51:209–210.",
-    what: "Exponentially weighted averages rather than rolling ones.",
+    what: "Exponentially weighted averages instead of rolling averages.",
     url: "https://pubmed.ncbi.nlm.nih.gov/28003238/",
   },
   {
     cite: "Lolli L, Batterham AM, Hawkins R, et al. Mathematical coupling causes spurious correlation within the conventional acute-to-chronic workload ratio calculations. Br J Sports Med, 2019;53:921–922.",
-    what: "Why the ratio cannot predict injury. The reason this scale is information only.",
+    what: "Why the ratio cannot predict injury. This is why the scale is information only.",
     url: "https://bjsm.bmj.com/content/53/15/921.full",
   },
 ];
@@ -52,21 +52,21 @@ function LoadGaugeInfo({ acute, chronic, ratio }) {
     <div data-testid="load-info" style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 14, marginTop: 10 }}>
       <div style={label}>What this is</div>
       <div style={{ ...body, marginBottom: 14 }}>
-        How much you have trained lately, against how much you are conditioned for. The
-        acute:chronic workload ratio.
+        This scale compares your recent training with the training that your body is
+        used to. Its name is the acute:chronic workload ratio.
       </div>
 
       <div style={label}>Information only</div>
       <div data-testid="load-info-only" style={{ ...body, marginBottom: 14 }}>
         This scale is information only. It cannot predict injury. Research disputes the
-        ratio as an injury predictor. Use it together with how you feel, and see a physio
-        or doctor if something hurts.
+        ratio as an injury predictor. Use it together with how you feel. If something
+        hurts, see a physio or a doctor.
       </div>
 
       <div style={label}>Your numbers</div>
       <div style={{ marginBottom: 14 }}>
         {[
-          ["Acute", `${Math.round(acute)} AU`, "last 7 days, weighted to the recent"],
+          ["Acute", `${Math.round(acute)} AU`, "last 7 days, recent days count more"],
           ["Chronic", `${Math.round(chronic)} AU`, "last 28 days, same weighting"],
           ["Ratio", ratio.toFixed(2), "acute ÷ chronic"],
         ].map(([name, value, note]) => (
@@ -78,13 +78,14 @@ function LoadGaugeInfo({ acute, chronic, ratio }) {
         ))}
       </div>
 
-      <div style={label}>Where a session's load comes from</div>
+      <div style={label}>How the app calculates session load</div>
       <div style={{ ...dim, marginBottom: 14 }}>
-        Effort out of 10, times minutes. A lift's effort is the average of its logged sets
-        (10 − RIR, so a set to failure is 10); its minutes come from the session clock, or
-        from its sets at your rest lengths for anything logged before the app timed itself.
-        A run has both already. AU is arbitrary units — the number only means anything
-        against your own other sessions.
+        Session load is effort (out of 10) multiplied by minutes. The effort of a lift is
+        the average effort of its logged sets. The effort of a set is 10 − RIR, so a set
+        to failure is 10. The minutes come from the session timer. For a session that the
+        app did not time, the app calculates the minutes from the sets and your rest times.
+        A run already has effort and minutes. AU means arbitrary units. Compare this number
+        only with your other sessions.
       </div>
 
       <div style={label}>The zones</div>
@@ -93,7 +94,7 @@ function LoadGaugeInfo({ acute, chronic, ratio }) {
           ["under 0.8", "Low", "amber", "less than you are used to"],
           ["0.8 – 1.3", "Usual", "green", "close to what you are used to"],
           ["1.3 – 1.5", "Ramping up", "amber", "more than you are used to"],
-          ["over 1.5", "Spike", "red", "a sharp rise; an easier day may help"],
+          ["over 1.5", "Spike", "red", "a sharp increase. An easier day may help."],
         ].map(([range, name, stage, note]) => (
           <div key={name} style={{ display: "flex", alignItems: "baseline", gap: 8, padding: "4px 0" }}>
             <span style={{ width: 8, height: 8, borderRadius: 2, background: STAGE_COLORS[stage], flexShrink: 0, alignSelf: "center" }} />
@@ -104,12 +105,12 @@ function LoadGaugeInfo({ acute, chronic, ratio }) {
         ))}
       </div>
 
-      <div style={label}>Dragging the marker</div>
+      <div style={label}>Drag the marker</div>
       <div style={{ ...dim, marginBottom: 14 }}>
-        Down: how long of doing nothing gets you there. Rest is the only thing that lowers
-        the ratio, and it falls by the same factor each day, so the hours are exact rather
-        than estimated. Up: resting cannot raise it, so it prices the session that would
-        instead. Nothing you drag is saved.
+        Drag down: the app shows how much rest gets you to that value. Only rest lowers
+        the ratio. The ratio falls by the same factor each day, so the hours are exact,
+        not estimates. Drag up: rest cannot raise the ratio. The app shows the session
+        that gets you to that value. The app does not save the marker position.
       </div>
 
       <div style={label}>Papers</div>
@@ -149,7 +150,7 @@ export function LoadGauge({ ratio, ready, acute, chronic }) {
         </div>
         <div style={{ height: 14, borderRadius: 7, background: COLORS.surfaceRaised, border: `1px solid ${COLORS.line}` }} />
         <div style={{ color: COLORS.textDim, fontSize: 11.5, marginTop: 7 }}>
-          Building a baseline — this needs a few weeks of training to compare against.
+          The app needs a few weeks of training data. Then it can show this value.
         </div>
       </div>
     );

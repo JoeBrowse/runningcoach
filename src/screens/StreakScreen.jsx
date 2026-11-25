@@ -118,7 +118,7 @@ export function StreakScreen({ onBack, onViewNerdStats }) {
     <div>
       <TopBar title="Consistency" onBack={onBack} />
       <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13 }}>
-        Every day you trained, a square per day — lifting and cardio both count.
+        Each square is one day. A filled square shows a day that you trained. Lifting and cardio both count.
       </div>
       <div style={{ padding: "0 20px 20px", display: "flex", gap: 10 }}>
         {[
@@ -180,7 +180,7 @@ export function StreakScreen({ onBack, onViewNerdStats }) {
               <PieChart size={14} /> Stats for Nerds
             </span>
             <span style={{ display: "block", color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.4 }}>
-              Tonnage, rep ranges, which muscles get the work, how often you go to failure, and when you actually train.
+              Tonnage, rep ranges, sets per muscle, sets to failure and training times.
             </span>
           </span>
           <ChevronRight size={16} color={COLORS.accent} style={{ flexShrink: 0 }} />

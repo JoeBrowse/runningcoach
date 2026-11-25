@@ -13,7 +13,7 @@ export function DoneScreen({ onHome, newPBs, programmeInfo, session, settings })
         Workout saved
       </div>
       <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: (newPBs && newPBs.length) || programmeInfo ? 20 : 32, textAlign: "center" }}>
-        Your weights and reps are logged for next time.
+        The app saved your weights and reps for your next workout.
       </div>
 
       {programmeInfo && (
@@ -33,9 +33,9 @@ export function DoneScreen({ onHome, newPBs, programmeInfo, session, settings })
             <div style={{ width: `${programmeInfo.planned ? Math.min(100, Math.round((programmeInfo.done / programmeInfo.planned) * 100)) : 0}%`, height: "100%", background: COLORS.accent }} />
           </div>
           {programmeInfo.complete ? (
-            <div style={{ color: COLORS.accent, fontSize: 12.5 }}>Programme complete — finish it to see your full stats. 🎉</div>
+            <div style={{ color: COLORS.accent, fontSize: 12.5 }}>You did all the sessions in this programme. Finish the programme to see all your statistics. 🎉</div>
           ) : (
-            <div style={{ color: COLORS.textDim, fontSize: 12.5 }}>Next up: <span style={{ color: COLORS.text }}>{programmeInfo.nextDayName}</span></div>
+            <div style={{ color: COLORS.textDim, fontSize: 12.5 }}>Next: <span style={{ color: COLORS.text }}>{programmeInfo.nextDayName}</span></div>
           )}
         </div>
       )}

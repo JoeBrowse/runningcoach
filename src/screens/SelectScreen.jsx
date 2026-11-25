@@ -117,7 +117,7 @@ export function SelectScreen({ split, settings, onBack, onContinue, onContinueSp
     <div style={{ paddingBottom: 100 }}>
       <TopBar title={split} onBack={onBack} />
       <div style={{ padding: "0 20px 4px", color: COLORS.textDim, fontSize: 13 }}>
-        {mode === "tap" ? "Tap a muscle to add an exercise for it. Tap again to add another." : "Pick exactly the exercises you want."}
+        {mode === "tap" ? "Tap a muscle to add an exercise for it. Tap again to add another." : "Select the exercises that you want."}
       </div>
       {isAdvanced && (
         <div style={{ padding: "0 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -310,7 +310,7 @@ export function SelectScreen({ split, settings, onBack, onContinue, onContinueSp
                         </button>
                         <button
                           onClick={() => handleTogglePaused(ex.id)}
-                          title={isPaused ? "Unpause — allow auto-selection again" : "Pause — exclude from auto-selection"}
+                          title={isPaused ? "Unpause. The app can select this exercise automatically again." : "Pause. The app will not select this exercise automatically."}
                           style={{ width: 30, height: 30, borderRadius: 8, background: COLORS.surfaceRaised, border: `1px solid ${COLORS.line}`, color: isPaused ? COLORS.accent : COLORS.textDim, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                         >
                           {isPaused ? <Play size={13} /> : <Pause size={13} />}

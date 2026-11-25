@@ -2,55 +2,55 @@
 
 **Last updated: 28 July 2026**
 
-Iron Log does not collect, transmit, or store any personal data.
+Iron Log does not collect, send or store any personal data.
 
-There is no account to create, no login, no analytics, no advertising, no
-tracking, and no server belonging to us for your data to be sent to.
+You do not make an account. There is no login, no analytics, no advertising
+and no tracking. We have no server that receives your data.
 
 ## What the app stores, and where
 
-Everything you enter — workouts, sets, weights, reps, personal records,
-programmes, bodyweight readings, height, age, and your settings — is written
-to storage on your own device and stays there.
+The app writes all the data that you enter to storage on your device. The data
+stays there. This includes workouts, sets, weights, reps, personal records,
+programmes, bodyweight readings, height, age and your settings.
 
-We cannot see any of it. There is no copy of it anywhere else.
+We cannot see any of this data. No copy of it exists in a different location.
 
 ## What leaves your device
 
-Nothing that you enter.
+No data that you enter leaves your device.
 
-The only network activity is the purchase itself. If you buy the lifetime
-unlock, that transaction is handled entirely by **Google Play Billing**.
-Google processes the payment and tells the app whether the product is owned.
-We never receive or handle your payment details, and no workout data is
-involved in that exchange. Google's handling of the transaction is covered by
-[Google's Privacy Policy](https://policies.google.com/privacy).
+The purchase is the only network activity. If you buy the lifetime unlock,
+**Google Play Billing** does all of the transaction. Google processes the
+payment. Google then tells the app if you own the product. We never receive or
+use your payment details. The transaction does not include workout data.
+[Google's Privacy Policy](https://policies.google.com/privacy) covers how
+Google uses the transaction data.
 
 ## Permissions
 
-The app requests no runtime permissions. It does not use the camera,
-microphone, location, contacts, files, or health data.
+The app does not ask for runtime permissions. It does not use the camera,
+microphone, location, contacts, files or health data.
 
 ## Deleting your data
 
-Because your data lives only on your device, uninstalling Iron Log removes it.
-You can also clear it from your device's app settings at any time. There is
-nothing for us to delete on your behalf, because we never had it.
+Your data is only on your device. When you uninstall Iron Log, this removes
+your data. You can also delete the data at any time in the app settings of your
+device. We have no data to delete for you, because we never had your data.
 
-Note that uninstalling is permanent: with no cloud copy, data removed this way
-cannot be recovered.
+Note: Uninstalling is permanent. There is no cloud copy, so you cannot recover
+data that you remove in this way.
 
 ## Children
 
-Iron Log is not directed at children under 13 and collects no data from anyone,
-including children.
+Iron Log is not for children under 13. The app collects no data from any
+person, and this includes children.
 
 ## Changes to this policy
 
-If this policy changes, the updated version will be published at this address
-and the date at the top will change.
+If this policy changes, we will publish the new version at this address. We
+will also change the date at the top.
 
 ## Contact
 
-Questions about this policy can be raised as an issue on the project's GitHub
-repository.
+If you have a question about this policy, open an issue on the GitHub
+repository of the project.

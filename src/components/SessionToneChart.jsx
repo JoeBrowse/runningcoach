@@ -9,7 +9,7 @@ import { COLORS, STAGE_COLORS } from "../theme.js";
 export function SessionToneChart({ tally }) {
   const rows = [
     { key: "up", label: "More reps", color: STAGE_COLORS.green, value: tally.up || 0 },
-    { key: "amber", label: "Held", color: STAGE_COLORS.amber, value: tally.amber || 0 },
+    { key: "amber", label: "Same reps", color: STAGE_COLORS.amber, value: tally.amber || 0 },
     { key: "down", label: "Fewer reps", color: STAGE_COLORS.red, value: tally.down || 0 },
   ];
   const total = rows.reduce((n, r) => n + r.value, 0);

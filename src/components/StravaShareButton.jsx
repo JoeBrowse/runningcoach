@@ -39,12 +39,12 @@ export function StravaShareButton({ session, unit, compact }) {
       </button>
       {state === "copied" && (
         <div style={{ color: COLORS.textDim, fontSize: 11, marginTop: 6, textAlign: "center", lineHeight: 1.4 }}>
-          Your workout is on the clipboard. Paste it into the activity&rsquo;s description.
+          The app copied your workout to the clipboard. Paste it into the description of the activity.
         </div>
       )}
       {state === "failed" && (
         <div style={{ color: COLORS.textDim, fontSize: 11, marginTop: 6, textAlign: "center", lineHeight: 1.4 }}>
-          This device would not share or copy. You can still see the workout in History.
+          This device cannot share or copy the workout. You can see the workout in History.
         </div>
       )}
     </div>

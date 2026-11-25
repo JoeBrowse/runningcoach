@@ -122,8 +122,8 @@ export function ProgrammeScreen({ programme: programmeProp, onBack, onStartDay, 
             <div style={{ marginTop: 12, background: COLORS.surfaceRaised, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 12 }}>
               <div style={{ color: COLORS.text, fontSize: 12.5, marginBottom: 10 }}>
                 {done < planned
-                  ? "Finish this programme now? It'll move to Finished Programmes with your stats so far."
-                  : "Complete this programme? It'll move to Finished Programmes."}
+                  ? "Finish this programme now? The app moves it to Finished Programmes with your stats to this point."
+                  : "Complete this programme? The app moves it to Finished Programmes."}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => setConfirmingFinish(false)} style={{ flex: 1, background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "9px 0", color: COLORS.textDim, fontSize: 12, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase" }}>
@@ -207,7 +207,7 @@ export function ProgrammeScreen({ programme: programmeProp, onBack, onStartDay, 
                       <button
                         onClick={() => removeExercise(day.key, ex.id)}
                         disabled={onlyOne}
-                        title={onlyOne ? "Add another exercise before removing this one" : `Remove ${ex.name}`}
+                        title={onlyOne ? "Add another exercise before you remove this one" : `Remove ${ex.name}`}
                         style={{ color: onlyOne ? COLORS.line : COLORS.textDim, flexShrink: 0, marginLeft: 8 }}
                       >
                         <X size={15} />
@@ -243,7 +243,7 @@ export function ProgrammeScreen({ programme: programmeProp, onBack, onStartDay, 
                   )}
 
                   <div style={{ color: COLORS.textDim, fontSize: 11, marginTop: 10 }}>
-                    Order and changes save as you make them, and apply from your next session — anything already logged stays as you did it.
+                    The app saves each change immediately. Changes apply from your next session. Sessions that you logged before do not change.
                   </div>
                 </div>
               )}

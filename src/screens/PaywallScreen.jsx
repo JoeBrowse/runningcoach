@@ -59,13 +59,13 @@ export function PaywallScreen({ onBack, onBuy, onRestore, busy, message, offers,
         {days} days free
       </div>
       <div style={{ color: COLORS.textDim, fontSize: 14, lineHeight: 1.5, marginBottom: 20 }}>
-        Everything unlocked for {days} days. Cancel any time in Google Play and you will not be charged. No ads, no account, and nothing leaves your phone.
+        You get all features for {days} days. Cancel in Google Play during the trial and you do not pay. There are no ads and no account. Your data does not leave your phone.
       </div>
 
       <PlanCard
         label="Annual"
         price={annual && annual.price}
-        note="Billed once a year"
+        note="You pay once a year"
         badge="Best value"
         selected={plan === "annual"}
         onSelect={() => setPlan("annual")}
@@ -73,7 +73,7 @@ export function PaywallScreen({ onBack, onBuy, onRestore, busy, message, offers,
       <PlanCard
         label="Monthly"
         price={monthly && monthly.price}
-        note="Billed every month"
+        note="You pay every month"
         selected={plan === "monthly"}
         onSelect={() => setPlan("monthly")}
       />
@@ -100,9 +100,9 @@ export function PaywallScreen({ onBack, onBuy, onRestore, busy, message, offers,
       </button>
       {message && <div style={{ marginTop: 14, color: COLORS.textDim, fontSize: 12.5, textAlign: "center" }}>{message}</div>}
       <div style={{ marginTop: 16, color: COLORS.textDim, fontSize: 11, lineHeight: 1.55, textAlign: "center", opacity: 0.85 }}>
-        Renews automatically until cancelled. Manage or cancel in Google Play at any time.
-        Your workouts stay on your phone whether you subscribe or not, and Backup in Settings
-        always works.
+        The subscription renews automatically until you cancel it. You can manage or cancel it
+        in Google Play at any time. Your workouts stay on your phone if you subscribe or not.
+        Backup in Settings always works.
       </div>
     </div>
   );

@@ -27,9 +27,9 @@ import { TopBar } from "../components/TopBar.jsx";
 // is the only one of the three that stays honest when the rep target
 // moves; the other two are still worth having, so all three are offered.
 const CHART_METRICS = [
-  { key: "e1rm", label: "Est. 1RM", blurb: "Estimated one-rep max over time — accounts for reps, so a lighter set for more reps still reads as progress." },
-  { key: "top", label: "Top Set", blurb: "Heaviest set of each session, ignoring how many reps it was for." },
-  { key: "volume", label: "Volume", blurb: "Total weight moved each session — sets x reps x weight, drop sets included." },
+  { key: "e1rm", label: "Est. 1RM", blurb: "This chart shows your estimated one-rep max over time. It includes reps, so a lighter set with more reps can also show progress." },
+  { key: "top", label: "Top Set", blurb: "This chart shows the heaviest set of each session. It does not use the number of reps." },
+  { key: "volume", label: "Volume", blurb: "This chart shows the total weight that you lifted in each session (sets x reps x weight). It includes drop sets." },
 ];
 
 /* One logged session reduced to the number a chart plots.
@@ -221,7 +221,7 @@ export function ProgressScreen({ onBack }) {
         <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30 }}>Loading…</div>
       ) : exerciseIds.length === 0 ? (
         <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30, fontSize: 13.5 }}>
-          No logged exercises yet. Finish a workout to start tracking progress.
+          There are no logged exercises. Finish a workout to see your progress.
         </div>
       ) : (
         <>
@@ -267,8 +267,8 @@ export function ProgressScreen({ onBack }) {
                 ) : chartData.length < 2 ? (
                   <div style={{ color: COLORS.textDim, fontSize: 13, textAlign: "center", padding: 20 }}>
                     {brandFilter
-                      ? `Only ${chartData.length === 1 ? "one session" : "no sessions"} logged ${brandFilter === UNTAGGED_BRAND ? "without a machine or implement recorded" : `on ${brandFilter}`}.`
-                      : "Log a couple more sessions to see a trend."}
+                      ? `${chartData.length === 1 ? "There is only one session" : "There are no sessions"} ${brandFilter === UNTAGGED_BRAND ? "without a recorded machine or implement" : `on ${brandFilter}`}.`
+                      : "Log at least two sessions to see a trend."}
                   </div>
                 ) : (
                   <SimpleLineChart data={chartData} dataKey="weight" height={200} trend flagOutliers />

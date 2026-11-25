@@ -70,7 +70,7 @@ export function stravaSummary(session, unit) {
     return `${ex.name}${how ? ` (${how})` : ""} — ${sets}`;
   });
 
-  return [head, "", ...lines, "", "Logged with Iron Log"].join("\n");
+  return [head, "", ...lines, "", "Recorded with Iron Log"].join("\n");
 }
 
 // Native share sheet where there is one, then the browser's, then the

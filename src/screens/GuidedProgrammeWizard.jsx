@@ -73,7 +73,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
         {step === 0 && (
           <div>
             <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
-              How new are you to training?
+              How much training experience do you have?
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
               {GUIDED_EXPERIENCE_OPTIONS.map((opt) => {
@@ -92,7 +92,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
             </div>
 
             <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
-              How long do you want to work out?
+              How long do you want each workout to be?
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 24 }}>
               {GUIDED_DURATION_OPTIONS.map((d) => {
@@ -110,9 +110,9 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
             </div>
 
             <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
-              Anything you want to improve most?
+              Which muscles do you want to improve most?
             </div>
-            <div style={{ color: COLORS.textDim, fontSize: 12, marginBottom: 10 }}>Optional — pick as many as you like, or skip this.</div>
+            <div style={{ color: COLORS.textDim, fontSize: 12, marginBottom: 10 }}>This step is optional. Select as many as you want, or skip this step.</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 28 }}>
               {SPLITS["Full Body"].map((m) => {
                 const active = focusMuscles.has(m);
@@ -141,7 +141,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
         {step === 1 && (
           <div>
             <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 16 }}>
-              A few things worth knowing before you start.
+              Read this information before you start.
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
               {guidedRecommendations(experience, bodyweightKg).map((rec) => (
@@ -163,7 +163,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
         {step === 2 && (
           <div>
             <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 16 }}>
-              Based on your answers, here's what Iron Log recommends.
+              Iron Log recommends this programme, based on your answers.
             </div>
             <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 16, marginBottom: 16 }}>
               <div style={{ color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 19, textTransform: "uppercase", marginBottom: 4 }}>{preset.name}</div>
@@ -179,7 +179,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
               ))}
             </div>
             <div style={{ color: COLORS.textDim, fontSize: 12, textAlign: "center", marginBottom: 20 }}>
-              6-week block · {generatedDays.length} day{generatedDays.length === 1 ? "" : "s"} · you can edit any exercise once it's created.
+              6-week block · {generatedDays.length} day{generatedDays.length === 1 ? "" : "s"} · you can edit all exercises after you create the programme.
             </div>
             <button
               onClick={accept}
@@ -191,7 +191,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
               onClick={onDecline}
               style={{ width: "100%", background: "transparent", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "14px 0", color: COLORS.textDim, fontSize: 13.5, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase" }}
             >
-              Not For Me — Build My Own
+              No, Build My Own
             </button>
           </div>
         )}

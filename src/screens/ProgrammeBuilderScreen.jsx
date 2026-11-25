@@ -106,7 +106,7 @@ export function ProgrammeBuilderScreen({ onBack, onCreate, onGuided }) {
       <div style={{ padding: "0 20px" }}>
         {step === 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 2 }}>Choose a split to base your programme on. You can tweak everything next.</div>
+            <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 2 }}>Select a split for your programme. You can change all of it in the next step.</div>
             <button
               onClick={onGuided}
               style={{ textAlign: "left", background: hexToRgba(COLORS.accent, 0.1), border: `1.5px solid ${COLORS.accent}`, borderRadius: 14, padding: 14 }}
@@ -119,7 +119,7 @@ export function ProgrammeBuilderScreen({ onBack, onCreate, onGuided }) {
                   Recommended
                 </span>
               </div>
-              <div style={{ color: COLORS.text, fontSize: 12, marginTop: 3 }}>Answer a few quick questions and Iron Log builds a split for you — accept it or tweak it yourself.</div>
+              <div style={{ color: COLORS.text, fontSize: 12, marginTop: 3 }}>Answer some short questions. Iron Log then builds a split for you. You can accept it or change it.</div>
             </button>
             {PROGRAMME_PRESETS.map((p) => (
               <button
@@ -140,7 +140,7 @@ export function ProgrammeBuilderScreen({ onBack, onCreate, onGuided }) {
         {step === 1 && (
           <div>
             <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 12 }}>
-              Set the exercises for each workout. Add, remove, rename days — this is your template.
+              Set the exercises for each workout. You can add, remove and rename days. This is your template.
             </div>
             {days.map((day, di) => {
               const isOpen = expanded === di;
@@ -163,7 +163,7 @@ export function ProgrammeBuilderScreen({ onBack, onCreate, onGuided }) {
                   {isOpen && (
                     <div style={{ padding: "0 14px 14px" }}>
                       {day.exercises.length === 0 && (
-                        <div style={{ color: COLORS.textDim, fontSize: 12.5, padding: "4px 0 10px" }}>No exercises yet — add some below.</div>
+                        <div style={{ color: COLORS.textDim, fontSize: 12.5, padding: "4px 0 10px" }}>No exercises yet. Add exercises below.</div>
                       )}
                       {/* The order here is the order you train in, so it is
                           yours to set — same up/down pair the live workout
@@ -269,7 +269,7 @@ export function ProgrammeBuilderScreen({ onBack, onCreate, onGuided }) {
 
         {step === 2 && (
           <div>
-            <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 12 }}>How long will you run this programme?</div>
+            <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 12 }}>How many weeks do you want this programme to last?</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
               {PROGRAMME_LENGTHS.map((opt) => {
                 const active = weeks === opt.weeks;

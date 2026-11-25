@@ -28,7 +28,7 @@ export function VersionHistoryScreen({ onBack }) {
       <TopBar title="Version History" onBack={onBack} />
       <div style={{ padding: "0 20px" }}>
         <div style={{ color: COLORS.textDim, fontSize: 12.5, lineHeight: 1.5, marginBottom: 18 }}>
-          {`${RELEASE_NOTES.length} releases, ${formatReleaseDate(first.released, true)} to ${formatReleaseDate(latest.released, true)}. Tap one to see what it brought.`}
+          {`${RELEASE_NOTES.length} releases, ${formatReleaseDate(first.released, true)} to ${formatReleaseDate(latest.released, true)}. Tap a release to see its changes.`}
         </div>
 
         {RELEASE_NOTES.map((notes) => {
@@ -80,7 +80,7 @@ export function VersionHistoryScreen({ onBack }) {
         })}
 
         <div style={{ color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.5, textAlign: "center", marginTop: 16 }}>
-          {`Iron Log has been in your hands since ${formatReleaseDate(first.released)}.`}
+          {`The first release of Iron Log was on ${formatReleaseDate(first.released)}.`}
         </div>
       </div>
     </div>

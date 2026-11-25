@@ -30,11 +30,12 @@ export function VolumeScreen({ onBack }) {
     <div>
       <TopBar title="Weekly Volume" onBack={onBack} />
       <div style={{ padding: "0 20px 8px", color: COLORS.textDim, fontSize: 13 }}>
-        Sets logged per muscle, trailing 7 days. Work where a muscle is a secondary counts as half a set.
+        This screen shows the sets that you logged for each muscle in the last 7 days. A set counts as half a set for a secondary muscle.
       </div>
       <div style={{ color: COLORS.textDim, fontSize: 11, padding: "4px 20px 16px", lineHeight: 1.45 }}>
-        No target is marked, because there isn't one. Taken close enough to failure, four to six hard sets a week is
-        plenty for a muscle; what you need depends on your goals, your experience and whether you're natural.
+        The screen shows no target, because there is no single correct target. Four to six hard sets a week, close to
+        failure, are enough for a muscle. The number of sets that you need depends on your goals and your experience. It
+        also depends on whether you use performance-enhancing drugs.
       </div>
       <div style={{ padding: "0 20px 40px", display: "flex", flexDirection: "column", gap: 12 }}>
         {loading ? (

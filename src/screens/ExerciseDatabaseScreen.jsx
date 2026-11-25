@@ -142,7 +142,7 @@ export function ExerciseDatabaseScreen({ onBack }) {
       <div style={{ paddingBottom: 40 }}>
         <TopBar title="Exercise Database" onBack={onBack} />
         <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13, lineHeight: 1.5 }}>
-          Every exercise Iron Log knows, by body part. Reorder them to change which ones the app suggests first, edit any of them, remove the ones you can’t or won’t do, and add your own.
+          This list shows all the exercises in Iron Log, by body part. Change the order to change which exercises the app suggests first. You can edit any exercise. You can remove exercises that you cannot do or do not want to do. You can also add your own exercises.
         </div>
         <div style={{ padding: "0 20px 12px" }}>
           <input
@@ -158,7 +158,7 @@ export function ExerciseDatabaseScreen({ onBack }) {
           <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 8 }}>
             {results.length === 0 && (
               <div style={{ color: COLORS.textDim, fontSize: 13, padding: "8px 2px" }}>
-                Nothing matches “{q}”. Open a body part below to add it yourself.
+                No exercise matches “{q}”. To add it, open a body part below.
               </div>
             )}
             {results.map((g) => (
@@ -206,7 +206,7 @@ export function ExerciseDatabaseScreen({ onBack }) {
     <div style={{ paddingBottom: 40 }}>
       <TopBar title={muscle} onBack={() => setMuscle(null)} />
       <div style={{ padding: "0 20px 14px", color: COLORS.textDim, fontSize: 12.5 }}>
-        Every variation, in one ranking. Top of the list gets suggested first. Tap the pencil to change a name, its muscles or its cue — your logged sets stay attached.
+        This list shows all the variations in one ranking. The app suggests the top exercise first. To change the name, muscles or cue of an exercise, tap the pencil. Your logged sets stay with the exercise.
       </div>
 
       {adding && (

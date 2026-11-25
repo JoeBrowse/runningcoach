@@ -93,7 +93,7 @@ export function MeasurementsPanel() {
         </div>
       </div>
       <div style={{ color: COLORS.textDim, fontSize: 12, marginBottom: 12, lineHeight: 1.45 }}>
-        The scale can sit still for months while these move. Fill in whichever you track and leave the rest blank.
+        Your body weight can stay the same for months while these measurements change. Fill in the measurements that you track. Leave the other fields blank.
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>

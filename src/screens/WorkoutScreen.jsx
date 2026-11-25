@@ -519,7 +519,7 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
     <div style={{ paddingBottom: ssPicker ? 130 : 24 }}>
       <TopBar title={split} onBack={onBack} />
       <div style={{ padding: "0 20px 8px", color: COLORS.textDim, fontSize: 13 }}>
-        {exercises.length} exercise{exercises.length === 1 ? "" : "s"} · log your sets as you go
+        {exercises.length} exercise{exercises.length === 1 ? "" : "s"} · log each set when you finish it
       </div>
 
       <div style={{ padding: "0 20px 6px" }}>
@@ -564,7 +564,7 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
           }}
         >
           <div style={{ color: COLORS.text, fontSize: 13, marginBottom: 8 }}>
-            Tap the exercises to superset together ({ssPicker.picked.length} selected).
+            Tap the exercises for the superset ({ssPicker.picked.length} selected).
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button
@@ -586,7 +586,7 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
 
       <div style={{ padding: "10px 20px" }}>
         {loading ? (
-          <div style={{ color: COLORS.textDim, padding: 20, textAlign: "center" }}>Building workout…</div>
+          <div style={{ color: COLORS.textDim, padding: 20, textAlign: "center" }}>Making the workout…</div>
         ) : (
           (() => {
             // Which exercise is the first of its muscle (for the warm-up block).
@@ -801,7 +801,7 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
             </button>
             {armedFinish && !saving && (
               <div style={{ color: COLORS.textDim, fontSize: 12, textAlign: "center", marginTop: 8 }}>
-                Nothing is saved until the second tap.
+                The app saves nothing until you tap a second time.
               </div>
             )}
           </div>

@@ -75,7 +75,7 @@ export function OneRMWorkoutScreen({ exerciseId, target, isBodyweight, settings,
     <div style={{ paddingBottom: 100 }}>
       <TopBar title={ex ? ex.name : "1RM Test"} onBack={onBack} />
       <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13 }}>
-        Progressive ramp toward today's attempt. Log what you actually hit at each step — adjust on the fly if it feels off.
+        Each step is heavier, up to today's attempt. Log what you did at each step. If a step feels wrong, adjust it during the session.
       </div>
 
       {timer && (

@@ -133,7 +133,7 @@ export function HistoryScreen({ onBack, settings }) {
   }
 
   async function deleteSession(session) {
-    if (!window.confirm(`Delete this ${session.split} workout from ${session.date}? This can't be undone.`)) return;
+    if (!window.confirm(`Delete this ${session.split} workout from ${session.date}? You cannot undo this action.`)) return;
     const updatedRaw = rawSessions.filter((s) => s.id !== session.id);
     await safeSet("workout-history", updatedRaw);
     for (const ex of session.exercises) {
@@ -149,14 +149,14 @@ export function HistoryScreen({ onBack, settings }) {
     <div>
       <TopBar title="Workout History" onBack={onBack} />
       <div style={{ padding: "0 20px 8px", color: COLORS.textDim, fontSize: 13 }}>
-        Every logged session, most recent first.
+        This list shows all logged workouts. The most recent workout is first.
       </div>
       <div style={{ padding: "10px 20px 40px" }}>
         {loading ? (
           <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30 }}>Loading…</div>
         ) : sessions.length === 0 ? (
           <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30, fontSize: 13.5 }}>
-            No workouts logged yet. Finish one and it'll show up here.
+            There are no workouts in the log. When you finish a workout, it shows here.
           </div>
         ) : (
           sessions.map((s) => {

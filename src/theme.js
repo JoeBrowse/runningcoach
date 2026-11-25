@@ -45,7 +45,7 @@ export function hexToRgba(hex, alpha) {
 export const COLOUR_SCHEMES = {
   default: {
     label: "Standard",
-    desc: "Red, amber and green. The original palette.",
+    desc: "Red, amber and green. These are the original colours.",
     shapes: false,
     dark: {
       accent: "#FF6A1A", accentDim: "#7A3A16", onAccent: "#1A1200",
@@ -65,7 +65,7 @@ export const COLOUR_SCHEMES = {
   },
   redGreen: {
     label: "Red–green",
-    desc: "For deuteranopia and protanopia, the common kinds. Readiness moves onto a blue-to-orange scale, which stays readable when red and green do not.",
+    desc: "For deuteranopia and protanopia, the most common types. Readiness uses a scale from blue to orange. You can read this scale when red and green look the same.",
     shapes: true,
     dark: {
       accent: "#E69F00", accentDim: "#6B4A00", onAccent: "#1A1200",
@@ -91,7 +91,7 @@ export const COLOUR_SCHEMES = {
   },
   blueYellow: {
     label: "Blue–yellow",
-    desc: "For tritanopia. Blue and yellow are the pair that go, so readiness uses red, pink and green instead.",
+    desc: "For tritanopia. With this type, blue and yellow look the same. Readiness uses red, pink and green instead.",
     shapes: true,
     dark: {
       accent: "#E24A8C", accentDim: "#6B2142", onAccent: "#1A0410",
@@ -111,7 +111,7 @@ export const COLOUR_SCHEMES = {
   },
   mono: {
     label: "Monochrome",
-    desc: "No colour at all. Readiness is told by brightness and by outline, for total colour blindness or any screen where hue cannot be trusted.",
+    desc: "No colour. Readiness shows by brightness and by outline. Use this for total colour blindness, or for a screen with colours that are not correct.",
     shapes: true,
     dark: {
       accent: "#E8E4DC", accentDim: "#5A5852", onAccent: "#15171A",
@@ -156,8 +156,8 @@ export const CHROME = {
 };
 
 export const THEME_MODES = [
-  { value: "system", label: "System", desc: "Follow whatever your phone is set to." },
-  { value: "dark", label: "Dark", desc: "The original. Easier on the eyes in a dim gym." },
+  { value: "system", label: "System", desc: "Use the same setting as your phone." },
+  { value: "dark", label: "Dark", desc: "The original theme. It is easier on the eyes in a dark gym." },
   { value: "light", label: "Light", desc: "For bright rooms and daylight." },
 ];
 

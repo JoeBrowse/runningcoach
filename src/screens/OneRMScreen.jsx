@@ -68,7 +68,7 @@ function OneRMGoalForm({ current, isBodyweight, unit, onSave, onCancel }) {
       </div>
 
       <div style={{ color: COLORS.textDim, fontSize: 11.5, marginBottom: 12, fontStyle: "italic" }}>
-        {weeksPreview ? `The app will calculate a plan of about ${weeksPreview} week${weeksPreview === 1 ? "" : "s"}, based on typical ${level} progression rates.` : t && c && t <= c ? "Target should be higher than your current number." : "Enter both numbers to see an estimated timeframe."}
+        {weeksPreview ? `The app will make a plan of about ${weeksPreview} week${weeksPreview === 1 ? "" : "s"}. It uses typical progress rates for the ${level} level.` : t && c && t <= c ? "Make the target higher than your current number." : "Enter the two numbers to see the estimated time."}
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
@@ -152,7 +152,7 @@ export function OneRMScreen({ settings, onBack, onGenerateWorkout }) {
     <div>
       <TopBar title="1RM Goals" onBack={onBack} />
       <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13 }}>
-        Set a target, get a weekly progression toward it, and generate a test day when you're ready to attempt it.
+        Set a target. The app gives you a weekly plan to reach it. When you are ready, make a test day for your attempt.
       </div>
       <div style={{ padding: "0 20px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
         {loading ? (

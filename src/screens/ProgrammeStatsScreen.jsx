@@ -32,7 +32,7 @@ export function ProgrammeStatsScreen({ programme, isFinished, onBack, onHome }) 
         </div>
 
         {!stats ? (
-          <div style={{ color: COLORS.textDim, textAlign: "center", padding: 20 }}>Crunching numbers…</div>
+          <div style={{ color: COLORS.textDim, textAlign: "center", padding: 20 }}>Calculating…</div>
         ) : (
           <>
             <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
@@ -48,7 +48,7 @@ export function ProgrammeStatsScreen({ programme, isFinished, onBack, onHome }) 
             </div>
             {stats.gainers.length === 0 ? (
               <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 18 }}>
-                Not enough repeat sessions yet to measure progression. Keep logging and this fills in.
+                The app needs more repeat sessions to measure progress. Continue to log your workouts. Then the app shows this list.
               </div>
             ) : (
               <div style={{ marginBottom: 18 }}>

@@ -90,9 +90,9 @@ export const PROGRESSION_RATES = {
 };
 
 export const TRAINING_LEVELS = [
-  { value: "beginner", label: "Beginner", desc: "< 1 year consistent training" },
-  { value: "intermediate", label: "Intermediate", desc: "1-3 years consistent training" },
-  { value: "advanced", label: "Advanced", desc: "3+ years consistent training" },
+  { value: "beginner", label: "Beginner", desc: "Less than 1 year of regular training" },
+  { value: "intermediate", label: "Intermediate", desc: "1-3 years of regular training" },
+  { value: "advanced", label: "Advanced", desc: "3 or more years of regular training" },
 ];
 
 // Estimates how many weeks a target realistically needs from current, given

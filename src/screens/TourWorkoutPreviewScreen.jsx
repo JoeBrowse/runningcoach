@@ -12,7 +12,7 @@ export function TourWorkoutPreviewScreen() {
   return (
     <div style={{ padding: "20px 20px 40px" }}>
       <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
-        Preview — nothing here is saved
+        Preview only. The app saves nothing here.
       </div>
       <div style={{ color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 20, textTransform: "uppercase", marginBottom: 16 }}>
         In a Real Workout

@@ -12,9 +12,9 @@ export const TRAINING = { historyDepth: 20, recoveryPace: 1 };
 // and trains a muscle every third day is not served by a table that says
 // otherwise, and someone older or on a deficit is not served by rushing them.
 export const RECOVERY_PACES = [
-  { value: "faster", label: "Faster", factor: 0.75, desc: "Muscles read as ready about a quarter sooner." },
-  { value: "normal", label: "Normal", factor: 1, desc: "The research-backed windows, unchanged." },
-  { value: "slower", label: "Slower", factor: 1.35, desc: "A third longer before a muscle reads as ready." },
+  { value: "faster", label: "Faster", factor: 0.75, desc: "Muscles show as ready about 25% sooner." },
+  { value: "normal", label: "Normal", factor: 1, desc: "The app uses the recovery times from research, with no change." },
+  { value: "slower", label: "Slower", factor: 1.35, desc: "Muscles show as ready about 35% later." },
 ];
 
 export function applyTrainingPrefs(settings) {
@@ -73,6 +73,6 @@ export const DEFAULT_SETTINGS = {
 // rather than a prop drilled everywhere, since it only touches a handful
 // of screens (SelectScreen, WorkoutScreen, ExerciseCard).
 export const APP_MODES = [
-  { value: "simple", label: "Simple", desc: "Just the essentials — pick a muscle, log your sets, done." },
-  { value: "advanced", label: "Advanced", desc: "Everything: pick the implement, supersets, drop sets, effort tracking, machine and grip tracking, templates." },
+  { value: "simple", label: "Simple", desc: "Only the basic features. Select a muscle and record your sets." },
+  { value: "advanced", label: "Advanced", desc: "All features: implement choice, supersets, drop sets, effort, machine and grip records, and templates." },
 ];

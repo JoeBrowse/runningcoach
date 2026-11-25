@@ -1,52 +1,55 @@
 # Iron Log
 
-**A gym tracker that stays on your phone.**
+**A gym tracker that keeps your data on your phone.**
 
 📄 **[ironlog product page →](https://joebrowse.github.io/IronLogV3/)**
 
-Log your sets. See what has recovered. Watch the numbers go up. No account,
-no cloud, nothing uploaded — Iron Log has no server to upload anything to.
+Log your sets. See which muscles have recovered. See your progress. No account,
+no cloud and no uploads. Iron Log has no server.
 
 ---
 
 ## What it is
 
-An offline-first Android workout tracker, built with React and wrapped with
-Capacitor. Everything lives in your device's own storage.
+An Android workout tracker that works offline. It uses React and Capacitor.
+The app keeps all data in the storage on your device.
 
-* **Muscle readiness** — an anatomical body map, front and rear, shaded by
-  what is actually recovered. Every muscle has its own recovery window, and
-  how hard you trained it decides which one applies.
-* **Guided workouts** — pick a split and Iron Log builds the session, ranked
-  by the exercise order you set and weighted toward what has recovered.
-* **Programmes** — multi-week plans followed day by day, including presets
-  like Push/Pull/Legs and Project Arms. Build your own or edit any of them.
-* **Progress charts** — estimated 1RM over time per exercise, grouped by
-  muscle, with machines and variations tracked separately.
-* **Simple and Advanced modes** — start with sets, reps and weight; add RIR,
-  machine tracking, volume analysis and 1RM testing when you want them.
+* **Muscle readiness**: a body map of the muscles, front and rear. The colour
+  of each muscle shows if it has recovered. Each muscle has its own recovery
+  time. How hard you trained the muscle sets which time applies.
+* **Guided workouts**: select a split, and Iron Log makes the session. It uses
+  the exercise order that you set and prefers muscles that have recovered.
+* **Programmes**: plans of many weeks that you follow day by day. Presets
+  include Push/Pull/Legs and Project Arms. You can make your own plan or edit
+  any plan.
+* **Progress charts**: estimated 1RM over time for each exercise, grouped by
+  muscle. The app records machines and variations separately.
+* **Simple and Advanced modes**: start with sets, reps and weight. Add RIR,
+  machine records, volume analysis and 1RM tests when you want them.
 
 ## Privacy
 
-The privacy is structural rather than promised:
+Privacy is part of the design, not only a promise:
 
 * There is no Iron Log server and no Iron Log account.
-* No analytics, no tracking, no ads, no third-party data collection.
-* The only network call is to Google Play, occasionally, to ask whether this
-  account is subscribed.
-* Backup writes plain JSON to your Downloads folder — your data, readable.
-* Cancelling the subscription stops the app; it does not take your history.
+* No analytics, no tracking and no ads. No third party collects data.
+* The app connects only to Google Play. It does this sometimes, to check if
+  this account has a subscription.
+* Backup writes a plain JSON file to your Downloads folder. You can read your
+  data in this format.
+* If you cancel the subscription, the app stops. Your history stays on your
+  device.
 
 Full policy: [docs/privacy-policy.md](docs/privacy-policy.md)
 
 ## Pricing
 
-Free to install, with a 7-day free trial run by Google Play — cancel before
-it ends and you are not charged. After that it is a subscription, monthly or
-annual, cancellable at any time in Google Play.
+Iron Log is now free. It is free software under the GPL-3.0 licence (see
+"Licence" below).
 
-Prices are set in Play Console and shown in your own currency inside the app.
-No price is hard-coded anywhere in this repository.
+Earlier versions used a Google Play subscription with a 7-day free trial.
+Play Console set the prices, and the app showed them in your currency.
+This repository does not hard-code a price.
 
 ## Building it
 
@@ -57,20 +60,20 @@ npm run lint    # JSX parse check
 npm run build   # production bundle into dist/
 ```
 
-The Android app is produced by wrapping `dist/` with Capacitor. This repo
-carries no build workflow and no signing keys — see "About this repository".
+Capacitor wraps `dist/` to make the Android app. This repository has no build
+workflow and no signing keys. See "About this repository".
 
 ## About this repository
 
-This is the public mirror of Iron Log. It carries the application source, the
-assets, the privacy policy and the product page — everything needed to read,
-build and understand the app.
+This is the public mirror of Iron Log. It has the application source, the
+assets, the privacy policy and the product page. You can use these files to
+read, build and understand the app.
 
-It deliberately does **not** carry the release automation. Debug builds of Iron
-Log are compiled with the paywall switched off so that testers can side-load
-them, which makes a debug APK a free, fully unlocked copy of a paid app. Build
-artifacts attached to a public repository are downloadable by anyone, so the
-workflow that produces them lives in the private repository instead.
+It does **not** have the release automation. This is intentional. Debug builds
+of Iron Log have the paywall switched off, so that testers can side-load them.
+Thus a debug APK is a free, fully unlocked copy of a paid app. Anyone can
+download build artifacts from a public repository. Thus the workflow that makes
+them is in the private repository.
 
 ## Licence
 
@@ -79,15 +82,15 @@ any later version (GPL-3.0-or-later). See [LICENSE](LICENSE).
 
 ## Third-party attribution
 
-The muscle readiness map is drawn using the region data from
-[body-muscles](https://github.com/vulovix/body-muscles) by Ivan Vulović, used
-under the Apache License 2.0. See [NOTICE](NOTICE).
+The muscle readiness map uses the region data from
+[body-muscles](https://github.com/vulovix/body-muscles) by Ivan Vulović, under
+the Apache License 2.0. See [NOTICE](NOTICE).
 
 ## AI assistance disclaimer
 
-Iron Log was developed with the assistance of Claude AI (Anthropic), used as a
-coding assistant to help generate, review, debug and improve parts of the
-application. The concept, requirements, testing and final decisions were
-directed by the developer. All generated code was reviewed before inclusion.
-No user data, private information or device data was provided to Claude during
-development.
+The developer used Claude AI (Anthropic) as a coding assistant for Iron Log.
+Claude helped to write, review, debug and improve parts of the application.
+The developer controlled the concept, requirements, testing and final
+decisions. The developer reviewed all generated code before it went into the
+app. The developer gave no user data, private information or device data to
+Claude during development.

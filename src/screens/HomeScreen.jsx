@@ -113,7 +113,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
           </button>
         ) : graceDaysLeft !== null && graceDaysLeft <= 5 ? (
           <div style={{ color: COLORS.textDim, fontSize: 11.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 0.5, textTransform: "uppercase" }}>
-            Offline — {graceDaysLeft} day{graceDaysLeft === 1 ? "" : "s"} left
+            Offline: {graceDaysLeft} day{graceDaysLeft === 1 ? "" : "s"} left
           </div>
         ) : (
           <div />
@@ -146,7 +146,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
             <Clock size={13} /> Unfinished Workout
           </div>
           <div style={{ color: COLORS.textDim, fontSize: 12.5, marginBottom: 12 }}>
-            {unfinished.split} · {unfinished.exercises.length} exercise{unfinished.exercises.length === 1 ? "" : "s"} — you left this one logged but not finished.
+            {unfinished.split} · {unfinished.exercises.length} exercise{unfinished.exercises.length === 1 ? "" : "s"}. You logged sets in this workout but did not finish it.
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button
@@ -301,7 +301,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
         {loading ? (
           <div style={{ color: COLORS.textDim, textAlign: "center", padding: 12, fontSize: 13 }}>Loading…</div>
         ) : recentSessions.length === 0 ? (
-          <div style={{ color: COLORS.textDim, fontSize: 13, padding: "4px 0 8px" }}>No workouts logged yet.</div>
+          <div style={{ color: COLORS.textDim, fontSize: 13, padding: "4px 0 8px" }}>There are no workouts in the log.</div>
         ) : (
           recentSessions.map((s) => (
             <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: `1px solid ${COLORS.line}` }}>

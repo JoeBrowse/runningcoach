@@ -168,7 +168,7 @@ export function ActivityPanel({ onChanged }) {
         <>
           {recent.length === 0 && !adding && (
             <div style={{ color: COLORS.textDim, fontSize: 12.5, lineHeight: 1.5, marginBottom: 12 }}>
-              Runs, rides, swims, rows and anything else, with a time and an effort. They stay out of your lifting stats, but they count on your streak, and whatever they tired shows on the readiness map above.
+              Log runs, rides, swims, rows and other activities with a time and an effort. Activities are not part of your lifting stats. They count for your streak. The readiness map above shows the muscles that they made tired.
             </div>
           )}
 
@@ -303,12 +303,12 @@ export function ActivityPanel({ onChanged }) {
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="What was it? e.g. Rowing"
+                  placeholder="Activity name, for example Rowing"
                   style={{ ...field, width: "100%", marginBottom: 12 }}
                 />
               )}
 
-              <div style={legend}>How long{chosen.distanceUnit ? " and how far" : ""}</div>
+              <div style={legend}>Time{chosen.distanceUnit ? " and distance" : ""}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                 <input type="number" inputMode="numeric" placeholder="min" value={minutes} onChange={(e) => setMinutes(e.target.value)} style={{ ...field, flex: 1 }} />
                 <input type="number" inputMode="numeric" placeholder="sec" value={seconds} onChange={(e) => setSeconds(e.target.value)} style={{ ...field, flex: 1 }} />
@@ -322,7 +322,7 @@ export function ActivityPanel({ onChanged }) {
                 </div>
               )}
 
-              <div style={legend}>Effort — RPE</div>
+              <div style={legend}>Effort (RPE)</div>
               <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => {
                   const active = rpe === n;
@@ -351,8 +351,8 @@ export function ActivityPanel({ onChanged }) {
               </div>
               <div style={{ color: COLORS.textDim, fontSize: 11, lineHeight: 1.45, marginBottom: 12 }}>
                 {chosen.primary.length || chosen.secondary.length
-                  ? `${rpe >= HARD_ACTIVITY_RPE ? "At RPE 9 or 10 this counts as hard work" : "Below RPE 9 this counts as work with something left"} on ${[...chosen.primary, ...chosen.secondary].join(", ")}.`
-                  : "Logged and timed, but the readiness map is left alone — the app has no way to know what this worked."}
+                  ? `${rpe >= HARD_ACTIVITY_RPE ? "At RPE 9 or 10, this counts as hard work" : "Below RPE 9, this counts as work that is not at full effort"} on ${[...chosen.primary, ...chosen.secondary].join(", ")}.`
+                  : "The app logs this activity and its time. The readiness map does not change, because the app cannot know which muscles this activity used."}
               </div>
 
               <div style={{ display: "flex", gap: 8 }}>

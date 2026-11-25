@@ -56,7 +56,7 @@ export function BackupPanel() {
     setBusy(true);
     try {
       const count = await restoreBackup(parsed);
-      setResult({ ok: true, title: "Restored", detail: `${count} items restored. Reopening…` });
+      setResult({ ok: true, title: "Restored", detail: `The app restored ${count} items. It opens again now…` });
       setTimeout(() => window.location.reload(), 900);
     } catch (e) {
       setResult({ ok: false, title: "Could not restore", detail: String((e && e.message) || e) });
@@ -84,7 +84,7 @@ export function BackupPanel() {
         Backup
       </div>
       <div style={{ color: COLORS.textDim, fontSize: 12, marginBottom: 12, lineHeight: 1.45 }}>
-        Your training is stored on this phone and nowhere else. Save a copy somewhere safe so a lost or wiped phone doesn't take it with it.
+        The app keeps your training data on this phone only. Save a copy in a safe place. Then you keep your data if you lose or erase the phone.
       </div>
 
       <button onClick={handleExport} disabled={busy} style={{ ...btn, background: COLORS.accent, border: "none", color: COLORS.onAccent, marginBottom: 8 }}>
@@ -109,8 +109,8 @@ export function BackupPanel() {
       {confirmFile && (
         <div style={{ marginTop: 12, background: COLORS.surfaceRaised, border: `1px solid ${COLORS.bad}`, borderRadius: 10, padding: "12px 13px" }}>
           <div style={{ color: COLORS.text, fontSize: 12.5, lineHeight: 1.5, marginBottom: 10 }}>
-            Restoring replaces everything currently in the app with the contents of this backup
-            {confirmFile.exportedAt ? ` from ${String(confirmFile.exportedAt).slice(0, 10)}` : ""}. This cannot be undone.
+            Restore replaces all the data in the app with the data in this backup
+            {confirmFile.exportedAt ? ` from ${String(confirmFile.exportedAt).slice(0, 10)}` : ""}. You cannot undo this.
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => setConfirmFile(null)} style={{ ...btn, flex: 1, background: "transparent", border: `1px solid ${COLORS.line}`, color: COLORS.textDim, padding: "10px 0" }}>

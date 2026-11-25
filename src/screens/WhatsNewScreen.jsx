@@ -16,7 +16,7 @@ export function WhatsNewScreen({ notes, onDismiss }) {
         </div>
 
         <div style={{ color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 30, textTransform: "uppercase", lineHeight: 1.1, letterSpacing: 0.5, marginBottom: 8 }}>
-          What's New
+          What Is New
         </div>
         <div style={{ color: COLORS.text, fontSize: 14.5, lineHeight: 1.55, marginBottom: 6 }}>{notes.headline}</div>
         <div style={{ color: COLORS.textDim, fontSize: 11.5, fontFamily: "'JetBrains Mono', monospace", marginBottom: 24 }}>{formatReleaseDate(notes.released)}</div>
@@ -33,7 +33,7 @@ export function WhatsNewScreen({ notes, onDismiss }) {
         </div>
 
         <div style={{ color: COLORS.textDim, fontSize: 12, textAlign: "center", marginTop: 22 }}>
-          Your workouts and settings are exactly as you left them.
+          The update did not change your workouts or settings.
         </div>
       </div>
 

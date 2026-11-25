@@ -8,7 +8,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "pplul",
     name: "Push Pull Legs Upper Lower",
-    blurb: "5 sessions over ~7 days — PPL plus dedicated upper/lower days for extra frequency.",
+    blurb: "5 sessions in about 7 days. You do PPL, then one upper day and one lower day. This trains each muscle more often.",
     days: [
       ["Push", ["Chest", "Front Delts", "Side Delts", "Triceps"], ["bench-press", "incline-press", "overhead-press", "lateral-raise", "pushdown", "overhead-extension"]],
       ["Pull", ["Back", "Rear Delts", "Biceps"], ["pull-ups", "bent-over-row", "face-pull", "cable-curl", "hammer-curl"]],
@@ -20,7 +20,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "ppl",
     name: "Push Pull Legs",
-    blurb: "The classic 3-day rotation. Run it once or twice per week.",
+    blurb: "A standard 3-day cycle. Do it one or two times each week.",
     days: [
       ["Push", ["Chest", "Front Delts", "Side Delts", "Triceps"], ["bench-press", "incline-press", "overhead-press", "lateral-raise", "pushdown", "overhead-extension"]],
       ["Pull", ["Back", "Rear Delts", "Biceps"], ["deadlift", "pull-ups", "bent-over-row", "face-pull", "cable-curl", "hammer-curl"]],
@@ -30,7 +30,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "upper-lower",
     name: "Upper Lower",
-    blurb: "4 sessions/week hitting each half twice. Balanced and simple.",
+    blurb: "4 sessions each week. You train the upper body and the lower body two times each. Balanced and simple.",
     days: [
       ["Upper", ["Chest", "Back", "Front Delts", "Side Delts", "Biceps", "Triceps"], ["bench-press", "bent-over-row", "overhead-press", "lat-pulldown", "lateral-raise", "cable-curl", "pushdown"]],
       ["Lower", ["Quads", "Hamstrings", "Glutes", "Calves"], ["squat", "romanian-deadlift", "leg-press", "leg-curl", "hip-thrust", "standing-calf-raise"]],
@@ -39,7 +39,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "full-body",
     name: "Full Body",
-    blurb: "Two alternating full-body sessions, 3x/week. Simple, heavy, effective.",
+    blurb: "Two full-body sessions that alternate, 3 times each week. Simple, with heavy weights.",
     days: [
       ["Full Body A", ["Quads", "Chest", "Back"], ["squat", "bench-press", "bent-over-row"]],
       ["Full Body B", ["Quads", "Front Delts", "Back"], ["squat", "overhead-press", "deadlift"]],
@@ -48,7 +48,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "bro",
     name: "Bro Split",
-    blurb: "One muscle group per day, 5 days. Maximum focus per session.",
+    blurb: "One muscle group each day, for 5 days. Each session trains one area only.",
     days: [
       ["Chest", ["Chest"], ["bench-press", "incline-press", "dips", "cable-fly", "pec-deck"]],
       ["Back", ["Back"], ["deadlift", "pull-ups", "bent-over-row", "lat-pulldown", "straight-arm-pulldown"]],
@@ -60,7 +60,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "arnold",
     name: "Arnold Split",
-    blurb: "6 sessions/week: Chest & Back, Shoulders & Arms, Legs — repeated twice. High volume, old-school.",
+    blurb: "6 sessions each week: Chest & Back, Shoulders & Arms, Legs. You do this cycle two times. High volume.",
     days: [
       ["Chest & Back", ["Chest", "Back"], ["bench-press", "incline-press", "dips", "pull-ups", "bent-over-row", "straight-arm-pulldown"]],
       ["Shoulders & Arms", ["Front Delts", "Side Delts", "Rear Delts", "Biceps", "Triceps"], ["overhead-press", "close-grip-bench", "lateral-raise", "face-pull", "cable-curl", "preacher-curl", "pushdown"]],
@@ -70,7 +70,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "project-arms",
     name: "Project Arms",
-    blurb: "Upper, lower, arms — twice through, with a rest day after each block. Two dedicated arm sessions a week and direct forearm and grip work.",
+    blurb: "Upper, lower, arms. You do this cycle two times, with a rest day after each cycle. You get two arm sessions each week. You also train the forearms and the grip directly.",
     days: [
       ["Upper A", ["Back", "Chest", "Front Delts", "Side Delts", "Rear Delts"], ["pull-ups", "bench-press", "overhead-press", "cable-fly", "lateral-raise", "face-pull"]],
       ["Lower A", ["Quads", "Hamstrings", "Glutes", "Calves", "Core"], [["squat", "Hack"], "romanian-deadlift", "hip-thrust", "hip-adduction", "standing-calf-raise", "cable-crunch"]],
@@ -83,7 +83,7 @@ export const PROGRAMME_PRESETS = [
   {
     key: "custom",
     name: "Custom",
-    blurb: "Build your own days from scratch.",
+    blurb: "Make your own days. Start with an empty plan.",
     days: [],
   },
 ];
@@ -91,10 +91,10 @@ export const PROGRAMME_PRESETS = [
 // Recommended block lengths. 6–8 weeks is the usual sweet spot before a
 // deload or exercise swap, so those are flagged as recommended.
 export const PROGRAMME_LENGTHS = [
-  { weeks: 4, label: "4 weeks", desc: "Short block or a test run." },
-  { weeks: 6, label: "6 weeks", desc: "Recommended — long enough to progress, short enough to stay fresh.", recommended: true },
-  { weeks: 8, label: "8 weeks", desc: "Recommended — a full training block with room to peak.", recommended: true },
-  { weeks: 12, label: "12 weeks", desc: "Long build. Consider a deload around the midpoint." },
+  { weeks: 4, label: "4 weeks", desc: "A short block, or a test of the programme." },
+  { weeks: 6, label: "6 weeks", desc: "Recommended. This is long enough to make progress and short enough to stay fresh.", recommended: true },
+  { weeks: 8, label: "8 weeks", desc: "Recommended. This is a full training block with time to reach your best.", recommended: true },
+  { weeks: 12, label: "12 weeks", desc: "A long block. Think about a deload near the middle." },
 ];
 
 /* ---------------------------------------------------------------
@@ -107,9 +107,9 @@ export const PROGRAMME_LENGTHS = [
 --------------------------------------------------------------- */
 
 export const GUIDED_EXPERIENCE_OPTIONS = [
-  { value: "new", label: "New To Training", desc: "Just starting out, or getting back into it after a long break.", presetKey: "full-body" },
-  { value: "some", label: "Some Experience", desc: "You've trained fairly consistently for a while now.", presetKey: "upper-lower" },
-  { value: "experienced", label: "Very Experienced", desc: "You know your way around the gym and want more frequency.", presetKey: "ppl" },
+  { value: "new", label: "New To Training", desc: "You are new to training, or you start again after a long break.", presetKey: "full-body" },
+  { value: "some", label: "Some Experience", desc: "You have trained regularly for some time.", presetKey: "upper-lower" },
+  { value: "experienced", label: "Very Experienced", desc: "You know the gym well and want to train each muscle more often.", presetKey: "ppl" },
 ];
 
 // Same duration → exercise-count mapping "Train Ready Muscles" uses, so a

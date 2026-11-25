@@ -94,13 +94,13 @@ export async function writeBackupFile(filename, text) {
         lastError = e;
       }
     }
-    throw lastError || new Error("Could not write the backup file.");
+    throw lastError || new Error("The app could not write the backup file.");
   }
 
   // Browser and PWA: a real download, which lands in the browser's own
   // downloads folder.
   if (typeof document === "undefined" || typeof URL === "undefined" || !URL.createObjectURL) {
-    throw new Error("This build cannot save files.");
+    throw new Error("This version of the app cannot save files.");
   }
   const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
   const a = document.createElement("a");

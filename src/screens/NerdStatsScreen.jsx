@@ -39,7 +39,7 @@ function tonnageComparison(kg) {
   const nice = options.find((o) => o.n >= 5 && o.n <= 200) || options[options.length - 1];
   if (!nice) return null;
   const count = Math.round(nice.n);
-  return `about ${count} ${count === 1 ? nice.unit.one : nice.unit.many}`;
+  return `about the weight of ${count} ${count === 1 ? nice.unit.one : nice.unit.many}`;
 }
 
 function NerdCard({ title, icon, note, children }) {
@@ -197,7 +197,7 @@ export function NerdStatsScreen({ onBack }) {
     return (
       <div>
         <TopBar title="Stats for Nerds" onBack={onBack} />
-        <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30 }}>Crunching…</div>
+        <div style={{ color: COLORS.textDim, textAlign: "center", padding: 30 }}>Loading…</div>
       </div>
     );
   }
@@ -206,7 +206,7 @@ export function NerdStatsScreen({ onBack }) {
       <div>
         <TopBar title="Stats for Nerds" onBack={onBack} />
         <div style={{ padding: "0 20px", color: COLORS.textDim, fontSize: 13, lineHeight: 1.5 }}>
-          Nothing logged yet. Train a few times and this fills up.
+          There is no logged data. Train a few times to see these statistics.
         </div>
       </div>
     );
@@ -224,9 +224,9 @@ export function NerdStatsScreen({ onBack }) {
   const topExercises = Object.entries(stats.exerciseSets).sort((a, b) => b[1] - a[1]).slice(0, 6);
   const effortRows = [
     { label: "To failure", value: stats.effort.byRir[0], colour: STAGE_COLORS.red },
-    { label: "1 left", value: stats.effort.byRir[1], colour: STAGE_COLORS.amber },
-    { label: "2 left", value: stats.effort.byRir[2], colour: COLORS.accent },
-    { label: "3+ left", value: stats.effort.byRir[3], colour: STAGE_COLORS.green },
+    { label: "1 rep left", value: stats.effort.byRir[1], colour: STAGE_COLORS.amber },
+    { label: "2 reps left", value: stats.effort.byRir[2], colour: COLORS.accent },
+    { label: "3+ reps left", value: stats.effort.byRir[3], colour: STAGE_COLORS.green },
   ];
   const pplRows = [
     { label: "Push", value: stats.ppl.Push, colour: STAGE_COLORS.red },
@@ -255,7 +255,7 @@ export function NerdStatsScreen({ onBack }) {
     <div style={{ paddingBottom: 40 }} data-tour="nerd-stats">
       <TopBar title="Stats for Nerds" onBack={onBack} />
       <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13, lineHeight: 1.5 }}>
-        {stats.firstDate ? `Everything logged since ${stats.firstDate}.` : "Everything you have logged."}
+        {stats.firstDate ? `All data logged since ${stats.firstDate}.` : "All the data that you logged."}
       </div>
 
       <div style={{ padding: "0 20px" }}>
@@ -270,16 +270,16 @@ export function NerdStatsScreen({ onBack }) {
         </div>
         {compare && (
           <div style={{ color: COLORS.textDim, fontSize: 11.5, textAlign: "center", marginBottom: 16, lineHeight: 1.4 }}>
-            {n(stats.tonnage)}kg of external load — {compare}. Bodyweight and assisted work carry no bar, so they add nothing here.
+            Total external load: {n(stats.tonnage)}kg. That is {compare}. This total does not include bodyweight or assisted sets, because they use no external weight.
           </div>
         )}
 
         {/* ---- where the work goes ---- */}
         {topMuscles.length > 0 && (
           <NerdCard
-            title="Where the work goes"
+            title="Sets by muscle"
             icon={<User size={13} color={COLORS.accent} />}
-            note={`${topMuscles[0][0]} takes the most of it — ${topMuscles[0][1]} sets, ${Math.round((topMuscles[0][1] / stats.sets) * 100)}% of everything you have logged.`}
+            note={`${topMuscles[0][0]} has the most sets: ${topMuscles[0][1]}. That is ${Math.round((topMuscles[0][1] / stats.sets) * 100)}% of all your logged sets.`}
           >
             <MuscleHeatBody muscleSets={stats.muscleSets} />
             <div style={{ marginTop: 14 }}>
@@ -291,9 +291,9 @@ export function NerdStatsScreen({ onBack }) {
         {/* ---- effort ---- */}
         {stats.effort.total > 0 && (
           <NerdCard
-            title="How hard you push"
+            title="Effort"
             icon={<Sparkles size={13} color={COLORS.accent} />}
-            note={`You go to failure on ${stats.effort.byRir[0]} of ${stats.effort.total} sets where you recorded the effort — ${failurePct}%.${stats.effort.hardestMuscle ? ` ${stats.effort.hardestMuscle[0]} is what you empty the tank on most.` : ""}`}
+            note={`You went to failure on ${stats.effort.byRir[0]} of ${stats.effort.total} sets with a recorded effort (${failurePct}%).${stats.effort.hardestMuscle ? ` You go to failure most often on ${stats.effort.hardestMuscle[0]}.` : ""}`}
           >
             <NerdDonut rows={effortRows} centreValue={`${failurePct}%`} centreLabel="TO FAILURE" />
           </NerdCard>
@@ -322,9 +322,9 @@ export function NerdStatsScreen({ onBack }) {
         {/* ---- most-done exercises ---- */}
         {topExercises.length > 0 && (
           <NerdCard
-            title="Most-done exercises"
+            title="Top exercises by sets"
             icon={<Trophy size={13} color={COLORS.accent} />}
-            note={`${stats.distinctExercises} different exercises logged.`}
+            note={`You logged ${stats.distinctExercises} different exercises.`}
           >
             <NerdBars rows={topExercises.map(([label, value]) => ({ label, value }))} unit=" sets" />
           </NerdCard>
@@ -333,9 +333,9 @@ export function NerdStatsScreen({ onBack }) {
         {/* ---- movers ---- */}
         {gainers.length > 0 && (
           <NerdCard
-            title="Biggest movers"
+            title="Largest changes"
             icon={<TrendingUp size={13} color={COLORS.accent} />}
-            note={`Estimated 1RM, first three sessions against the last three. Lifts with at least ${MOVER_MIN_SESSIONS} sessions behind them.`}
+            note={`This compares the estimated 1RM of the first three sessions with the last three sessions. It shows only lifts with at least ${MOVER_MIN_SESSIONS} sessions.`}
           >
             <NerdBars
               rows={gainers.map((m) => ({ label: m.name, value: m.pct, display: `+${Math.round(m.pct)}%`, colour: STAGE_COLORS.green }))}
@@ -343,7 +343,7 @@ export function NerdStatsScreen({ onBack }) {
             {fallers.length > 0 && (
               <div style={{ marginTop: 12 }}>
                 <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 7 }}>
-                  Going backwards
+                  Decreases
                 </div>
                 <NerdBars
                   rows={fallers.map((m) => ({ label: m.name, value: m.pct, display: `${Math.round(m.pct)}%`, colour: STAGE_COLORS.red }))}
@@ -358,7 +358,7 @@ export function NerdStatsScreen({ onBack }) {
           <NerdCard
             title="When you train"
             icon={<Clock size={13} color={COLORS.accent} />}
-            note={`Peak hour is ${peakHour}:00. From the ${stats.timedSessions} session${stats.timedSessions === 1 ? "" : "s"} the app timed itself — imported ones carry no real clock.`}
+            note={`Your peak hour is ${peakHour}:00. This uses the ${stats.timedSessions} session${stats.timedSessions === 1 ? "" : "s"} that the app timed. Imported sessions have no real start time.`}
           >
             <NerdColumns
               values={stats.byHour}
@@ -371,16 +371,16 @@ export function NerdStatsScreen({ onBack }) {
 
         {/* ---- weekdays ---- */}
         <NerdCard
-          title="Which days"
+          title="Training days"
           icon={<HistoryIcon size={13} color={COLORS.accent} />}
-          note={`${busyDay} is your busiest, ${quietDay} your quietest.`}
+          note={`You train most on ${busyDay}. You train least on ${quietDay}.`}
         >
           <NerdColumns values={stats.byWeekday} labels={WEEKDAY_LABELS} colour={COLORS.accent} highlight />
         </NerdCard>
 
         {/* ---- weekly tonnage ---- */}
         {weeklyData.length >= 4 && (
-          <NerdCard title="Weight moved per week" icon={<TrendingUp size={13} color={COLORS.accent} />} note="Last six months, kilograms.">
+          <NerdCard title="Weight lifted per week" icon={<TrendingUp size={13} color={COLORS.accent} />} note="Last six months, in kilograms.">
             <SimpleLineChart
               data={weeklyData}
               dataKey="tonnage"
@@ -392,15 +392,15 @@ export function NerdStatsScreen({ onBack }) {
         )}
 
         {/* ---- the record book ---- */}
-        <NerdCard title="Record book" icon={<Bookmark size={13} color={COLORS.accent} />}>
+        <NerdCard title="Records" icon={<Bookmark size={13} color={COLORS.accent} />}>
           <div>
             {[
               ["Days trained", n(stats.daysTrained)],
               ["Longest streak", `${stats.longestStreak} day${stats.longestStreak === 1 ? "" : "s"}`],
-              ["Longest time off", `${stats.longestGap} day${stats.longestGap === 1 ? "" : "s"}`],
+              ["Longest break", `${stats.longestGap} day${stats.longestGap === 1 ? "" : "s"}`],
               stats.busiestMonth ? ["Busiest month", `${stats.busiestMonth.month} · ${stats.busiestMonth.count} sessions`] : null,
               ["Sets per session", stats.setsPerSession.toFixed(1)],
-              stats.biggestSession ? ["Biggest session", `${stats.biggestSession.sets} sets · ${stats.biggestSession.date}`] : null,
+              stats.biggestSession ? ["Largest session", `${stats.biggestSession.sets} sets · ${stats.biggestSession.date}`] : null,
             ].filter(Boolean).map(([label, value], i, arr) => (
               <div key={label} style={{ ...factRow, borderBottom: i === arr.length - 1 ? "none" : factRow.borderBottom }}>
                 <span style={{ color: COLORS.textDim }}>{label}</span>
@@ -415,7 +415,7 @@ export function NerdStatsScreen({ onBack }) {
           <NerdCard
             title="Cardio"
             icon={<Footprints size={13} color={COLORS.accent} />}
-            note={`${stats.cardio.count} session${stats.cardio.count === 1 ? "" : "s"}, ${formatDuration(stats.cardio.seconds)} on your feet and wheels.`}
+            note={`${stats.cardio.count} session${stats.cardio.count === 1 ? "" : "s"}. Total time: ${formatDuration(stats.cardio.seconds)}.`}
           >
             <NerdBars rows={cardioRows} />
           </NerdCard>

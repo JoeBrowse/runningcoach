@@ -82,7 +82,7 @@ export function ColourScreen({ settings, onChange, onBack }) {
       <div style={{ padding: "0 20px 22px" }}>
         <div style={sectionLabel}>Colour Scheme</div>
         <div style={note}>
-          The readiness map tells you what is recovered using colour, and red, amber and green is the worst possible set for the commonest kind of colour blindness. Pick the one that matches how you see. Every colour in the app that means something changes with it, and the muscles gain outlines so you are never relying on colour alone.
+          The readiness map uses colour to show which muscles have recovered. Red, amber and green are the worst colours for the most common type of colour blindness. Select the scheme that matches how you see colour. All colours in the app that have a meaning change with the scheme. The muscles also get outlines. Thus colour is not the only sign.
         </div>
 
         <StagePreview />
@@ -126,7 +126,7 @@ export function ColourScreen({ settings, onChange, onBack }) {
               High Contrast
             </span>
             <span style={{ display: "block", color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.45 }}>
-              Pure black or pure white behind everything, stronger text, heavier lines. For bad lighting, low vision, or a phone held at arm&rsquo;s length in a bright gym. Turns the readiness outlines on whatever scheme you are using.
+              A pure black or pure white background, stronger text and thicker lines. Use it in bad light, for low vision, or when you hold the phone far from you in a bright gym. It also turns on the readiness outlines in all colour schemes.
             </span>
           </span>
           <span style={{ width: 42, height: 24, borderRadius: 12, background: settings.highContrast ? COLORS.accent : COLORS.surfaceRaised, border: `1px solid ${settings.highContrast ? COLORS.accent : COLORS.line}`, flexShrink: 0, position: "relative" }}>

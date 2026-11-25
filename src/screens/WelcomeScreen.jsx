@@ -18,13 +18,13 @@ import { hexToRgba, COLORS } from "../theme.js";
 --------------------------------------------------------------- */
 
 const TIER_ROWS = [
-  ["Logging sets, reps and weight", true, true],
+  ["Log sets, reps and weight", true, true],
   ["Full exercise database", true, true],
   ["Muscle readiness map", true, true],
   ["Programmes and guided plans", true, true],
   ["Progress charts and history", true, true],
   ["Backups", true, true],
-  ["Keeps working past day 7", false, true],
+  ["Works after day 7", false, true],
 ];
 
 export function TierTable() {
@@ -59,7 +59,7 @@ export function TierTable() {
         </div>
       ))}
       <div style={{ padding: "10px 13px", borderTop: `1px solid ${COLORS.line}`, color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.45 }}>
-        Everything is included free for 7 days. After that it is a subscription — monthly or annual, cancel any time in Google Play. No account, no ads, and nothing leaves your phone either way.
+        All features are free for 7 days. After that, you need a subscription. You can pay monthly or annually. You can cancel at any time in Google Play. There is no account and there are no ads. Your data does not leave your phone in either case.
       </div>
     </div>
   );
@@ -78,7 +78,7 @@ export function WelcomeScreen({ onChoose }) {
           How much do you want on screen?
         </div>
         <div style={{ color: COLORS.textDim, fontSize: 13.5, lineHeight: 1.5, marginBottom: 22 }}>
-          Pick one to start with. You can change it whenever you like in Settings — nothing is lost either way.
+          Select one mode to start. You can change it at any time in Settings. You do not lose data when you change it.
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 26 }}>
