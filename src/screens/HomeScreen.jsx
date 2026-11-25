@@ -10,6 +10,7 @@ import { BodyMap } from "../components/BodyMap.jsx";
 import { DailyQuote } from "../components/DailyQuote.jsx";
 import { FormGauge } from "../components/FormGauge.jsx";
 import { ModeHeader } from "../modes/ModeHeader.jsx";
+import { LiftToday } from "../plan/LiftToday.jsx";
 import { loadSummary, weekStreak } from "../shared/load.js";
 import { listActivities } from "../shared/store.js";
 
@@ -107,6 +108,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
     <div style={{ padding: "28px 24px 40px" }}>
       <ModeHeader mode={mode || "lift"} onModeChange={onModeChange || (() => {})} onViewSettings={onViewSettings} />
       <DailyQuote />
+      <LiftToday reloadKey={reloadKey} />
 
       {unfinished && (
         <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.accent}`, borderRadius: 14, padding: 16, marginBottom: 20 }}>

@@ -19,6 +19,7 @@ import { ExerciseSearchPicker } from "../components/ExercisePicker.jsx";
 import { NewExerciseForm } from "../components/NewExerciseForm.jsx";
 import { RestTimer } from "../components/RestTimer.jsx";
 import { TopBar } from "../components/TopBar.jsx";
+import { markGymSession } from "../plan/planState.js";
 
 export function WorkoutScreen({ split, selection, presetExercises, presetSupersets, resumeData, settings, appendMobility, programmeCtx, onBack, onFinish }) {
   const isAdvanced = settings.appMode === "advanced";
@@ -493,6 +494,7 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
         return ka < kb ? -1 : ka > kb ? 1 : 0;
       });
       await safeSet("workout-history", all.slice(-200));
+      await markGymSession(session); // marks the planned gym day done in Plan mode
 
       // Log this session against the active programme so it knows what's next
       // and can track progress.

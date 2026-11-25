@@ -1,96 +1,104 @@
-# Iron Log
+# Skid Marks
 
-**A gym tracker that keeps your data on your phone.**
+**A free running coach and gym tracker in one app. Your data stays on your phone.**
 
-📄 **[ironlog product page →](https://joebrowse.github.io/IronLogV3/)**
+[**Download the Android app (APK)**](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk) · [All releases](https://github.com/JoeBrowse/runningcoach/releases) · [Privacy](docs/privacy-policy.md) · [Licence: GPL-3.0](LICENSE)
 
-Log your sets. See which muscles have recovered. See your progress. No account,
-no cloud and no uploads. Iron Log has no server.
+Skid Marks plans your runs around your gym days. It adapts the plan when life changes, and it tells you why each change happens. All features are free. There are no ads, no accounts and no paywall.
 
 ---
 
-## What it is
+## Three modes, one week
 
-An Android workout tracker that works offline. It uses React and Capacitor.
-The app keeps all data in the storage on your device.
+Use the switch at the top of the screen: **Plan · Run · Lift**.
 
-* **Muscle readiness**: a body map of the muscles, front and rear. The colour
-  of each muscle shows if it has recovered. Each muscle has its own recovery
-  time. How hard you trained the muscle sets which time applies.
-* **Guided workouts**: select a split, and Iron Log makes the session. It uses
-  the exercise order that you set and prefers muscles that have recovered.
-* **Programmes**: plans of many weeks that you follow day by day. Presets
-  include Push/Pull/Legs and Project Arms. You can make your own plan or edit
-  any plan.
-* **Progress charts**: estimated 1RM over time for each exercise, grouped by
-  muscle. The app records machines and variations separately.
-* **Simple and Advanced modes**: start with sets, reps and weight. Add RIR,
-  machine records, volume analysis and 1RM tests when you want them.
+| Mode | What it does |
+|---|---|
+| **Plan** | Your master week. Run days and gym days are in one plan. Today's session, the week, a weekly review, races and goals, and the muscle readiness map. |
+| **Run** | The running coach. Today's run, GPS recording with voice cues, the season chart, progress, zones and race prediction, fuel, weather, routes and the coach. |
+| **Lift** | The gym tracker (based on Iron Log). Log sets, follow programmes, see 1RM progress and which muscles have recovered. Runner presets are included. |
+
+Each session goes into one shared log. A run that you record appears in all three modes and on the muscle map. You never log a session twice.
+
+## What makes it different
+
+- **Plans that respect your gym days.** A heavy leg day counts as a hard day. The plan keeps heavy legs 48 hours away from quality runs and 72 hours away from the long run. Before a race, lifting changes to maintenance.
+- **Safety rules that the app checks honestly.** Weekly distance grows by 10% or less. Hard days never touch. The long run is the longest run of the week. About 80% of running is easy. The checks test the real plan, and a test suite checks thousands of generated plans.
+- **Changes with reasons.** Tell the app that you missed a run, were ill, have a pain, go on holiday or are back after a break. It asks its questions first. Then it changes the plan and shows each change with its reason. You can undo any change.
+- **Goals with or without a race.** Run/walk to your first 5K, 5K to marathon, a 50K trail race, or goals with no date: keep fit, get faster at 5K, build to 10K. A, B and C races, a recovery block after each race, and a "What next?" step.
+- **Simple or Advanced.** Simple mode uses plain effort words ("slow enough to talk") and hides scores and phases. Advanced mode shows the fitness score, zones, predictions and the fitness / fatigue / form chart.
+- **Bring your history.** Import Strava and Garmin export files, and FIT, GPX and TCX files, many at once. Duplicates are skipped. Optional link to Intervals.icu with your own API key.
 
 ## Privacy
 
-Privacy is part of the design, not only a promise:
-
-* There is no Iron Log server and no Iron Log account.
-* No analytics, no tracking and no ads. No third party collects data.
-* The app connects only to Google Play. It does this sometimes, to check if
-  this account has a subscription.
-* Backup writes a plain JSON file to your Downloads folder. You can read your
-  data in this format.
-* If you cancel the subscription, the app stops. Your history stays on your
-  device.
+- All data stays on your phone. There is no Skid Marks server and no account.
+- No analytics, no tracking and no ads.
+- The app connects to the internet only for links that you turn on: local weather (Open-Meteo) and Intervals.icu.
+- Location is used only while you record a run.
+- Strava data is shown only to you. The app never sends it to an AI.
+- Backups are plain JSON files that you can read.
 
 Full policy: [docs/privacy-policy.md](docs/privacy-policy.md)
 
-## Pricing
+## Medical disclaimer
 
-Iron Log is now free. It is free software under the GPL-3.0 licence (see
-"Licence" below).
+Skid Marks gives general training information. It is not medical advice. It cannot diagnose injuries or predict injury. The training load values are information only. Talk to a doctor before you start to train. If something hurts, see a physio or a doctor.
 
-Earlier versions used a Google Play subscription with a 7-day free trial.
-Play Console set the prices, and the app showed them in your currency.
-This repository does not hard-code a price.
+## Install
 
-## Building it
+1. On your Android phone, open the [APK download link](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk).
+2. Open the file. Allow your browser or file manager to install apps when Android asks.
+3. Open Skid Marks.
+
+This is a test build signed with a debug key, so Android shows a warning. The app installs next to Iron Log and does not change Iron Log's data. To move your Iron Log data, save a backup in Iron Log and restore it in Skid Marks.
+
+## Build from source
+
+You need Node.js 22.
 
 ```bash
 npm install
-npm run dev     # local dev server
-npm run lint    # JSX parse check
-npm run build   # production bundle into dist/
+npm run dev     # local development server
+npm test        # engine, import and plan tests
+npm run lint    # parse check of every source file
+npm run build   # production build into dist/
 ```
 
-Capacitor wraps `dist/` to make the Android app. This repository has no build
-workflow and no signing keys. See "About this repository".
+To build the Android app, you also need Java 21 and the Android SDK:
 
-## About this repository
+```bash
+npx cap add android
+node scripts/android-permissions.mjs
+npx cap sync android
+cd android && ./gradlew assembleDebug
+```
 
-This is the public mirror of Iron Log. It has the application source, the
-assets, the privacy policy and the product page. You can use these files to
-read, build and understand the app.
+GitHub Actions builds the APK on every push (`.github/workflows/android.yml`). Each push to `main` publishes the APK on a release.
 
-It does **not** have the release automation. This is intentional. Debug builds
-of Iron Log have the paywall switched off, so that testers can side-load them.
-Thus a debug APK is a free, fully unlocked copy of a paid app. Anyone can
-download build artifacts from a public repository. Thus the workflow that makes
-them is in the private repository.
+## Project structure
+
+| Path | Contents |
+|---|---|
+| `src/run/` | The plan engine: plans, safety rules, adaptation, prediction, load. See [src/run/ENGINE.md](src/run/ENGINE.md). |
+| `src/plan/` | Plan mode: first-open setup, plan wizard, master week, life events, weekly review, races. |
+| `src/runui/` | Run mode: today's run, recording, progress, zones, fuel, weather, routes, coach, shoes. |
+| `src/shared/` | Shared activity store, load model, file import, Intervals.icu, weather and export. |
+| `src/modes/` | The mode switch and the screen registry. See [src/modes/README.md](src/modes/README.md). |
+| `src/screens/`, `src/components/`, `src/lib/`, `src/data/` | Lift mode (Iron Log). |
+| `test/` | Tests (`npm test`). |
+| `docs/v1-spec.md` | The V1 specification. |
+| `docs/research/` | Market research of 37 apps and six user reviews. |
+
+## Credits
+
+- Lift mode is based on [Iron Log](https://github.com/JoeBrowse/IronLogV3).
+- The muscle readiness map uses region data from [body-muscles](https://github.com/vulovix/body-muscles) by Ivan Vulović, under the Apache License 2.0. See [NOTICE](NOTICE).
+- Race prediction uses the published Daniels and Gilbert equations and the Riegel formula. The app is not linked to or endorsed by their authors.
+
+## AI assistance
+
+Skid Marks was developed with the help of Claude (Anthropic) as a coding assistant. The developer directed the concept, the requirements, the testing and the final decisions. No user data was given to Claude.
 
 ## Licence
 
-Iron Log is free software under the GNU General Public License, version 3 or
-any later version (GPL-3.0-or-later). See [LICENSE](LICENSE).
-
-## Third-party attribution
-
-The muscle readiness map uses the region data from
-[body-muscles](https://github.com/vulovix/body-muscles) by Ivan Vulović, under
-the Apache License 2.0. See [NOTICE](NOTICE).
-
-## AI assistance disclaimer
-
-The developer used Claude AI (Anthropic) as a coding assistant for Iron Log.
-Claude helped to write, review, debug and improve parts of the application.
-The developer controlled the concept, requirements, testing and final
-decisions. The developer reviewed all generated code before it went into the
-app. The developer gave no user data, private information or device data to
-Claude during development.
+Skid Marks is free software under the GNU General Public License, version 3 or any later version (GPL-3.0-or-later). See [LICENSE](LICENSE).

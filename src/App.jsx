@@ -38,10 +38,10 @@ import { TourWorkoutPreviewScreen } from "./screens/TourWorkoutPreviewScreen.jsx
 import { TrainingScreen } from "./screens/TrainingScreen.jsx";
 import { VersionHistoryScreen } from "./screens/VersionHistoryScreen.jsx";
 import { VolumeScreen } from "./screens/VolumeScreen.jsx";
-import { WelcomeScreen } from "./screens/WelcomeScreen.jsx";
 import { WhatsNewScreen } from "./screens/WhatsNewScreen.jsx";
 import { WorkoutScreen } from "./screens/WorkoutScreen.jsx";
 import { MODE_SCREENS, isModeScreen, modeById, normaliseMode } from "./modes/index.js";
+import { WhoAreYou, handleFirstChoice } from "./plan/Onboarding.jsx";
 
 const INTRO_SEEN_KEY = "intro-seen";
 
@@ -163,15 +163,20 @@ export default function App() {
     openLiftScreen: (id) => setScreen(id),
   };
 
-  async function chooseMode(mode) {
-    const next = { ...settings, appMode: mode === "advanced" ? "advanced" : "simple" };
-    setSettings(next);
-    await safeSet("settings", next);
-    await safeSet("mode-chosen", true);
+  // First launch: "Who are you?" sets Simple/Advanced and the mode, then
+  // opens the Plan onboarding or, for "Only the gym", the Lift tour.
+  function chooseWho(choice) {
     setShowWelcome(false);
-    setTourSteps(next.appMode === "simple" ? SIMPLE_TOUR_STEPS : TOUR_STEPS);
-    setTourDemoData(true);
-    setShowTour(true);
+    handleFirstChoice(choice, {
+      settings,
+      updateSettings,
+      startTour: (appMode) => {
+        setTourSteps(appMode === "simple" ? SIMPLE_TOUR_STEPS : TOUR_STEPS);
+        setTourDemoData(true);
+        setShowTour(true);
+      },
+      openOnboarding: (params) => nav.go("plan:onboarding", params),
+    });
   }
 
   useEffect(() => {
@@ -216,6 +221,13 @@ export default function App() {
       // The tour starts once the choice is made (see chooseMode).
       if (!tourSeen) {
         if (await safeGet("mode-chosen")) {
+          setTourSteps(mergedForIntro.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);
+          setTourDemoData(true);
+          setShowTour(true);
+        } else if (((await safeGet("workout-history")) || []).length) {
+          // An upgraded Iron Log user: no onboarding. Lift opens as before
+          // and Plan home shows a "Set up running" card.
+          await safeSet("mode-chosen", true);
           setTourSteps(mergedForIntro.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);
           setTourDemoData(true);
           setShowTour(true);
@@ -526,6 +538,7 @@ export default function App() {
           onViewWhatsNew={() => setWhatsNew(releaseNotesFor(APP_VERSION))}
           onViewVersionHistory={() => setScreen("versionHistory")}
           onViewData={() => nav.go("shared:data")}
+          onViewSampleDemo={() => nav.go("plan:demo")}
         />
       )}
 
@@ -708,7 +721,7 @@ export default function App() {
           update and a first launch can never stack on top of each other. */}
       {/* Ahead of everything: the mode choice is the first thing a new
           install shows, and the tour only begins once it is made. */}
-      {showWelcome && <WelcomeScreen onChoose={chooseMode} />}
+      {showWelcome && <WhoAreYou overlay onChoose={chooseWho} />}
 
       {whatsNew && !showTour && (
         <WhatsNewScreen notes={whatsNew} onDismiss={() => setWhatsNew(null)} />

@@ -6,7 +6,7 @@ import { BackupPanel } from "../components/BackupPanel.jsx";
 import { SettingsToggleRow } from "../components/SettingsToggleRow.jsx";
 import { TopBar } from "../components/TopBar.jsx";
 
-export function SettingsScreen({ settings, onChange, onBack, onViewColour, onViewTraining, onReplayTour, onViewFeatureList, onViewWhatsNew, onViewVersionHistory, onViewData }) {
+export function SettingsScreen({ settings, onChange, onBack, onViewColour, onViewTraining, onReplayTour, onViewFeatureList, onViewWhatsNew, onViewVersionHistory, onViewData, onViewSampleDemo }) {
   function toggle(key) {
     onChange({ ...settings, [key]: !settings[key] });
   }
@@ -92,6 +92,26 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
               </span>
               <span style={{ display: "block", color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.4 }}>
                 Bring your history from Strava, Garmin and files. Link Intervals.icu. Save CSV, GPX and backup files.
+              </span>
+            </span>
+            <ChevronRight size={16} color={COLORS.accent} style={{ flexShrink: 0 }} />
+          </button>
+        </div>
+      )}
+
+      {onViewSampleDemo && (
+        <div style={{ padding: "0 20px 16px" }}>
+          <button
+            data-testid="settings-sample"
+            onClick={onViewSampleDemo}
+            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "13px 14px", textAlign: "left" }}
+          >
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: "block", color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 14, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>
+                Try with sample data
+              </span>
+              <span style={{ display: "block", color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.4 }}>
+                See a sample running plan. Nothing is saved. Your data does not change.
               </span>
             </span>
             <ChevronRight size={16} color={COLORS.accent} style={{ flexShrink: 0 }} />
