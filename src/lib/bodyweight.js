@@ -15,13 +15,15 @@ export function onBodyweightChange(fn) {
 }
 
 export async function upsertBodyweight(record) {
-  await safeSet("bodyweight", record);
   const hist = (await safeGet("bodyweight-history")) || [];
   const next = [...hist.filter((h) => h.date !== record.date), record].sort((a, b) => (a.date < b.date ? -1 : 1));
+  // A back-dated reading goes into the history. The current weight is
+  // always the newest reading.
+  await safeSet("bodyweight", next[next.length - 1] || record);
   await safeSet("bodyweight-history", next);
   bodyweightListeners.forEach((fn) => {
     try {
-      fn(record, next);
+      fn(next[next.length - 1] || record, next);
     } catch (e) {
       /* one panel failing to refresh must not stop the others */
     }

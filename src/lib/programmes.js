@@ -22,14 +22,18 @@ export function exercisesFromIds(ids) {
   const out = [];
   for (const entry of ids) {
     // An entry is an id, or [id, method] where the programme means one
-    // particular variation — a hack squat rather than whichever squat.
-    const [id, method] = Array.isArray(entry) ? entry : [entry, null];
+    // particular variation — a hack squat rather than whichever squat,
+    // or { id, method, sets, reps } with a target (runner presets).
+    const isObj = entry && typeof entry === "object" && !Array.isArray(entry);
+    const [id, method] = isObj ? [entry.id, entry.method || null] : Array.isArray(entry) ? entry : [entry, null];
     let found = null;
     for (const [muscle, list] of Object.entries(EXERCISES)) {
       const hit = list.find((e) => e.id === id);
       if (hit) {
         found = { id: hit.id, name: hit.name, muscle, type: hit.type };
         if (method) found.method = method;
+        if (isObj && entry.sets) found.sets = entry.sets;
+        if (isObj && entry.reps) found.reps = entry.reps;
         break;
       }
     }

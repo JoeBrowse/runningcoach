@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { todayStr } from "../lib/dates.js";
+import { LogDateField } from "./LogDateField.jsx";
 import { safeGet, safeSet } from "../lib/storage.js";
 import { COLORS } from "../theme.js";
 
@@ -20,6 +21,7 @@ export function MeasurementsPanel() {
   const [history, setHistory] = useState([]);
   const [unit, setUnit] = useState("cm");
   const [draft, setDraft] = useState({});
+  const [logDate, setLogDate] = useState(todayStr);
   const [flash, setFlash] = useState("");
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export function MeasurementsPanel() {
   }, []);
 
   async function save() {
-    const record = { date: todayStr() };
+    const record = { date: logDate || todayStr() };
     let any = false;
     BODY_MEASUREMENTS.forEach(({ key }) => {
       const v = parseFloat(draft[key]);
@@ -124,11 +126,14 @@ export function MeasurementsPanel() {
         })}
       </div>
 
+      <div style={{ ...label, marginBottom: 5 }}>Date</div>
+      <LogDateField value={logDate} onChange={setLogDate} label="Measurements date" style={{ width: "100%", marginBottom: 12 }} />
+
       <button
         onClick={save}
         style={{ width: "100%", background: COLORS.accent, border: "none", borderRadius: 10, padding: "11px 0", color: COLORS.onAccent, fontFamily: "'Oswald', sans-serif", fontSize: 13, textTransform: "uppercase", letterSpacing: 0.5 }}
       >
-        Save Today's Measurements
+        {logDate === todayStr() ? "Save Today's Measurements" : `Save Measurements for ${logDate}`}
       </button>
       {flash && <div style={{ color: COLORS.ok, fontSize: 12, marginTop: 8, textAlign: "center" }}>{flash}</div>}
       {history.length > 1 && (

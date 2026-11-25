@@ -1,6 +1,6 @@
 // Resolved defensively, the same way capPrefs() resolves Preferences —
-// true only inside a packaged Capacitor app, so billing code never runs
-// (and never needs to work) during `npm run dev` in a plain browser.
+// true only inside a packaged Capacitor app, so native-only code (for
+// example the service worker skip) never runs in a plain browser.
 export function isNativeRuntime() {
   try {
     return !!(

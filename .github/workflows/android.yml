@@ -47,8 +47,6 @@ jobs:
         run: npm run lint
 
       - name: Build the web app
-        env:
-          VITE_UNLOCKED: "1"
         run: npm run build
 
       - name: Create the Android project

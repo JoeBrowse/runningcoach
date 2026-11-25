@@ -19,7 +19,7 @@ export const BACKUP_FORMAT = 1;
 export function backupFilename(now) {
   const d = now || new Date();
   const pad = (n) => String(n).padStart(2, "0");
-  return `iron-log-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+  return `skid-marks-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
 }
 
 // Everything under the app's storage prefix, so a key added later is
@@ -33,13 +33,15 @@ export async function collectBackup() {
   }
   return {
     format: BACKUP_FORMAT,
-    app: "Iron Log",
+    app: "Skid Marks",
     version: APP_VERSION,
     exportedAt: new Date().toISOString(),
     data,
   };
 }
 
+// Accepts backups from Skid Marks and from Iron Log. Both use format 1 and
+// the same keys, so the `app` field is not checked.
 export function isBackupFile(parsed) {
   return !!(parsed && parsed.data && typeof parsed.data === "object" && parsed.format === BACKUP_FORMAT);
 }
@@ -47,11 +49,17 @@ export function isBackupFile(parsed) {
 // Replaces rather than merges: a half-restored account with today's
 // history and last year's programme would be worse than either.
 export async function restoreBackup(parsed) {
-  if (!isBackupFile(parsed)) throw new Error("That file is not an Iron Log backup.");
+  if (!isBackupFile(parsed)) throw new Error("That file is not a Skid Marks or Iron Log backup.");
   const existing = await safeList("");
   for (const key of existing) await safeDelete(key);
   const entries = Object.entries(parsed.data);
-  for (const [key, value] of entries) await safeSet(key, value);
+  for (const [key, value] of entries) {
+    // The licence record came from the old paid Iron Log. Skid Marks is free.
+    if (key === "license") continue;
+    await safeSet(key, value);
+  }
+  // A restore is not a first launch. Old backups have no intro flag.
+  await safeSet("intro-seen", true);
   return entries.length;
 }
 

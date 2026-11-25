@@ -1,13 +1,12 @@
-import { ChevronRight, History as HistoryIcon, Lock, RotateCcw, Sparkles, BookOpen } from "lucide-react";
+import { ChevronRight, History as HistoryIcon, Sparkles, BookOpen } from "lucide-react";
 import { APP_VERSION, releaseNotesFor } from "../data/releaseNotes.js";
-import { UNLOCKED_BUILD, isLicenseUnlocked, manageSubscriptionUrl } from "../lib/billing.js";
 import { APP_MODES } from "../lib/settings.js";
 import { hexToRgba, COLORS } from "../theme.js";
 import { BackupPanel } from "../components/BackupPanel.jsx";
 import { SettingsToggleRow } from "../components/SettingsToggleRow.jsx";
 import { TopBar } from "../components/TopBar.jsx";
 
-export function SettingsScreen({ settings, onChange, onBack, onViewColour, onViewTraining, onReplayTour, onViewFeatureList, onViewWhatsNew, onViewVersionHistory, license, onBuy, onRestore, purchaseBusy, purchaseMsg }) {
+export function SettingsScreen({ settings, onChange, onBack, onViewColour, onViewTraining, onReplayTour, onViewFeatureList, onViewWhatsNew, onViewVersionHistory }) {
   function toggle(key) {
     onChange({ ...settings, [key]: !settings[key] });
   }
@@ -28,10 +27,8 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
     // switches scattered down a list.
     { key: "stravaShare", label: "Share to Strava", desc: "Add a share button at the end of each workout and on each past workout. The button puts your lifts into text and sends the text to the share sheet. Then it opens Strava. Paste the text into the activity." },
     { key: "randomizeSelection", label: "Randomize Exercise Selection", desc: "Off: the app selects exercises in ranked order. On: the app selects them in random order for variety." },
-    { key: "showIntro", label: "Opening Animation", desc: "The app shows a geometric animation when it starts. Tap the animation to skip it. Turn this off to open the app without it. If your phone uses the reduce motion setting, the app skips it automatically." },
+    { key: "introEachLaunch", label: "Opening Animation at Each Start", desc: "The app shows a geometric animation on the first start only. Turn this on to see it each time that the app starts. Tap the animation to skip it. If your phone uses the reduce motion setting, the app skips it automatically." },
   ];
-
-  const subscribed = isLicenseUnlocked(license);
 
   const appMode = settings.appMode === "advanced" ? "advanced" : "simple";
 
@@ -129,48 +126,6 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
 
       <BackupPanel />
 
-      {license && !UNLOCKED_BUILD && (
-        <div style={{ margin: "10px 20px 20px", background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 16 }}>
-          <div style={{ color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 15, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4, display: "flex", alignItems: "center", gap: 7 }}>
-            <Lock size={14} color={COLORS.accent} /> Subscription
-          </div>
-          <div style={{ color: COLORS.textDim, fontSize: 12, marginBottom: 12 }}>
-            {subscribed
-              ? "Iron Log is active on this device. You can manage or cancel your subscription at any time in Google Play. Your workouts stay on your phone in both cases."
-              : "Start a free trial to unlock all features. You can cancel at any time in Google Play."}
-          </div>
-          {!subscribed && (
-            <button
-              onClick={onBuy}
-              disabled={purchaseBusy}
-              style={{ width: "100%", marginBottom: 8, background: COLORS.accent, border: "none", borderRadius: 10, padding: "12px 0", color: COLORS.onAccent, fontSize: 13.5, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase" }}
-            >
-              {purchaseBusy ? "Working…" : "Start Free Trial"}
-            </button>
-          )}
-          {/* Play requires cancellation to be reachable from inside the app,
-              and hiding it is a listing rejection. */}
-          {subscribed && (
-            <a
-              href={manageSubscriptionUrl()}
-              target="_blank"
-              rel="noreferrer"
-              style={{ width: "100%", marginBottom: 8, boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, background: COLORS.surfaceRaised, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: "11px 0", color: COLORS.text, fontSize: 12.5, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", textDecoration: "none" }}
-            >
-              Manage Subscription
-            </a>
-          )}
-          <button
-            onClick={onRestore}
-            disabled={purchaseBusy}
-            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, background: COLORS.surfaceRaised, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: "11px 0", color: COLORS.text, fontSize: 12.5, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase" }}
-          >
-            <RotateCcw size={13} /> Restore Subscription
-          </button>
-          {purchaseMsg && <div style={{ marginTop: 8, color: COLORS.textDim, fontSize: 11.5 }}>{purchaseMsg}</div>}
-        </div>
-      )}
-
       <div data-tour="opt-in-features" style={{ padding: "0 20px 10px" }}>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
           Off by default
@@ -194,7 +149,7 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
             onClick={onReplayTour}
             style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "13px 0", color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 13.5, textTransform: "uppercase", letterSpacing: 0.5 }}
           >
-            <Sparkles size={15} color={COLORS.accent} /> Replay App Tour
+            <Sparkles size={15} color={COLORS.accent} /> Show the Full Tour
           </button>
         </div>
       )}
@@ -203,10 +158,13 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
           that the NOTICE travel with it. An installed APK has nowhere else to
           put that, so it lives at the foot of Settings alongside the version. */}
       <div style={{ padding: "0 20px 40px", textAlign: "center" }}>
-        <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>Iron Log v{APP_VERSION}</div>
+        <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>Skid Marks v{APP_VERSION}</div>
+        <div data-testid="about-text" style={{ color: COLORS.textDim, fontSize: 11.5, marginTop: 6, lineHeight: 1.5 }}>
+          Skid Marks is free and open source (GPL-3.0). Lift mode is based on Iron Log.
+        </div>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, marginTop: 6, opacity: 0.8, lineHeight: 1.5 }}>
           The muscle map artwork is from Body Muscles, © 2024 Ivan Vulović.
-          Iron Log uses it under the Apache License 2.0.
+          Skid Marks uses it under the Apache License 2.0.
           <br />
           github.com/vulovix/body-muscles
         </div>

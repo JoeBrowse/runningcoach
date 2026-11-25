@@ -1,7 +1,7 @@
 {
-  "name": "Iron Log",
-  "short_name": "Iron Log",
-  "description": "A gym workout tracker that works offline. No account, no cloud and no ads.",
+  "name": "Skid Marks",
+  "short_name": "Skid Marks",
+  "description": "A free running coach and gym tracker. Your data stays on your phone. No account and no ads.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -20,6 +20,8 @@ const ACTIVITY_ICONS = {
   "assault-bike": <Bike size={14} />,
   elliptical: <Bike size={14} />,
   swim: <Activity size={14} />,
+  football: <Activity size={14} />,
+  "team-sport": <Activity size={14} />,
   rower: <Activity size={14} />,
   other: <Activity size={14} />,
 };
@@ -46,6 +48,9 @@ export function ActivityPanel({ onChanged }) {
   // but editable, because the other half are logged that evening, and a
   // run stamped six hours late tells the readiness map the wrong thing.
   const [date, setDate] = useState(todayStr);
+  // A date in the future is not a log. The max on the field stops most of
+  // them; this also catches a typed date.
+  const dateOk = !!date && date <= todayStr();
   const [time, setTime] = useState(nowTimeStr);
   // The id being edited, or null when the form is adding a new one. The
   // same form does both: an edit is the same four fields, and a second
@@ -101,7 +106,7 @@ export function ActivityPanel({ onChanged }) {
   }
 
   async function save() {
-    if (!secs) return;
+    if (!secs || !dateOk) return;
     const record = {
       // Keep the id when editing, so this replaces the entry rather than
       // adding a second copy of it.
@@ -168,7 +173,7 @@ export function ActivityPanel({ onChanged }) {
         <>
           {recent.length === 0 && !adding && (
             <div style={{ color: COLORS.textDim, fontSize: 12.5, lineHeight: 1.5, marginBottom: 12 }}>
-              Log runs, rides, swims, rows and other activities with a time and an effort. Activities are not part of your lifting stats. They count for your streak. The readiness map above shows the muscles that they made tired.
+              Log runs, rides, swims, football and other activities with a date, a time and an effort. Activities are not part of your lifting stats. They count for your streak. The readiness map above shows the muscles that they made tired.
             </div>
           )}
 
@@ -299,11 +304,12 @@ export function ActivityPanel({ onChanged }) {
                 />
               </div>
 
-              {type === "other" && (
+              {(type === "other" || type === "team-sport") && (
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Activity name, for example Rowing"
+                  aria-label="Activity name"
+                  placeholder={type === "team-sport" ? "Sport name, for example Rugby" : "Activity name, for example Climbing"}
                   style={{ ...field, width: "100%", marginBottom: 12 }}
                 />
               )}

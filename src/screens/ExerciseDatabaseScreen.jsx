@@ -142,7 +142,7 @@ export function ExerciseDatabaseScreen({ onBack }) {
       <div style={{ paddingBottom: 40 }}>
         <TopBar title="Exercise Database" onBack={onBack} />
         <div style={{ padding: "0 20px 16px", color: COLORS.textDim, fontSize: 13, lineHeight: 1.5 }}>
-          This list shows all the exercises in Iron Log, by body part. Change the order to change which exercises the app suggests first. You can edit any exercise. You can remove exercises that you cannot do or do not want to do. You can also add your own exercises.
+          This list shows all the exercises in Skid Marks, by body part. Change the order to change which exercises the app suggests first. You can edit any exercise. You can remove exercises that you cannot do or do not want to do. You can also add your own exercises.
         </div>
         <div style={{ padding: "0 20px 12px" }}>
           <input
@@ -238,7 +238,7 @@ export function ExerciseDatabaseScreen({ onBack }) {
                     style={{ display: "block", margin: "-4px 0 12px", background: "transparent", border: "none", color: COLORS.textDim, fontSize: 12, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 }}
                   >
                     <RotateCcw size={12} style={{ verticalAlign: "-2px", marginRight: 5 }} />
-                    Revert to Iron Log&rsquo;s version
+                    Revert to the built-in version
                   </button>
                 )}
               </div>

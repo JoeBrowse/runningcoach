@@ -23,6 +23,41 @@ export const LAST_SEEN_VERSION_KEY = "last-seen-version";
 
 export const RELEASE_NOTES = [
   {
+    version: "2.0.0",
+    released: "2026-11-25",
+    headline: "Iron Log is now Skid Marks. It is a free running coach and gym tracker in one app.",
+    items: [
+      {
+        title: "A new name",
+        body: "The app has a new name: Skid Marks. The gym tracker is now called Lift. Lift works as Iron Log did. All your workouts, programmes and settings are still here. Your old Iron Log backups still restore.",
+      },
+      {
+        title: "All features are free",
+        body: "There is no trial, no subscription and no paywall. All features are free for all users. There are no ads and no account. The app sells no data. Skid Marks is open source under the GPL-3.0 licence.",
+      },
+      {
+        title: "Plan, Run and Lift",
+        body: "The app now has three modes. A switch at the top of each home screen shows Plan, Run and Lift. Tap a mode to open it. You can also tap the name at the top. Plan shows your week of runs and gym days. Run is the running coach. Lift is the gym tracker. Plan and Run are new. They get more features in the next versions.",
+      },
+      {
+        title: "One training load for all modes",
+        body: "Runs, gym sessions and other sports now share one training load. The load of a session is its effort multiplied by its minutes. A new Form gauge shows fitness, fatigue and form. It replaces the old load scale on the home screen. It is information only. It cannot predict injury. The streak now counts weeks, not days. A rest day does not break it.",
+      },
+      {
+        title: "Runner presets",
+        body: "Three new programmes are available. Runner strength, 1 day, is one full-body session for runners. Runner strength, 2 days, has a legs and core day and an upper day. Beginner machines has five machine moves at 2 sets of 10 reps, with hints to start light.",
+      },
+      {
+        title: "More sports and back-dated logs",
+        body: "Cardio and Activity now has Football and Team Sport. They count as leg work on the readiness map, as a run does. Each log form now has a date field, so you can log a past day.",
+      },
+      {
+        title: "A shorter start",
+        body: "The opening animation plays on the first start only. You can turn it on for each start in Settings. In Simple Mode, the first tour has four cards. The full tour is in Settings.",
+      },
+    ],
+  },
+  {
     version: "1.29.0",
     released: "2026-10-26",
     headline: "We removed the Strava strength file. Sharing to Strava works as it did before.",

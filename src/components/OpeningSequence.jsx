@@ -21,7 +21,7 @@ import { hexToRgba, COLORS } from "../theme.js";
    exploding evenly in all directions.
 
    What the fragments reassemble into is read off the wordmark itself:
-   "IRON LOG" is drawn once to an offscreen canvas in the app's own
+   "SKID MARKS" is drawn once to an offscreen canvas in the app's own
    typeface and its pixels sampled, so the particles converge on the
    real letterforms at whatever size the phone is, and the sequence
    cannot drift out of step with the branding.
@@ -31,7 +31,8 @@ import { hexToRgba, COLORS } from "../theme.js";
    - prefers-reduced-motion gets a still frame and a short fade. An
      animation someone's system has asked not to see is not epic, it
      is rude.
-   - Settings has a switch, because the tenth time you open the app in
+   - It plays on the first launch only (Settings can turn it on for every
+     launch), because the tenth time you open the app in
      a day is not the first.
    - It never blocks the app: the whole thing runs on one canvas over
      the top, the app is already mounted and interactive underneath,
@@ -216,7 +217,7 @@ export function OpeningSequence({ onDone }) {
     // Where the fragments are going: the wordmark's own pixels, in the band
     // the finished mark occupies.
     const bandH = Math.min(h * 0.3, 190);
-    const marks = sampleWordmark("IRON LOG", w, bandH, "'Oswald', 'Arial Narrow', sans-serif");
+    const marks = sampleWordmark("SKID MARKS", w, bandH, "'Oswald', 'Arial Narrow', sans-serif");
 
     // Thin the sampled pixels by striding through them in scan order rather
     // than taking a random subset: a random subset of a letterform leaves

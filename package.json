@@ -1,8 +1,8 @@
 {
-  "name": "iron-log",
-  "version": "1.29.0",
+  "name": "skid-marks",
+  "version": "2.0.0",
   "type": "module",
-  "description": "Offline-first workout tracking app",
+  "description": "Free running coach and gym tracker that keeps your data on your phone",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,6 @@
     "@capacitor/filesystem": "^8.1.5",
     "@capacitor/preferences": "^8.0.1",
     "body-muscles": "^1.0.0",
-    "capacitor-plugin-cdv-purchase": "^13.18.0",
     "lucide-react": "^0.383.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

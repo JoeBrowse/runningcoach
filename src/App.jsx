@@ -2,14 +2,13 @@ import { useState, useEffect } from "react";
 import { X, BookOpen } from "lucide-react";
 import { APP_VERSION, LAST_SEEN_VERSION_KEY, releaseNotesFor } from "./data/releaseNotes.js";
 import { setTourDemoData } from "./data/tourDemo.js";
-import { TOUR_STEPS } from "./data/tourSteps.jsx";
-import { UNLOCKED_BUILD, loadLicense, setLicenseEntitled, offlineGraceDaysLeft, isLicenseUnlocked, ALLOWED_WHEN_LOCKED_SCREENS, initBilling, subscribe, restorePurchases } from "./lib/billing.js";
+import { TOUR_STEPS, SIMPLE_TOUR_STEPS } from "./data/tourSteps.jsx";
 import { loadCustomExercises, loadPausedExercises, loadHiddenExercises, loadManualOrderMuscles, loadExerciseOrder, loadExerciseEdits } from "./lib/exerciseLibrary.js";
 import { runMigrations } from "./lib/migrations.js";
-import { isNativeRuntime, registerServiceWorker } from "./lib/platform.js";
+import { registerServiceWorker } from "./lib/platform.js";
 import { programmeNextIndex, programmePlanned, programmeCompleted, programmeWeekNumber, getActiveProgramme, saveActiveProgramme, archiveActiveProgramme } from "./lib/programmes.js";
 import { applyTrainingPrefs, DEFAULT_SETTINGS } from "./lib/settings.js";
-import { safeGet, safeSet, requestPersistentStorage } from "./lib/storage.js";
+import { safeGet, safeSet, lsGet, requestPersistentStorage } from "./lib/storage.js";
 import { hexToRgba, COLORS, applyTheme } from "./theme.js";
 import { FeatureTour } from "./components/FeatureTour.jsx";
 import { introAlreadyPlayed, OpeningSequence } from "./components/OpeningSequence.jsx";
@@ -24,7 +23,6 @@ import { HomeScreen } from "./screens/HomeScreen.jsx";
 import { NerdStatsScreen } from "./screens/NerdStatsScreen.jsx";
 import { OneRMScreen } from "./screens/OneRMScreen.jsx";
 import { OneRMWorkoutScreen } from "./screens/OneRMWorkoutScreen.jsx";
-import { PaywallScreen } from "./screens/PaywallScreen.jsx";
 import { PersonalInfoScreen } from "./screens/PersonalInfoScreen.jsx";
 import { ProgrammeBuilderScreen } from "./screens/ProgrammeBuilderScreen.jsx";
 import { ProgrammeScreen } from "./screens/ProgrammeScreen.jsx";
@@ -43,6 +41,23 @@ import { VolumeScreen } from "./screens/VolumeScreen.jsx";
 import { WelcomeScreen } from "./screens/WelcomeScreen.jsx";
 import { WhatsNewScreen } from "./screens/WhatsNewScreen.jsx";
 import { WorkoutScreen } from "./screens/WorkoutScreen.jsx";
+import { MODE_SCREENS, isModeScreen, modeById, normaliseMode } from "./modes/index.js";
+
+const INTRO_SEEN_KEY = "intro-seen";
+
+// Read synchronously from the localStorage mirror, so the first frame is
+// right. init() checks the durable store again (native Preferences).
+function introWantedSync() {
+  if (introAlreadyPlayed()) return false;
+  try {
+    const seen = JSON.parse(lsGet(INTRO_SEEN_KEY) || "false");
+    const s = JSON.parse(lsGet("settings") || "null") || {};
+    if (s.showIntro === false) return false;
+    return !seen || !!s.introEachLaunch;
+  } catch (e) {
+    return true;
+  }
+}
 
 /* ---------------------------------------------------------------
    APP
@@ -79,32 +94,74 @@ export default function App() {
   // Starts true so the first painted frame is the opening rather than a
   // flash of Home behind it; switched off immediately once settings load if
   // the lifter has turned it off, or if it has already run this session.
-  const [intro, setIntro] = useState(() => !introAlreadyPlayed());
+  // Plays on the first launch only (spec 3.1), unless the user turns on
+  // "Opening Animation at Each Start" in Settings.
+  const [intro, setIntro] = useState(introWantedSync);
   const [tourStep, setTourStep] = useState(0);
   const [showFeatureListHint, setShowFeatureListHint] = useState(false);
-  const [license, setLicense] = useState(null);
-  const [offers, setOffers] = useState(null);
-  const [purchaseBusy, setPurchaseBusy] = useState(false);
-  const [purchaseMsg, setPurchaseMsg] = useState("");
+  // Simple mode gets the short tour on first launch; Settings always
+  // replays the full one.
+  const [tourSteps, setTourSteps] = useState(TOUR_STEPS);
+  // Back stack and parameters for the registry screens (src/modes/).
+  const [navStack, setNavStack] = useState([]);
+  const [screenParams, setScreenParams] = useState(null);
 
   const activeProgrammeMeta = currentProgramme
     ? { name: currentProgramme.name, nextDayName: currentProgramme.days[programmeNextIndex(currentProgramme)] ? currentProgramme.days[programmeNextIndex(currentProgramme)].name : "" }
     : null;
 
-  const unlocked = isLicenseUnlocked(license);
+  // The tour always runs over Lift, because it describes Iron Log screens.
+  const mode = showTour ? "lift" : normaliseMode(settings.mode);
 
-  // The only place navigation is gated: while locked (trial over, not
-  // purchased) and not mid-tour, anything outside ALLOWED_WHEN_LOCKED_SCREENS
-  // redirects to the paywall instead. Every existing onClick handler in this
-  // file already calls setScreen(...), so this wrapper is the only change
-  // needed to make the whole app respect the trial/purchase gate.
   function setScreen(target) {
-    if (!showTour && !unlocked && !ALLOWED_WHEN_LOCKED_SCREENS.has(target)) {
-      setScreenRaw("paywall");
-      return;
+    if (target === "home") {
+      setNavStack([]);
+      setScreenParams(null);
     }
     setScreenRaw(target);
   }
+
+  async function setMode(next) {
+    const id = normaliseMode(next);
+    setScreen("home");
+    if (typeof window !== "undefined" && window.scrollTo) window.scrollTo(0, 0);
+    if (id === settings.mode) return;
+    await updateSettings({ ...settings, mode: id });
+  }
+
+  /* The one prop that every registry screen and mode home gets.
+     See src/modes/README.md. */
+  const nav = {
+    mode,
+    setMode,
+    screen,
+    params: screenParams,
+    settings,
+    updateSettings,
+    reloadKey: homeReload,
+    reload: () => setHomeReload((n) => n + 1),
+    go(id, params) {
+      setNavStack((st) => [...st, { screen, params: screenParams }]);
+      setScreenParams(params === undefined ? null : params);
+      setScreenRaw(id);
+      if (typeof window !== "undefined" && window.scrollTo) window.scrollTo(0, 0);
+    },
+    back() {
+      if (!navStack.length) {
+        setScreen("home");
+        return;
+      }
+      const prev = navStack[navStack.length - 1];
+      setNavStack(navStack.slice(0, -1));
+      setScreenParams(prev.params);
+      setScreenRaw(prev.screen);
+    },
+    home: () => setScreen("home"),
+    openSettings: () => setScreen("settings"),
+    // Opens an Iron Log screen by its id ("history", "streak", ...). Its
+    // back button returns to the current mode's home.
+    openLiftScreen: (id) => setScreen(id),
+  };
 
   async function chooseMode(mode) {
     const next = { ...settings, appMode: mode === "advanced" ? "advanced" : "simple" };
@@ -112,6 +169,7 @@ export default function App() {
     await safeSet("settings", next);
     await safeSet("mode-chosen", true);
     setShowWelcome(false);
+    setTourSteps(next.appMode === "simple" ? SIMPLE_TOUR_STEPS : TOUR_STEPS);
     setTourDemoData(true);
     setShowTour(true);
   }
@@ -147,6 +205,8 @@ export default function App() {
         // seeing.
         if (merged.showIntro === false) setIntro(false);
       }
+      const mergedForIntro = { ...DEFAULT_SETTINGS, ...(savedSettings || {}) };
+      if ((await safeGet(INTRO_SEEN_KEY)) && !mergedForIntro.introEachLaunch) setIntro(false);
       const active = await getActiveProgramme();
       setCurrentProgramme(active);
       const tourSeen = await safeGet("tour-seen");
@@ -156,6 +216,7 @@ export default function App() {
       // The tour starts once the choice is made (see chooseMode).
       if (!tourSeen) {
         if (await safeGet("mode-chosen")) {
+          setTourSteps(mergedForIntro.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);
           setTourDemoData(true);
           setShowTour(true);
         } else {
@@ -177,41 +238,6 @@ export default function App() {
         const notes = releaseNotesFor(APP_VERSION);
         if (notes && tourSeen) setWhatsNew(notes);
         await safeSet(LAST_SEEN_VERSION_KEY, APP_VERSION);
-      }
-
-      const lic = await loadLicense();
-      setLicense(lic);
-      // Nothing to sell in a give-away build, so the store is never even
-      // contacted — a side-loaded APK has no Play Billing connection to
-      // make anyway.
-      if (!UNLOCKED_BUILD) {
-        initBilling(
-          async (entitled) => {
-            // Play's answer is authoritative in both directions: this is
-            // what re-locks the app when a subscription lapses, not just
-            // what unlocks it when one starts.
-            const next = await setLicenseEntitled(entitled);
-            setLicense(next);
-          },
-          (found) => setOffers(found),
-        );
-      }
-      if (!isNativeRuntime()) {
-        // Dev-only escape hatches so the paywall flow can be exercised
-        // outside a packaged APK, where Play Billing never runs. Not wired
-        // to any UI — call from the browser console.
-        window.__ironlogDevUnlock = async () => {
-          const next = await setLicenseEntitled(true);
-          setLicense(next);
-        };
-        window.__ironlogDevLock = async () => {
-          const next = await setLicenseEntitled(false);
-          setLicense(next);
-        };
-        window.__ironlogDevOffers = (o) => setOffers(o || {
-          annual: { planId: "annual", price: "£9.99", trialDays: 7 },
-          monthly: { planId: "monthly", price: "£1.99", trialDays: 7 },
-        });
       }
 
       setDbReady(true);
@@ -237,15 +263,9 @@ export default function App() {
   // of the real "workout" screen.
   useEffect(() => {
     if (!showTour) return;
-    const step = TOUR_STEPS[tourStep];
+    const step = tourSteps[tourStep] || tourSteps[0];
     setScreenRaw(step.screen === "workoutPreview" ? "tourWorkoutPreview" : step.screen);
-  }, [showTour, tourStep]);
-
-  // The moment the app becomes unlocked (purchase completes, or restore
-  // succeeds) while the paywall is showing, drop straight back to Home.
-  useEffect(() => {
-    if (screen === "paywall" && isLicenseUnlocked(license)) setScreenRaw("home");
-  }, [license, screen]);
+  }, [showTour, tourStep, tourSteps]);
 
   async function updateSettings(next) {
     // The palette lives in a module object every screen reads while it
@@ -274,6 +294,7 @@ export default function App() {
     }
   }
   function replayTour() {
+    setTourSteps(TOUR_STEPS);
     setTourDemoData(true);
     setTourStep(0);
     setShowTour(true);
@@ -288,38 +309,10 @@ export default function App() {
     return () => clearTimeout(t);
   }, [showFeatureListHint]);
 
-  async function handleBuy(planKey) {
-    setPurchaseMsg("");
-    if (!isNativeRuntime()) {
-      setPurchaseMsg("You can subscribe only in the installed app. You cannot subscribe in a browser preview.");
-      return;
-    }
-    setPurchaseBusy(true);
-    const result = await subscribe(planKey);
-    setPurchaseBusy(false);
-    if (!result.ok) setPurchaseMsg("The purchase did not complete. Try again.");
-  }
-
-  async function handleRestore() {
-    setPurchaseMsg("");
-    if (!isNativeRuntime()) {
-      setPurchaseMsg("You can restore a purchase only in the installed app. You cannot restore it in a browser preview.");
-      return;
-    }
-    setPurchaseBusy(true);
-    const ok = await restorePurchases();
-    setPurchaseBusy(false);
-    if (ok && !isLicenseUnlocked(license)) {
-      setPurchaseMsg("The app found no active subscription for this Google account.");
-    } else if (!ok) {
-      setPurchaseMsg("The app could not restore your purchase. Check your Google Play account and try again.");
-    }
-  }
-
   function startProgrammeDay(day, programme) {
     setSplit(day.name);
     setSelection({});
-    setPresetExercises(day.exercises.map((e) => ({ id: e.id, muscle: e.muscle, method: e.method || null })));
+    setPresetExercises(day.exercises.map((e) => ({ id: e.id, muscle: e.muscle, method: e.method || null, sets: e.sets || null, reps: e.reps || null })));
     setPresetSupersets(null);
     setResumeData(null);
     setProgrammeCtx({ programmeId: programme.id, dayKey: day.key, dayName: day.name });
@@ -411,14 +404,23 @@ export default function App() {
         button { cursor: pointer; background: none; border: none; color: inherit; font: inherit; padding: 0; }
       `}</style>
 
-      {screen === "home" && (
+      {screen === "home" && mode !== "lift" && (() => {
+        const ModeHome = modeById(mode).Home;
+        return <ModeHome nav={nav} />;
+      })()}
+
+      {isModeScreen(screen) && (() => {
+        const Screen = MODE_SCREENS[screen].Component;
+        return <Screen key={screen} nav={nav} />;
+      })()}
+
+      {screen === "home" && mode === "lift" && (
         <HomeScreen
           settings={settings}
           reloadKey={homeReload}
           activeProgramme={currentProgramme}
-          subscribed={isLicenseUnlocked(license)}
-          graceDaysLeft={UNLOCKED_BUILD ? null : offlineGraceDaysLeft(license)}
-          onViewPaywall={() => setScreenRaw("paywall")}
+          mode={mode}
+          onModeChange={setMode}
           onStart={() => setScreen("startChoice")}
           onViewHistory={() => setScreen("history")}
           onOpenProgramme={() => setScreen("programme")}
@@ -523,11 +525,6 @@ export default function App() {
           onViewFeatureList={() => setScreen("featureList")}
           onViewWhatsNew={() => setWhatsNew(releaseNotesFor(APP_VERSION))}
           onViewVersionHistory={() => setScreen("versionHistory")}
-          license={license}
-          onBuy={handleBuy}
-          onRestore={handleRestore}
-          purchaseBusy={purchaseBusy}
-          purchaseMsg={purchaseMsg}
         />
       )}
 
@@ -554,18 +551,6 @@ export default function App() {
       {screen === "exerciseDb" && <ExerciseDatabaseScreen onBack={() => setScreen("home")} />}
 
       {screen === "tourWorkoutPreview" && <TourWorkoutPreviewScreen />}
-
-      {screen === "paywall" && (
-        <PaywallScreen
-          onBack={() => setScreenRaw("home")}
-          onBuy={handleBuy}
-          onRestore={handleRestore}
-          busy={purchaseBusy}
-          message={purchaseMsg}
-          offers={offers}
-          trialDays={(offers && ((offers.annual && offers.annual.trialDays) || (offers.monthly && offers.monthly.trialDays))) || 7}
-        />
-      )}
 
       {screen === "suggested" && (
         <SuggestedScreen
@@ -709,7 +694,14 @@ export default function App() {
           be on screen is already there. It is drawn from the first frame
           and dismissed as soon as settings say so, so an install with it
           switched off never sees a flash of it. */}
-      {intro && <OpeningSequence onDone={() => setIntro(false)} />}
+      {intro && (
+        <OpeningSequence
+          onDone={() => {
+            setIntro(false);
+            safeSet(INTRO_SEEN_KEY, true);
+          }}
+        />
+      )}
 
       {/* Above the tour in the tree but gated on it not running, so an
           update and a first launch can never stack on top of each other. */}
@@ -723,8 +715,9 @@ export default function App() {
 
       {showTour && (
         <FeatureTour
+          steps={tourSteps}
           stepIndex={tourStep}
-          onNext={() => setTourStep((s) => Math.min(TOUR_STEPS.length - 1, s + 1))}
+          onNext={() => setTourStep((s) => Math.min(tourSteps.length - 1, s + 1))}
           onPrev={() => setTourStep((s) => Math.max(0, s - 1))}
           onSkip={closeTour}
         />

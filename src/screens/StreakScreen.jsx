@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, PieChart } from "lucide-react";
 import { MONTH_NAMES, todayStr } from "../lib/dates.js";
-import { loadTrainedDates, computeCurrentStreak, buildHeatmapDays } from "../lib/stats.js";
+import { loadTrainedDates, buildHeatmapDays } from "../lib/stats.js";
+import { weekStreak } from "../shared/load.js";
 import { hexToRgba, COLORS } from "../theme.js";
 import { TopBar } from "../components/TopBar.jsx";
 
@@ -92,7 +93,8 @@ export function StreakScreen({ onBack, onViewNerdStats }) {
   const thisYear = new Date().getFullYear();
   const [year, setYear] = useState(thisYear);
 
-  const streak = computeCurrentStreak(trainedDates);
+  // One streak in weeks (spec section 6). Rest days never break it.
+  const streak = weekStreak([...trainedDates].map((date) => ({ date })));
   const thisWeekCount = buildHeatmapDays(trainedDates, 1).filter((d) => d.trained).length;
 
   // Only offer years the user could actually have trained in: back to their
@@ -122,7 +124,7 @@ export function StreakScreen({ onBack, onViewNerdStats }) {
       </div>
       <div style={{ padding: "0 20px 20px", display: "flex", gap: 10 }}>
         {[
-          { label: "Current Streak", value: streak },
+          { label: "Week Streak", value: streak },
           { label: "This Week", value: thisWeekCount },
           { label: "Days Trained", value: totalWorkouts },
         ].map((s) => (

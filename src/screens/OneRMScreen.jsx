@@ -6,6 +6,7 @@ import { PB_EXERCISE_IDS, BODYWEIGHT_LIFT_IDS, getCurrentEstimate, TRAINING_LEVE
 import { safeGet, safeSet, safeDelete } from "../lib/storage.js";
 import { COLORS } from "../theme.js";
 import { TopBar } from "../components/TopBar.jsx";
+import { LogDateField } from "../components/LogDateField.jsx";
 
 /* ---------------------------------------------------------------
    ONE-REP MAX GOALS SCREEN
@@ -95,6 +96,7 @@ export function OneRMScreen({ settings, onBack, onGenerateWorkout }) {
   const [expandedGoal, setExpandedGoal] = useState(null);
   const [logForm, setLogForm] = useState(null); // exerciseId or null
   const [logInput, setLogInput] = useState("");
+  const [logDate, setLogDate] = useState(todayStr);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,7 +137,7 @@ export function OneRMScreen({ settings, onBack, onGenerateWorkout }) {
   async function saveManual1RM(exerciseId) {
     const val = parseFloat(logInput);
     if (!val) return;
-    const record = { value: val, date: todayStr() };
+    const record = { value: val, date: logDate || todayStr() };
     await safeSet(`manual-1rm:${exerciseId}`, record);
     setEstimates((prev) => ({ ...prev, [exerciseId]: { value: val, isManual: true, date: record.date } }));
     setLogForm(null);
@@ -180,7 +182,8 @@ export function OneRMScreen({ settings, onBack, onGenerateWorkout }) {
                         : "current: no data yet"}
                     </div>
                     {logForm === id ? (
-                      <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 8 }}>
+                      <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
+                        <LogDateField value={logDate} onChange={setLogDate} label="Date of the max" style={{ padding: "7px 8px", fontSize: 12, width: 140 }} />
                         <input
                           type="number"
                           inputMode="decimal"

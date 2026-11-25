@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ChevronRight, ChevronDown } from "lucide-react";
-import { UNLOCKED_BUILD } from "../lib/billing.js";
 import { COLORS } from "../theme.js";
 import { TopBar } from "../components/TopBar.jsx";
 
@@ -63,7 +62,7 @@ export function FeatureListScreen({ onBack }) {
     <div style={{ paddingBottom: 40 }}>
       <TopBar title="Feature List" onBack={onBack} />
       <div style={{ padding: "0 20px 20px", color: COLORS.textDim, fontSize: 13, lineHeight: 1.5 }}>
-        This list shows all the features of Iron Log. Tap a section to open it.
+        This list shows the Lift features of Skid Marks. Tap a section to open it.
       </div>
 
       <div style={{ padding: "0 20px" }}>
@@ -72,13 +71,13 @@ export function FeatureListScreen({ onBack }) {
             Tap a muscle one or more times to add exercises for it. In Advanced Mode, select "Choose specific exercises instead". Then select the exact exercises from a list. The list has a section for each body part. You can open and close each section.
           </FeatureItem>
           <FeatureItem name="Programmes">
-            Build a plan for a number of weeks. Use Push/Pull/Legs, Upper/Lower or Bro Split, or make a fully custom plan. Iron Log automatically selects your next training day. It shows your progress through the block until you finish it.
+            Build a plan for a number of weeks. Use Push/Pull/Legs, Upper/Lower or Bro Split, or make a fully custom plan. The app automatically selects your next training day. It shows your progress through the block until you finish it.
           </FeatureItem>
           <FeatureItem name="Guided Programme (Recommended)">
-            This is the highlighted option when you create a programme. Answer three short questions: your experience level, your session length, and the body parts that you want to make a priority. Iron Log then builds a split for you. It shows recommendations for rep ranges and protein. Then it shows the exact programme before you accept it. If you decline it, the app opens the normal builder. There you can make your own programme.
+            This is the highlighted option when you create a programme. Answer three short questions: your experience level, your session length, and the body parts that you want to make a priority. The app then builds a split for you. It shows recommendations for rep ranges and protein. Then it shows the exact programme before you accept it. If you decline it, the app opens the normal builder. There you can make your own programme.
           </FeatureItem>
           <FeatureItem name="Train Ready Muscles">
-            The muscle readiness map on Home gives each muscle a colour. The colour shows how much recovery time the muscle still needs. Green means that the muscle is ready. Amber means that it needs less than one more day. Red means that it needs more than one more day. The recovery time depends on the muscle and on how hard you trained it. After a session to failure, the lower back needs four days. After a session with reps left, it needs two and a half days. The side delts need one and a half days or one day. Muscles that an exercise works indirectly have their own shorter recovery times. Thus after a hard bench press, your chest is red, but your triceps recover sooner. Select how much time you have. Iron Log then builds a session from the green muscles.
+            The muscle readiness map on Home gives each muscle a colour. The colour shows how much recovery time the muscle still needs. Green means that the muscle is ready. Amber means that it needs less than one more day. Red means that it needs more than one more day. The recovery time depends on the muscle and on how hard you trained it. After a session to failure, the lower back needs four days. After a session with reps left, it needs two and a half days. The side delts need one and a half days or one day. Muscles that an exercise works indirectly have their own shorter recovery times. Thus after a hard bench press, your chest is red, but your triceps recover sooner. Select how much time you have. The app then builds a session from the green muscles.
           </FeatureItem>
           <FeatureItem name="Backup">
             Settings → Backup saves all your data to one JSON file in your Downloads folder. This includes history, programmes, settings and exercise order. The app shows the exact path of the file. Restore puts all the data back. Your data does not leave the phone in any other way. Thus if you lose the phone, this file is the only copy of your data.
@@ -117,7 +116,7 @@ export function FeatureListScreen({ onBack }) {
             Progress charts show the weight that you actually moved. This is your bodyweight minus the assistance, or your bodyweight plus the added weight. Thus when you stop using the assist machine, the chart shows progress. It does not show a sudden drop. This feature needs your bodyweight in Personal Info.
           </FeatureItem>
           <FeatureItem name="Share a workout to Strava">
-            Turn on Settings → Share to Strava. A share button then shows when you finish a workout. It also shows on each past workout in History. The button puts the session into text. The text starts with the split, exercises, sets and total weight moved. Then it shows each lift with its sets and implement. The app sends the text to the share sheet of your phone and opens Strava. Paste the text into the activity. The app cannot post directly to Strava. A direct post needs a secret key, and Iron Log has no server to keep that key. Also, Strava has no structured fields for sets and reps.
+            Turn on Settings → Share to Strava. A share button then shows when you finish a workout. It also shows on each past workout in History. The button puts the session into text. The text starts with the split, exercises, sets and total weight moved. Then it shows each lift with its sets and implement. The app sends the text to the share sheet of your phone and opens Strava. Paste the text into the activity. The app cannot post directly to Strava. A direct post needs a secret key, and Skid Marks has no server to keep that key. Also, Strava has no structured fields for sets and reps.
           </FeatureItem>
           <FeatureItem name="Repeat last session in one tap">
             The "last time" panel on an exercise is a button. Tap it to copy those weights and reps onto the card. The app adds one row for each set that you did last time. If the exercise is empty, the app fills it immediately. If you already typed values, the app asks first. It replaces your values only after a second tap. The app never copies reps in reserve. Reps in reserve measures the set that you are about to do. It is not a plan.
@@ -135,7 +134,7 @@ export function FeatureListScreen({ onBack }) {
             Open it from the Home screen. It shows all exercises by body part. You can change the order of all exercises. The app uses this order as the priority when it selects exercises for you. For example, if you move cable pushdowns to the top, you get them first. Remove the exercises that you cannot do or do not want to do. The app then removes them from all pickers. You can restore them at any time. You can also add your own exercises.
           </FeatureItem>
           <FeatureItem name="Edit any exercise">
-            In the Exercise Database, tap the pencil next to an exercise. This works for your exercises and for Iron Log exercises. You can change the name, the muscle, the type, the other muscles that it works, or the cue. The exercise keeps its identity. Thus all sets that you logged for it stay with it. If you rename it or move it to a different muscle, the app also updates your past workouts. If you add an indirect muscle, the app also applies it to past sessions. Those sessions then count immediately in the readiness map and in the weekly volume for that muscle. The app marks a changed built-in exercise as Edited. You can change it back to the Iron Log version at any time.
+            In the Exercise Database, tap the pencil next to an exercise. This works for your exercises and for built-in exercises. You can change the name, the muscle, the type, the other muscles that it works, or the cue. The exercise keeps its identity. Thus all sets that you logged for it stay with it. If you rename it or move it to a different muscle, the app also updates your past workouts. If you add an indirect muscle, the app also applies it to past sessions. Those sessions then count immediately in the readiness map and in the weekly volume for that muscle. The app marks a changed built-in exercise as Edited. You can change it back to the built-in version at any time.
           </FeatureItem>
           <FeatureItem name="Custom exercises (Advanced Mode)">
             To add your own exercise, tap "+ New" on an exercise picker or use the Exercise Database screen. The app saves the exercise. You can then use it everywhere in the app.
@@ -183,13 +182,13 @@ export function FeatureListScreen({ onBack }) {
             A graph for each exercise over time. It shows estimated 1RM, top-set weight or total volume. Estimated 1RM is the first option. It is the only value that stays accurate when the rep target changes. For example, a lighter set with more reps still shows as progress. The chart shows when an exercise has two logged sessions.
           </FeatureItem>
           <FeatureItem name="1RM Goals">
-            Set a one-rep max target. The app then gives you a weekly progression to that target. Log a max yourself, or let Iron Log estimate it from your workouts.
+            Set a one-rep max target. The app then gives you a weekly progression to that target. Log a max yourself, or let the app estimate it from your workouts.
           </FeatureItem>
           <FeatureItem name="Personal Info & Weight Tracking">
             Keep your weight, height and age in one place. Turn on weight tracking to set a goal and to see a chart of your weight over time.
           </FeatureItem>
           <FeatureItem name="Consistency">
-            The Home screen shows a streak counter. The Consistency screen shows a square for each day of the year, month by month. Use the year picker to see past years.
+            The Home screen shows a week streak. It counts the weeks in a row with at least one activity. Rest days do not break it. The Consistency screen shows a square for each day of the year, month by month. Use the year picker to see past years.
           </FeatureItem>
         </FeatureSection>
 
@@ -210,7 +209,7 @@ export function FeatureListScreen({ onBack }) {
             Shows the last top set that you logged for an exercise. It shows while you log the new set.
           </FeatureItem>
           <FeatureItem name="Cardio & Activity">
-            A panel at the bottom of Home. Cardio does not count in your lifting stats, but it does change the readiness map above the panel. There are fifteen activities in two groups. Outdoor: run, walk, hike, cycle and swim. Indoor: treadmill, incline walk, stationary bike, spin, rowing machine, elliptical, stair climber, assault bike, jump rope and Other. Select a date and time, a duration, a distance if the activity has one, and an effort from RPE 1 to 10. The app calculates pace in the usual unit for each sport: min/km on foot, km/h on a bike, a /500m split on the rower and /100m in the pool. Each activity has its own muscles. A run fatigues the quads, calves and hamstrings directly. It fatigues the glutes, shins and core indirectly. A rower works the quads and back, and the erectors keep the body stable. A swim works the back and front delts. A walk works all its muscles indirectly. If a walk counted as direct leg work, the map would show red legs for all people who walk to work. RPE 9 or 10 counts as hard. This is the same limit as a set at 0-1 RIR. The app records the time of an "Other" activity and logs it, but it does not change the map. The app cannot know which muscles that activity worked. All activities count towards your day streak and your consistency calendar.
+            A panel at the bottom of Home. Cardio does not count in your lifting stats, but it does change the readiness map above the panel. There are seventeen activities in two groups. Outdoor: run, walk, hike, cycle, swim, football and team sport. Indoor: treadmill, incline walk, stationary bike, spin, rowing machine, elliptical, stair climber, assault bike, jump rope and Other. Select a date and time, a duration, a distance if the activity has one, and an effort from RPE 1 to 10. The app calculates pace in the usual unit for each sport: min/km on foot, km/h on a bike, a /500m split on the rower and /100m in the pool. Each activity has its own muscles. A run fatigues the quads, calves and hamstrings directly. It fatigues the glutes, shins and core indirectly. A rower works the quads and back, and the erectors keep the body stable. A swim works the back and front delts. Football and team sports work the legs, like a run. A walk works all its muscles indirectly. If a walk counted as direct leg work, the map would show red legs for all people who walk to work. RPE 9 or 10 counts as hard. This is the same limit as a set at 0-1 RIR. The app records the time of an "Other" activity and logs it, but it does not change the map. The app cannot know which muscles that activity worked. All activities count towards your week streak and your consistency calendar.
           </FeatureItem>
           <FeatureItem name="Stats for Nerds">
             At the bottom of the Consistency screen. It has twelve panels:
@@ -230,11 +229,8 @@ export function FeatureListScreen({ onBack }) {
             </ul>
             Tonnage counts only external load. Bodyweight and assisted work do not add to it. The app hides a panel until it has enough data.
           </FeatureItem>
-          <FeatureItem name="Training Load">
-            Drag the marker along the scale to see what is necessary to reach a different point on it. If you drag it down, the app shows the rest that you need. It shows the number of hours, and the time (24-hour clock) and date when you get to that point. This number is exact, not an estimate. On a day with no training, the app multiplies the 7-day average by 0.75 and the 28-day average by 0.931. Thus the ratio decreases by the same factor each day. The app calculates the time to each lower value from this factor. If you drag the marker up, the app cannot show rest, because only training increases the ratio. Thus the app shows a session: the minutes at RPE 8 that get you to that point today. The value shows only while you drag the marker. A faint mark stays at your actual position for comparison. When you release the marker, it goes back to your actual position. The marker answers a question. It does not change a setting.
-          </FeatureItem>
-          <FeatureItem name="Training Load">
-            A scale under the readiness map. It gives information for a question that the map cannot answer. The map answers "Can I train my chest?". The scale gives information for "Should I train at all?". The map keeps only the most recent session for each muscle. Thus the map does not show the total effect of a training block. The scale shows the acute:chronic workload ratio. This is a common sports-science measure. It is information only. It cannot predict injury. Research disputes its use to predict injury. Each session gets a load. The app uses Foster's session-RPE method: the effort of the session multiplied by its duration. This method gives a set of squats and a 10 km run the same units. For a lifting session, the app gets the RPE from your logged RIR. It gets the minutes from the clock. For sessions that you logged before the app timed sessions, it calculates the minutes from the sets and your rest settings. The app compares the average of the last 7 days with the average of the last 28 days. Both averages are exponentially weighted. Williams et al. showed that this method is better than simple rolling averages. The zones follow Gabbett. Under 0.8 is less than your usual training. 0.8–1.3 is close to your usual training. 1.3–1.5 is an increase. Over 1.5 is a sharp increase. The bar shows a colour for each zone and a marker at your position. The app divides by your own 28-day average. Thus the scale compares you with your own fitness, not with a fixed standard. The scale needs a few weeks of history before it shows a number.
+          <FeatureItem name="Form">
+            A gauge under the readiness map. It shows fitness, fatigue and form for all your training: lift sessions, runs and other sports. It is information only. It cannot predict injury. Each session gets a load: the effort (1 to 10) multiplied by the minutes. This is Foster's session-RPE method. For a lift session, the app gets the effort from your logged RIR. Fitness is the average daily load of about the last 42 days. Fatigue is the average daily load of about the last 7 days. Recent days count more. Form is fitness minus fatigue. After hard days, form is below zero. After rest days, form goes up. The gauge needs about four weeks of history before it shows a value. Tap the info button to see your numbers and the zones.
           </FeatureItem>
           <FeatureItem name="Muscle Readiness Map">
             Shows or hides the body diagram recovery map on the Home screen.
@@ -250,31 +246,14 @@ export function FeatureListScreen({ onBack }) {
           </FeatureItem>
         </FeatureSection>
 
-        {UNLOCKED_BUILD ? (
-          <FeatureSection title="Your Copy">
-            <FeatureItem name="Fully unlocked">
-              This build has all features turned on permanently. There is no trial and no purchase. Nothing expires.
-            </FeatureItem>
-          </FeatureSection>
-        ) : (
-          <FeatureSection title="Trial & Subscription">
-            <FeatureItem name="7-day free trial">
-              You get all features for 7 days. Google Play manages the trial. Cancel before the trial ends and you do not pay.
-            </FeatureItem>
-            <FeatureItem name="Monthly or annual">
-              Select one when you start the trial. You can manage or cancel your subscription at any time from Settings or Google Play.
-            </FeatureItem>
-            <FeatureItem name="Works offline">
-              Iron Log works without a signal. It must connect to Google Play only from time to time to confirm the subscription.
-            </FeatureItem>
-            <FeatureItem name="Your data is yours">
-              All your data stays on your phone, with or without a subscription. Backup in Settings always works. If you cancel, you do not lose access to your history.
-            </FeatureItem>
-            <FeatureItem name="Restore Subscription">
-              If you install the app again or change to a different device, restore your subscription from Settings. Use the same Google account.
-            </FeatureItem>
-          </FeatureSection>
-        )}
+        <FeatureSection title="Free for Everyone">
+          <FeatureItem name="All features are free">
+            Skid Marks is free and open source (GPL-3.0). There is no trial, no subscription and no purchase. Nothing expires.
+          </FeatureItem>
+          <FeatureItem name="Your data is yours">
+            All your data stays on your phone. There is no account and there are no ads. Backup in Settings always works.
+          </FeatureItem>
+        </FeatureSection>
       </div>
     </div>
   );

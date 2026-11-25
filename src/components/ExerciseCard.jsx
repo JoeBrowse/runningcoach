@@ -402,6 +402,12 @@ export function ExerciseCard({
         </div>
       )}
 
+      {ex.targetSets && ex.targetReps && (
+        <div data-testid="target-hint" style={{ color: COLORS.accent, fontSize: 12, lineHeight: 1.4, marginTop: 6, marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>
+          Target: {ex.targetSets} × {ex.targetReps}{ex.targetReps === 1 ? " (hold 30 to 45 seconds)" : ""}
+        </div>
+      )}
+
       {showMachineBlock && (
         <div style={{ background: COLORS.surfaceRaised, borderRadius: 8, padding: "9px 10px", marginBottom: 10 }}>
           <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
@@ -683,7 +689,7 @@ export function ExerciseCard({
             <input
               type="number"
               inputMode="numeric"
-              placeholder="reps"
+              placeholder={ex.targetReps ? String(ex.targetReps) : "reps"}
               value={s.reps}
               onChange={(e) => onSetChange(ex.id, i, "reps", e.target.value)}
               style={{ ...inputBase, width: 62, flexGrow: 0, flexShrink: 0, padding: "5px 6px", boxSizing: "border-box", ...toneStyle }}

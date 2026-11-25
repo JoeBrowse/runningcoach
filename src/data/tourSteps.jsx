@@ -24,14 +24,14 @@ import { Plus, Check, Dumbbell, Clock, Trophy, History as HistoryIcon, Timer, Pl
 export const TOUR_STEPS = [
   {
     icon: <Dumbbell size={26} />,
-    title: "Welcome to Iron Log",
-    body: "Iron Log is a fast and simple gym tracker. The app starts in Simple Mode. Simple Mode shows only the basic features, so you can start to train quickly. For exercise variants, supersets, drop sets and more, select Advanced Mode in Settings. You can change the mode at any time. To close the tour, tap Skip at any time.",
+    title: "Welcome to Lift",
+    body: "Skid Marks has three modes: Plan, Run and Lift. Use the switch at the top of the home screen to change the mode. This tour shows Lift, the gym tracker. The app starts in Simple Mode. Simple Mode shows only the basic features, so you can start to train quickly. For exercise variants, supersets, drop sets and more, select Advanced Mode in Settings. You can change the mode at any time. To close the tour, tap Skip at any time.",
     screen: "home",
   },
   {
     icon: <Plus size={26} />,
     title: "Start a Workout",
-    body: "Select a split (Push, Pull, Legs and more) or select specific muscles. Iron Log then makes a balanced session for you. You can also make your own session and add each exercise yourself.",
+    body: "Select a split (Push, Pull, Legs and more) or select specific muscles. The app then makes a balanced session for you. You can also make your own session and add each exercise yourself.",
     screen: "split",
     target: "split-list",
   },
@@ -44,7 +44,7 @@ export const TOUR_STEPS = [
   {
     icon: <BookOpen size={26} />,
     title: "Your Order of Importance",
-    body: "Iron Log uses this list when it makes a session. It starts at the top of each muscle group, so you get the top exercise first. Use the arrows to move your favourite exercises up. Remove the exercises that your gym does not have. Add your own exercises. For more variety, turn on Randomize Exercise Selection in Settings. The app then selects exercises at random and does not use the ranking.",
+    body: "The app uses this list when it makes a session. It starts at the top of each muscle group, so you get the top exercise first. Use the arrows to move your favourite exercises up. Remove the exercises that your gym does not have. Add your own exercises. For more variety, turn on Randomize Exercise Selection in Settings. The app then selects exercises at random and does not use the ranking.",
     screen: "exerciseDb",
     target: "exercise-db-list",
   },
@@ -65,7 +65,7 @@ export const TOUR_STEPS = [
   {
     icon: <Play size={26} />,
     title: "How to Do an Exercise",
-    body: "Each exercise has a play button next to its name. Tap it, and Iron Log opens a YouTube search for that exercise. The search uses the implement that you selected. For example, a search for a Smith machine bench press does not show a barbell bench press.",
+    body: "Each exercise has a play button next to its name. Tap it, and the app opens a YouTube search for that exercise. The search uses the implement that you selected. For example, a search for a Smith machine bench press does not show a barbell bench press.",
     screen: "workoutPreview",
     target: "form-video",
   },
@@ -147,7 +147,7 @@ export const TOUR_STEPS = [
   {
     icon: <BookOpen size={26} />,
     title: "Help Starts Here",
-    body: "This list explains each feature and each setting in Iron Log. If you do not know how to do something, look here first.",
+    body: "This list explains each feature and each setting in Lift. If you do not know how to do something, look here first.",
     screen: "settings",
     target: "feature-list-btn",
   },
@@ -155,6 +155,37 @@ export const TOUR_STEPS = [
     icon: <Check size={26} />,
     title: "The Tour Is Complete",
     body: "The tour showed all of the app. You can start this tour again at any time from Settings. Now start your first workout.",
+    screen: "home",
+  },
+];
+
+/* The short tour for Simple mode on first launch (spec section 8).
+   The full tour above stays available from Settings. */
+export const SIMPLE_TOUR_STEPS = [
+  {
+    icon: <Dumbbell size={26} />,
+    title: "Welcome to Skid Marks",
+    body: "Skid Marks has three modes: Plan, Run and Lift. Use the switch at the top of the home screen to change the mode. You can also tap the name at the top. This short tour shows Lift, the gym tracker.",
+    screen: "home",
+  },
+  {
+    icon: <Plus size={26} />,
+    title: "Start a Workout",
+    body: "Tap Start Workout. Select a split, for example Push, Pull or Legs. The app then makes a balanced session for you.",
+    screen: "split",
+    target: "split-list",
+  },
+  {
+    icon: <Check size={26} />,
+    title: "Log Your Sets",
+    body: "Enter the weight and reps for each set. Tick the box when you complete the set. The rest timer then starts. To log a past workout, tap 'Logging for now' and set the date.",
+    screen: "workoutPreview",
+    target: "set-rows",
+  },
+  {
+    icon: <RotateCcw size={26} />,
+    title: "Your Data Stays Here",
+    body: "All your data stays on this phone. Make a backup in Settings. All features are free. To see the full tour, open Settings and tap Show the Full Tour.",
     screen: "home",
   },
 ];

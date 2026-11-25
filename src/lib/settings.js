@@ -61,6 +61,10 @@ export const DEFAULT_SETTINGS = {
   highContrast: false,
   stravaShare: false,
   showIntro: true,
+  // Skid Marks: the top-level mode ("plan" | "run" | "lift"). See src/modes/.
+  mode: "lift",
+  // The opening animation plays on the first launch only, unless this is on.
+  introEachLaunch: false,
 };
 
 

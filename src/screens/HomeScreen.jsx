@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, Plus, Dumbbell, Clock, History as HistoryIcon, Play, Lock, TrendingUp, Trash2, ChevronUp, ChevronDown, Settings as SettingsIcon, Sparkles, User } from "lucide-react";
+import { ChevronRight, Plus, Dumbbell, Clock, History as HistoryIcon, Play, TrendingUp, Trash2, ChevronUp, ChevronDown, Sparkles, User } from "lucide-react";
 import { setHasData } from "../lib/history.js";
-import { loadTrainingLoad } from "../lib/load.js";
 import { programmeNextIndex, programmePlanned, programmeCompleted, programmeWeekNumber, getFinishedProgrammes, deleteFinishedProgramme } from "../lib/programmes.js";
 import { MUSCLE_GROUPS, loadRecoveryMap } from "../lib/recovery.js";
-import { loadTrainedDates, computeCurrentStreak } from "../lib/stats.js";
 import { safeGet, safeSet, safeDelete } from "../lib/storage.js";
 import { COLORS } from "../theme.js";
 import { ActivityPanel } from "../components/ActivityPanel.jsx";
 import { BodyMap } from "../components/BodyMap.jsx";
 import { DailyQuote } from "../components/DailyQuote.jsx";
-import { LoadGauge } from "../components/LoadGauge.jsx";
+import { FormGauge } from "../components/FormGauge.jsx";
+import { ModeHeader } from "../modes/ModeHeader.jsx";
+import { loadSummary, weekStreak } from "../shared/load.js";
+import { listActivities } from "../shared/store.js";
 
-export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, onStartTemplate, onResumeWorkout, onViewSettings, onViewSuggested, onViewVolume, onViewStreak, onViewOneRM, onViewExerciseDb, onOpenProgramme, onStartProgrammeDay, onViewProgrammeStats, onNewProgramme, reloadKey, activeProgramme, settings, subscribed, graceDaysLeft, onViewPaywall }) {
+export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, onStartTemplate, onResumeWorkout, onViewSettings, onViewSuggested, onViewVolume, onViewStreak, onViewOneRM, onViewExerciseDb, onOpenProgramme, onStartProgrammeDay, onViewProgrammeStats, onNewProgramme, reloadKey, activeProgramme, settings, mode, onModeChange }) {
   const [dates, setDates] = useState({});
   const [loading, setLoading] = useState(true);
   const [recentSessions, setRecentSessions] = useState([]);
@@ -28,7 +29,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
   // Bumped when an activity is logged or deleted, so the readiness map
   // redraws without a full screen reload.
   const [activityTick, setActivityTick] = useState(0);
-  const [load, setLoad] = useState({ ratio: null, ready: false });
+  const [form, setForm] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,7 +46,10 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
       setFinishedProgrammes([...finished].reverse());
       const map = await loadRecoveryMap();
       setDates(map);
-      setLoad(await loadTrainingLoad(settings));
+      // One list for the Form gauge and the week streak (src/shared/).
+      const everything = await listActivities(settings);
+      setForm(loadSummary(everything, { settings }));
+      setStreak(weekStreak(everything));
       setRecentSessions([...hist].reverse().slice(0, 3));
       setTemplates(tpls);
       setGoalCount(Object.keys(savedGoals).length);
@@ -67,7 +71,6 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
         });
       });
       setWeeklyVolume(volMap);
-      setStreak(computeCurrentStreak(await loadTrainedDates()));
 
       setLoading(false);
     }
@@ -102,42 +105,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
 
   return (
     <div style={{ padding: "28px 24px 40px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        {/* Three states, and only two of them say anything. Subscribed and
-            online is the normal case and earns no chrome at all; the grace
-            countdown only appears once Play has actually been out of touch
-            for a day, so nobody sees a warning for a single flight. */}
-        {!subscribed ? (
-          <button onClick={onViewPaywall} style={{ display: "flex", alignItems: "center", gap: 5, color: COLORS.accent, fontSize: 11.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 0.5, textTransform: "uppercase" }}>
-            <Lock size={12} /> Start free trial
-          </button>
-        ) : graceDaysLeft !== null && graceDaysLeft <= 5 ? (
-          <div style={{ color: COLORS.textDim, fontSize: 11.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 0.5, textTransform: "uppercase" }}>
-            Offline: {graceDaysLeft} day{graceDaysLeft === 1 ? "" : "s"} left
-          </div>
-        ) : (
-          <div />
-        )}
-        <button
-          onClick={onViewSettings}
-          aria-label="Settings"
-          style={{ width: 38, height: 38, borderRadius: 10, background: COLORS.surface, border: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
-          <SettingsIcon size={17} color={COLORS.textDim} />
-        </button>
-      </div>
-      <div
-        style={{
-          fontFamily: "'Oswald', sans-serif",
-          fontSize: 15,
-          letterSpacing: 3,
-          textTransform: "uppercase",
-          color: COLORS.accent,
-          marginBottom: 6,
-        }}
-      >
-        Iron Log
-      </div>
+      <ModeHeader mode={mode || "lift"} onModeChange={onModeChange || (() => {})} onViewSettings={onViewSettings} />
       <DailyQuote />
 
       {unfinished && (
@@ -284,7 +252,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
             <BodyMap dates={dates} />
           )
         )}
-        {!loading && <LoadGauge ratio={load.ratio} ready={load.ready} acute={load.acute} chronic={load.chronic} />}
+        {!loading && <FormGauge summary={form} />}
       </div>
 
       <div style={{ borderTop: `1px solid ${COLORS.line}`, paddingTop: 24, marginBottom: 24 }}>
@@ -384,7 +352,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
             const tiles = [
               { key: "info", onClick: onViewPB, value: bodyweight ? `${bodyweight.value}${bodyweight.unit}` : "—", label: "Personal Info", icon: <User size={13} color={COLORS.accent} /> },
               { key: "vol", onClick: onViewVolume, value: totalSets, label: "Sets This Week", icon: <Dumbbell size={13} color={COLORS.accent} /> },
-              { key: "streak", onClick: onViewStreak, value: streak, label: streak === 1 ? "Day Streak" : "Day Streak", icon: <Clock size={13} color={COLORS.accent} /> },
+              { key: "streak", onClick: onViewStreak, value: streak, label: "Week Streak", icon: <Clock size={13} color={COLORS.accent} /> },
               { key: "goals", onClick: onViewOneRM, value: goalCount, label: "1RM Goals", icon: <TrendingUp size={13} color={COLORS.accent} /> },
             ];
             return tiles.map((t) => (

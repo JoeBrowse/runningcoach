@@ -80,6 +80,65 @@ export const PROGRAMME_PRESETS = [
       ["Arms B", ["Triceps", "Biceps", "Forearms"], ["pushdown", "preacher-curl", "reverse-curl", "eugene-curl", "reverse-eugene-curl", "plate-pinch"]],
     ],
   },
+  /* Runner presets (Skid Marks). Strength work that supports running:
+     single-leg strength, the hip and the back of the leg, calves and
+     shins, and the trunk. An entry can be an object with a target set
+     and rep count: { id, method, sets, reps }. */
+  {
+    key: "runner-1",
+    name: "Runner strength, 1 day",
+    blurb: "One full-body session each week for runners. It trains the legs, the hips, the calves and the trunk, and also the upper back. Do it on an easy run day or a rest day. Do not do it the day before a long run or a hard run.",
+    runner: true,
+    days: [
+      ["Runner Full Body", ["Quads", "Glutes", "Hamstrings", "Calves", "Core", "Back"], [
+        { id: "bulgarian-split-squat", sets: 3, reps: 8 },
+        { id: "romanian-deadlift", sets: 3, reps: 8 },
+        { id: "hip-thrust", sets: 3, reps: 10 },
+        { id: "standing-calf-raise", sets: 3, reps: 12 },
+        { id: "db-row", sets: 3, reps: 10 },
+        { id: "plank", sets: 2, reps: 1 },
+      ]],
+    ],
+  },
+  {
+    key: "runner-2",
+    name: "Runner strength, 2 days",
+    blurb: "Two sessions each week for runners. Day 1 trains the legs and the trunk. Day 2 trains the upper body. Put the legs day after a hard run, not before it. Keep at least two days between the legs day and your long run.",
+    runner: true,
+    days: [
+      ["Legs and Core", ["Quads", "Glutes", "Hamstrings", "Calves", "Shins", "Core"], [
+        { id: "bulgarian-split-squat", sets: 3, reps: 8 },
+        { id: "romanian-deadlift", sets: 3, reps: 8 },
+        { id: "hip-thrust", sets: 3, reps: 10 },
+        { id: "standing-calf-raise", sets: 3, reps: 12 },
+        { id: "tibialis-raise", sets: 2, reps: 15 },
+        { id: "plank", sets: 2, reps: 1 },
+      ]],
+      ["Upper", ["Chest", "Back", "Front Delts", "Rear Delts", "Core"], [
+        { id: "push-up", sets: 3, reps: 10 },
+        { id: "lat-pulldown", sets: 3, reps: 10 },
+        { id: "db-row", sets: 3, reps: 10 },
+        { id: "overhead-press", method: "Dumbbell", sets: 2, reps: 10 },
+        { id: "face-pull", sets: 2, reps: 15 },
+        { id: "reverse-crunch", sets: 2, reps: 12 },
+      ]],
+    ],
+  },
+  {
+    key: "beginner-machines",
+    name: "Beginner machines",
+    blurb: "Five machine moves for your first weeks in the gym. Do 2 sets of 10 reps. Start light: select a weight that you can lift 15 times. Add a little weight only when 10 reps feel easy. There are no pull-ups and no dips.",
+    beginner: true,
+    days: [
+      ["Machines", ["Quads", "Chest", "Back", "Hamstrings"], [
+        { id: "leg-press", sets: 2, reps: 10 },
+        { id: "bench-press", method: "Machine", sets: 2, reps: 10 },
+        { id: "lat-pulldown", sets: 2, reps: 10 },
+        { id: "seated-leg-curl", sets: 2, reps: 10 },
+        { id: "cable-row", sets: 2, reps: 10 },
+      ]],
+    ],
+  },
   {
     key: "custom",
     name: "Custom",

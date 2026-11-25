@@ -43,7 +43,7 @@ export function BackupPanel() {
     if (!file) return;
     try {
       const parsed = JSON.parse(await file.text());
-      if (!isBackupFile(parsed)) throw new Error("That file is not an Iron Log backup.");
+      if (!isBackupFile(parsed)) throw new Error("That file is not a Skid Marks or Iron Log backup.");
       setConfirmFile(parsed);
     } catch (e) {
       setResult({ ok: false, title: "Could not read that file", detail: String((e && e.message) || e) });

@@ -4,6 +4,7 @@ import { onBodyweightChange, upsertBodyweight } from "../lib/bodyweight.js";
 import { todayStr } from "../lib/dates.js";
 import { safeGet, safeSet } from "../lib/storage.js";
 import { hexToRgba, COLORS } from "../theme.js";
+import { LogDateField } from "./LogDateField.jsx";
 import { SimpleLineChart } from "./SimpleLineChart.jsx";
 
 // Opt-in weight tracking: off by default. Once turned on, the user can set a
@@ -18,6 +19,7 @@ export function WeightTrackingPanel() {
   const [unit, setUnit] = useState("lb");
   const [history, setHistory] = useState([]);
   const [logInput, setLogInput] = useState("");
+  const [logDate, setLogDate] = useState(todayStr);
   const [flash, setFlash] = useState("");
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export function WeightTrackingPanel() {
   async function logWeight() {
     const v = parseFloat(logInput);
     if (!v) return;
-    const record = { value: v, unit, date: todayStr() };
+    const record = { value: v, unit, date: logDate || todayStr() };
     const next = await upsertBodyweight(record);
     setHistory(next);
     setFlash("Weight logged ✓");
@@ -126,9 +128,10 @@ export function WeightTrackingPanel() {
       </div>
 
       <div style={{ marginBottom: 14 }}>
-        <div style={fieldLabel}>Log Today's Weight</div>
+        <div style={fieldLabel}>Log Your Weight</div>
         <div style={{ display: "flex", gap: 6 }}>
-          <input type="number" inputMode="decimal" placeholder="e.g. 172" value={logInput} onChange={(e) => setLogInput(e.target.value)} style={inputStyle} />
+          <LogDateField value={logDate} onChange={setLogDate} label="Weight date" style={{ flex: 1.4 }} />
+          <input type="number" inputMode="decimal" placeholder="e.g. 172" value={logInput} onChange={(e) => setLogInput(e.target.value)} style={{ ...inputStyle, minWidth: 0 }} />
           <button onClick={logWeight} style={{ padding: "0 16px", borderRadius: 8, border: "none", background: COLORS.accent, color: COLORS.onAccent, fontFamily: "'Oswald', sans-serif", fontSize: 12.5, textTransform: "uppercase" }}>Log</button>
         </div>
       </div>

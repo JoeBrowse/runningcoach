@@ -18,7 +18,7 @@
      latency to every launch.
 */
 
-const VERSION = "iron-log-v1";
+const VERSION = "skid-marks-v2";
 const SHELL = "./";
 
 self.addEventListener("install", (event) => {

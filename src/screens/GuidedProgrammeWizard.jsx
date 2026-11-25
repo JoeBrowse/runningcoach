@@ -163,7 +163,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
         {step === 2 && (
           <div>
             <div style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 16 }}>
-              Iron Log recommends this programme, based on your answers.
+              The app recommends this programme, based on your answers.
             </div>
             <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 16, marginBottom: 16 }}>
               <div style={{ color: COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 19, textTransform: "uppercase", marginBottom: 4 }}>{preset.name}</div>

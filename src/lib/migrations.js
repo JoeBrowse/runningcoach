@@ -1,5 +1,4 @@
 import { EXERCISES, ALL_EXERCISES_BY_ID } from "../data/exercises.js";
-import { LICENSE_KEY } from "./billing.js";
 import { sortByAt } from "./dates.js";
 import { methodsFor, muscleOfExerciseId } from "./exercises.js";
 import { capHistory } from "./settings.js";
@@ -28,16 +27,10 @@ import { safeGet, safeSet, safeList, safeDelete } from "./storage.js";
 --------------------------------------------------------------- */
 
 export const MIGRATIONS = [
-  // v0 -> v1: introduce the on-device license/trial record. Only creates
-  // it if missing; never touches an existing trialStartedAt or purchased
-  // flag, so replaying this (or upgrading again later) can't reset a
-  // user's trial or silently un-purchase the app.
-  async function migrateAddLicense() {
-    const existing = await safeGet(LICENSE_KEY);
-    if (!existing) {
-      await safeSet(LICENSE_KEY, { trialStartedAt: new Date().toISOString(), purchased: false });
-    }
-  },
+  // v0 -> v1: this slot once created the on-device licence record. The
+  // app is free now, so it does nothing. The slot stays, because each
+  // migration's version number is its index in this list.
+  async function migrateLicenceRemoved() {},
   // v1 -> v2: "Shoulders" split into "Front Delts" and "Side Delts".
   // Stored data records the muscle name on every logged exercise, on
   // programme days, on templates and as the key of the custom exercise

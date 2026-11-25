@@ -119,7 +119,7 @@ export function ProgrammeBuilderScreen({ onBack, onCreate, onGuided }) {
                   Recommended
                 </span>
               </div>
-              <div style={{ color: COLORS.text, fontSize: 12, marginTop: 3 }}>Answer some short questions. Iron Log then builds a split for you. You can accept it or change it.</div>
+              <div style={{ color: COLORS.text, fontSize: 12, marginTop: 3 }}>Answer some short questions. The app then builds a split for you. You can accept it or change it.</div>
             </button>
             {PROGRAMME_PRESETS.map((p) => (
               <button

@@ -108,7 +108,7 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
         ? presetExercises
             .map((pe) => {
               const full = ALL_EXERCISES_BY_ID[pe.id];
-              return full ? { ...full, muscle: pe.muscle, method: pe.method || undefined } : null;
+              return full ? { ...full, muscle: pe.muscle, method: pe.method || undefined, targetSets: pe.sets || undefined, targetReps: pe.reps || undefined } : null;
             })
             .filter(Boolean)
         : buildWorkout(split, selection, settings.randomizeSelection);
@@ -145,7 +145,7 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
                 arr.map((s) => (s.done === undefined ? { ...s, done: false } : s)),
               ])
             )
-          : Object.fromEntries(list.map((ex) => [ex.id, blankSets(settings)]))
+          : Object.fromEntries(list.map((ex) => [ex.id, blankSets(ex.targetSets ? { ...settings, startingSets: ex.targetSets } : settings)]))
       );
       if (resumeData) {
         if (resumeData.meta) setMeta(resumeData.meta);

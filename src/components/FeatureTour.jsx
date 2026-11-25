@@ -46,9 +46,10 @@ function useScrollTourTargetIntoView(targetKey) {
 
 // Controlled by App() — stepIndex/onNext/onPrev/onSkip live there so the
 // same step change that advances the card also drives navigation.
-export function FeatureTour({ stepIndex, onNext, onPrev, onSkip }) {
-  const step = TOUR_STEPS[stepIndex];
-  const last = stepIndex === TOUR_STEPS.length - 1;
+// `steps` is TOUR_STEPS (full tour) or SIMPLE_TOUR_STEPS (4 cards).
+export function FeatureTour({ steps = TOUR_STEPS, stepIndex, onNext, onPrev, onSkip }) {
+  const step = steps[stepIndex] || steps[0];
+  const last = stepIndex >= steps.length - 1;
   useScrollTourTargetIntoView(step.target);
 
   return (
@@ -78,7 +79,7 @@ export function FeatureTour({ stepIndex, onNext, onPrev, onSkip }) {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'Oswald', sans-serif", letterSpacing: 1, textTransform: "uppercase" }}>
-            {stepIndex + 1} / {TOUR_STEPS.length}
+            {stepIndex + 1} / {steps.length}
           </div>
           <button onClick={onSkip} style={{ color: COLORS.textDim, fontSize: 12.5, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 }}>
             Skip
@@ -96,7 +97,7 @@ export function FeatureTour({ stepIndex, onNext, onPrev, onSkip }) {
         </div>
 
         <div style={{ display: "flex", gap: 5, marginBottom: 18 }}>
-          {TOUR_STEPS.map((_, idx) => (
+          {steps.map((_, idx) => (
             <div key={idx} style={{ flex: 1, height: 3, borderRadius: 2, background: idx <= stepIndex ? COLORS.accent : COLORS.surfaceRaised }} />
           ))}
         </div>

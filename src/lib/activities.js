@@ -50,12 +50,18 @@ export function activityPace(a) {
 export function activityLabel(a) {
   const type = activityType((a || {}).type);
   const name = ((a || {}).name || "").trim();
-  return type.id === "other" && name ? name : type.label;
+  return (type.id === "other" || type.id === "team-sport") && name ? name : type.label;
 }
+
+// Iron Log kept 200 activities. Runners import years of runs, so the cap
+// is much higher now. Old data is not changed.
+export const ACTIVITY_CAP = 5000;
 
 export async function addActivity(activity) {
   const list = (await safeGet("activity-history")) || [];
-  const next = [...list, activity].slice(-200);
+  const next = [...list, activity]
+    .sort((a, b) => (sessionTime(a) || 0) - (sessionTime(b) || 0))
+    .slice(-ACTIVITY_CAP);
   await safeSet("activity-history", next);
   return next;
 }

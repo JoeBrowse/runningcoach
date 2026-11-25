@@ -85,6 +85,28 @@ export const ACTIVITY_TYPES = [
     pace: "min/100m",
     distanceUnit: "m",
   },
+  {
+    id: "football",
+    label: "Football",
+    group: "Outdoor",
+    // Sprints, stops and turns: the legs take the load, as in a run. The
+    // map treats it like a run so the legs show the work.
+    primary: ["Quads", "Calves", "Hamstrings"],
+    secondary: ["Glutes", "Shins", "Core"],
+    pace: null,
+    distanceUnit: "km",
+  },
+  {
+    id: "team-sport",
+    label: "Team Sport",
+    group: "Outdoor",
+    // Rugby, hockey, basketball, netball and the like. The name field
+    // says which. Legs first, like a run.
+    primary: ["Quads", "Calves", "Hamstrings"],
+    secondary: ["Glutes", "Shins", "Core"],
+    pace: null,
+    distanceUnit: "km",
+  },
   // ---- Indoor ----
   {
     id: "treadmill",
@@ -180,7 +202,7 @@ export const ACTIVITY_TYPES = [
     id: "other",
     label: "Other",
     group: "Indoor",
-    // Five-a-side, a climbing session, a martial arts class. The app
+    // A climbing session, a martial arts class. The app
     // cannot know what these worked, and guessing would be worse than
     // the gap, so they are logged and timed but leave the map alone.
     // The form says so rather than letting it look like a bug.
