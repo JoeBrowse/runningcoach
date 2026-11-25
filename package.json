@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "node lint.js"
+    "lint": "node lint.js",
+    "test": "node --test test/"
   },
   "dependencies": {
     "@capacitor-community/keep-awake": "^8.0.1",
