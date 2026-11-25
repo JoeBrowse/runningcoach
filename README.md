@@ -62,7 +62,7 @@ Skid Marks gives general training information. It is not medical advice. It cann
 2. Open the file. Allow your browser or file manager to install apps when Android asks.
 3. Open Skid Marks.
 
-This is a test build signed with a debug key, so Android shows a warning. The app installs next to Iron Log and does not change Iron Log's data. To move your Iron Log data, save a backup in Iron Log and restore it in Skid Marks.
+This is a test build signed with a public test key (see [signing/README.md](signing/README.md)), so Android shows a warning. All builds use the same key, so a new build installs over an old one and keeps your data. The app installs next to Iron Log and does not change Iron Log's data. To move your Iron Log data, save a backup in Iron Log and restore it in Skid Marks.
 
 ## Build from source
 

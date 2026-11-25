@@ -5,8 +5,9 @@
 # latest build is always at:
 #   https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk
 #
-# The APK is signed with the Android debug key. It is a test build:
-# Android asks the user to allow apps from unknown sources.
+# The APK is signed with the fixed test key in signing/ (see its README).
+# It is a test build: Android asks the user to allow apps from unknown sources.
+# Builds with the same key install over each other.
 name: Android APK
 
 on:
@@ -68,6 +69,11 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \".*\"/versionName \"$VERSION\"/" android/app/build.gradle
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Use the fixed test signing key
+        run: |
+          mkdir -p ~/.android
+          cp signing/debug.keystore ~/.android/debug.keystore
 
       - name: Build the APK
         working-directory: android
