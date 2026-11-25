@@ -1,5 +1,6 @@
 node_modules/
 dist/
 dist-single/
-android/
+/android/
 _site/
+native/wear-bridge/android/build/
