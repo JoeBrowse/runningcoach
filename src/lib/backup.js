@@ -1,5 +1,6 @@
 import { APP_VERSION } from "../data/releaseNotes.js";
 import { safeGet, safeSet, safeList, safeDelete } from "./storage.js";
+import { isNativeRuntime } from "./platform.js";
 
 /* ---------------------------------------------------------------
    BACKUP
@@ -85,7 +86,9 @@ export function capPlugin(name) {
 
 // Returns { label, path } naming where the file actually landed.
 export async function writeBackupFile(filename, text) {
-  const Filesystem = capPlugin("Filesystem");
+  // Only in the APK. In a browser the Filesystem web plugin writes to
+  // IndexedDB, where the user cannot find the file, so use a download.
+  const Filesystem = isNativeRuntime() ? capPlugin("Filesystem") : null;
   if (Filesystem) {
     let lastError = null;
     for (const target of BACKUP_TARGETS) {

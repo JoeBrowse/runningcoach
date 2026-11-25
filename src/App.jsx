@@ -525,6 +525,7 @@ export default function App() {
           onViewFeatureList={() => setScreen("featureList")}
           onViewWhatsNew={() => setWhatsNew(releaseNotesFor(APP_VERSION))}
           onViewVersionHistory={() => setScreen("versionHistory")}
+          onViewData={() => nav.go("shared:data")}
         />
       )}
 
