@@ -58,6 +58,7 @@ jobs:
         run: |
           npx cap add android
           node scripts/android-permissions.mjs
+          node scripts/android-signing.mjs
 
       - name: Make the app icons and splash screens
         run: npx @capacitor/assets generate --android || echo "Icon generation failed. The build uses the default icon."
