@@ -2,7 +2,7 @@
 
    The APK never registers this — Capacitor already serves the bundle from
    the device, and a second cache layer in front of that is only a way to
-   ship someone a stale app. See registerServiceWorker() in App.jsx, which
+   ship someone a stale app. See registerServiceWorker() in src/lib/platform.js, which
    bails out on a native runtime.
 
    Two strategies, because the two kinds of request want opposite things:
