@@ -23,7 +23,7 @@ npm run lint    # parses every file under src/
 npm run build   # production build into dist/
 ```
 
-Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on every push and publishes it on a release for each push to `main`. The latest APK: `https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk`. The workflow runs `npx cap add android`, then `scripts/android-permissions.mjs` (location and notification permissions), then `cap sync` and Gradle. The `android/` folder is generated and not committed.
+Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on every push and publishes it on a release for each push to `main`. The latest APK: `https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk`. The workflow runs `npx cap add android`, then `scripts/android-permissions.mjs` (location and notification permissions) and `scripts/android-signing.mjs` (signs with the fixed test key in `signing/`), then `cap sync` and Gradle. The `android/` folder is generated and not committed.
 
 ## Code map
 

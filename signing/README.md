@@ -6,4 +6,4 @@
 - It uses the standard Android debug values: alias `androiddebugkey`, passwords `android`.
 - **This key is public.** Anyone can sign an app with it. Use it only for test builds. A Play Store release must use a private key that is kept out of the repository (for example in a GitHub Actions secret).
 
-The workflow copies this file to `~/.android/debug.keystore` before Gradle runs.
+`scripts/android-signing.mjs` names this file in the phone app's Gradle file, and `wear/app/build.gradle.kts` names it for the watch app. So both apps always have the same signature, on any build machine.

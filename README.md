@@ -82,6 +82,7 @@ To build the Android app, you also need Java 21 and the Android SDK:
 ```bash
 npx cap add android
 node scripts/android-permissions.mjs
+node scripts/android-signing.mjs
 npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
