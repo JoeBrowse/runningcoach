@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Dumbbell, Check, Undo2 } from "lucide-react"
 import { hexToRgba, COLORS } from "../theme.js";
 import * as engine from "../run/engine.js";
 import { applyEvent, undo, markDone, clearDone, saveMasterAndRebuild, gymLabel, GYM_TYPE_LABEL } from "./planState.js";
-import { Screen, Card, Btn, Chip, Row, Label, Notice, ChangeList, StepsList, WorkoutShape, Segmented, TextInput, Field, LinkRow, Loading, usePlanData, dayLine, st, oswald, WEEK_ORDER, DAY_LONG } from "./ui.jsx";
+import { Screen, Card, Btn, Chip, Row, Label, Notice, ChangeList, StepsList, WorkoutShape, Segmented, TextInput, Field, LinkRow, Loading, usePlanData, dayLine, niceDates, st, oswald, WEEK_ORDER, DAY_LONG } from "./ui.jsx";
 import { phaseName } from "./PlanHome.jsx";
 
 /* ---------------------------------------------------------------
@@ -19,15 +19,15 @@ export function ResultPanel({ result, onUndo, testId = "result-panel" }) {
   if (result.refused) {
     return (
       <Notice testId={`${testId}-refused`} tone="bad" title="Not changed">
-        {result.reason || result.message}
+        {niceDates(result.reason || result.message)}
       </Notice>
     );
   }
   return (
     <Card testId={testId} accent>
       <div style={{ ...st.title(14), marginBottom: 4 }}>What changed and why</div>
-      {result.message && <div style={{ ...st.text(), marginBottom: 8 }}>{result.message}</div>}
-      <ChangeList changes={(result.changes || []).map((c) => ({ date: c.iso || c.date, before: c.before, after: c.after, reason: c.reason }))} testId={`${testId}-changes`} />
+      {result.message && <div style={{ ...st.text(), marginBottom: 8 }}>{niceDates(result.message)}</div>}
+      <ChangeList changes={(result.changes || []).map((c) => ({ date: c.iso || c.date, before: c.before, after: c.after, reason: c.reason })).sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")))} testId={`${testId}-changes`} />
       {onUndo && (
         <div style={{ marginTop: 10 }}>
           <Btn small kind="secondary" testId={`${testId}-undo`} onClick={onUndo}>
@@ -79,6 +79,8 @@ function GymEditor({ master, dow, onSave, onCancel }) {
 
 function MovePicker({ plan, day, today, onMove, onCancel }) {
   const sug = engine.suggestDays(plan, day.iso, { today });
+  // Safe days first, then the days that break a rule (each group by date).
+  const options = [...sug.days.filter((x) => x.ok), ...sug.days.filter((x) => !x.ok)];
   const [picked, setPicked] = useState(null);
   const [other, setOther] = useState("");
   const check = picked ? sug.days.find((x) => x.iso === picked) || engine.checkMove(plan, day.iso, picked, today) : null;
@@ -87,7 +89,7 @@ function MovePicker({ plan, day, today, onMove, onCancel }) {
     <div data-testid="move-picker" style={{ marginTop: 10 }}>
       <div style={{ ...st.body(), marginBottom: 8 }}>Orange days are safe. All safety rules still pass on those days. Grey days break a rule.</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {sug.days.map((x) => (
+        {options.map((x) => (
           <Chip key={x.iso} testId={`move-to-${x.iso}`} tone={x.ok ? "safe" : undefined} active={picked === x.iso} onClick={() => setPicked(x.iso)} style={x.ok ? {} : { color: COLORS.textDim }}>
             {engine.fmtDate(x.iso)}
           </Chip>
@@ -95,13 +97,13 @@ function MovePicker({ plan, day, today, onMove, onCancel }) {
       </div>
       {check && (
         <div data-testid="move-check" style={{ ...st.text(), fontSize: 13, marginTop: 8, color: check.ok ? COLORS.text : COLORS.bad }}>
-          {check.reason}
+          {niceDates(check.reason)}
         </div>
       )}
       <Field label="Or pick another date (also in another week)">
         <input data-testid="move-other" type="date" value={other} min={today} onChange={(e) => setOther(e.target.value)} style={st.field()} />
       </Field>
-      {otherCheck && <div data-testid="move-other-check" style={{ ...st.text(), fontSize: 13, marginBottom: 8, color: otherCheck.ok ? COLORS.text : COLORS.bad }}>{otherCheck.reason}</div>}
+      {otherCheck && <div data-testid="move-other-check" style={{ ...st.text(), fontSize: 13, marginBottom: 8, color: otherCheck.ok ? COLORS.text : COLORS.bad }}>{niceDates(otherCheck.reason)}</div>}
       <Row gap={8}>
         <Btn small testId="move-confirm" disabled={!((check && check.ok) || (otherCheck && otherCheck.ok))} onClick={() => onMove(otherCheck && otherCheck.ok ? other : picked)}>
           Move
@@ -208,7 +210,9 @@ export function WeekScreen({ nav }) {
   useEffect(() => {
     if (!data || !data.plan || wi !== null) return;
     const iso = (nav.params && nav.params.iso) || data.today;
-    let idx = data.plan.weeks.findIndex((w) => iso >= w.startIso && iso <= engine.addDays(w.startIso, 6));
+    // Plan weeks (Run mode) opens a week by its index.
+    const given = nav.params && Number.isInteger(nav.params.weekIndex) ? nav.params.weekIndex : -1;
+    let idx = given >= 0 && given < data.plan.weeks.length ? given : data.plan.weeks.findIndex((w) => iso >= w.startIso && iso <= engine.addDays(w.startIso, 6));
     if (idx < 0) idx = iso < data.plan.startIso ? 0 : data.plan.weeks.length - 1;
     setWi(idx);
     if (nav.params && nav.params.iso) setOpen(nav.params.iso);
@@ -288,12 +292,12 @@ export function WeekScreen({ nav }) {
                 <div style={{ display: "flex", alignItems: "center", gap: 6, color: run ? COLORS.text : COLORS.textDim, fontSize: 14 }}>
                   {run && <span style={{ width: 9, height: 9, borderRadius: 5, flexShrink: 0, background: d.intensity === "easy" ? "transparent" : COLORS.accent, border: `1.5px solid ${COLORS.accent}` }} />}
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{dayLine(d, units)}</span>
-                  {d.done && <Check size={14} color={COLORS.ok} />}
+                  {d.done && <Check size={14} color={COLORS.ok} aria-label="Done" role="img" />}
                 </div>
                 {d.gym && (
                   <div style={{ display: "flex", alignItems: "center", gap: 6, color: COLORS.textDim, fontSize: 13, marginTop: 3 }}>
                     <Dumbbell size={12} /> {gymLabel(d.gym)}
-                    {d.gymDone && <Check size={13} color={COLORS.ok} />}
+                    {d.gymDone && <Check size={13} color={COLORS.ok} aria-label="Gym done" role="img" />}
                   </div>
                 )}
                 {d.adjusted && !isOpen && <div style={{ fontSize: 11.5, color: COLORS.accent, marginTop: 2 }}>Changed</div>}

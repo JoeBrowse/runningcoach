@@ -6,6 +6,18 @@
 
 Skid Marks plans your runs around your gym days. It adapts the plan when life changes, and it tells you why each change happens. All features are free. There are no ads, no accounts and no paywall.
 
+<p>
+  <img src="docs/screens/plan-today.png" width="180" alt="Plan mode: today's run and gym session">
+  <img src="docs/screens/plan-week.png" width="180" alt="The master week with run days and gym days">
+  <img src="docs/screens/run-home.png" width="180" alt="Run mode: today's run and the GO button">
+  <img src="docs/screens/run-record.png" width="180" alt="A run in progress with a voice cue caption">
+</p>
+<p>
+  <img src="docs/screens/run-progress.png" width="180" alt="Run progress: fitness and fatigue, weekly distance">
+  <img src="docs/screens/lift-home.png" width="180" alt="Lift mode: the muscle readiness map">
+  <img src="docs/screens/onboarding.png" width="180" alt="First open: Who are you?">
+</p>
+
 ---
 
 ## Three modes, one week

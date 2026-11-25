@@ -697,12 +697,17 @@ function shrinkWeek(wk, cap, measure, ctx, log, reason) {
     const runs = wk.days.filter(isRun);
     const long = runs.find((d) => d.intensity === 'long');
     const easies = runs.filter((d) => EASY_TYPES.has(d.type));
-    const reducible = sum(easies, (d) => Math.max(0, d.km - SAFETY.minRunKm));
+    // The long run shrinks with the easy runs, by the same share. When only
+    // the easy runs shrink, the long run becomes too large a part of the
+    // week, the long-run rule cuts it, and the week ends far below its cap.
+    // The next week then grows from that low week, so the plan falls away.
+    const pool = long && (long.type === 'long' || long.type === 'longfinish') ? [...easies, long] : easies;
+    const reducible = sum(pool, (d) => Math.max(0, d.km - SAFETY.minRunKm));
     if (reducible > 0.1) {
       const f = Math.min(1, (excess + 0.05) / reducible);
-      for (const d of easies) {
+      for (const d of pool) {
         const nk = Math.max(SAFETY.minRunKm, Math.floor((d.km - (d.km - SAFETY.minRunKm) * f) * 10) / 10);
-        if (nk < d.km) { const nw = replaceIn(wk, d, { ...d.spec, km: nk }, ctx, reason, log); if (nw.km >= d.km) replaceIn(wk, nw, { type: 'easy', km: nk }, ctx, reason, log); }
+        if (nk < d.km) { const nw = replaceIn(wk, d, { ...d.spec, km: nk }, ctx, reason, log); if (nw.km >= d.km) replaceIn(wk, nw, { type: d === long ? 'long' : 'easy', km: nk }, ctx, reason, log); }
       }
       continue;
     }
@@ -796,9 +801,11 @@ export function classifyWeek(wk) {
   return 'normal';
 }
 
-export function enforceWeeks(plan, ctxFor, log, warnings) {
+export function enforceWeeks(plan, ctxFor, log, warnings, rebuildWeek = null) {
   const p = plan.paces; const cap1 = plan.limits.week1MaxKm;
   let lastNormal = null; let peak = 0; let prevTaperTr = null;
+  const raceIsos = (plan.races || []).filter((r) => r.inPlan !== false).map((r) => r.iso);
+  const nearRace = (iso) => raceIsos.some((r) => Math.abs(daysBetween(iso, r)) <= 4);
   plan.weeks.forEach((wk, wi) => {
     const ctx = ctxFor(wi);
     wk.check = classifyWeek(wk);
@@ -812,6 +819,19 @@ export function enforceWeeks(plan, ctxFor, log, warnings) {
       cap = Math.min(wk.targetKm != null ? wk.targetKm : Infinity, (wk.taperFrac || 1) * (peak || ref * (1 + SAFETY.maxWeeklyIncrease)), prevTaperTr != null ? prevTaperTr : Infinity, ref * (1 + SAFETY.maxWeeklyIncrease));
     }
     if (wi === 0) cap = Math.min(cap, cap1);
+    // A week that is much larger than its cap (for example after a race
+    // lowered the week before) is planned again at the cap. Cuts to the
+    // easy runs alone would leave a week of long and quality runs only.
+    // The long-run rules then cut it far below the cap, and the next week
+    // grows from that low week, so the plan falls away week by week.
+    if (rebuildWeek && (wk.check === 'normal' || wk.check === 'cutback') && Number.isFinite(cap) && weekKm(wk) > cap * 1.08 && !wk.days.some((d) => d.adjusted || d.type === 'race' || d.type === 'timetrial' || nearRace(d.iso))) {
+      const days = rebuildWeek(wk, wi, Math.max(0, cap));
+      if (days) {
+        const gymOf = new Map(wk.days.map((d) => [d.iso, d.gym]));
+        for (const d of days) if (gymOf.get(d.iso) !== undefined) d.gym = gymOf.get(d.iso);
+        wk.days = days;
+      }
+    }
     const reason = wk.check === 'taper' ? 'Taper: less running before the race.' : wi === 0 ? 'Week 1 is at most your current weekly distance plus 10%.' : wk.check === 'cutback' ? 'Every 4th week is a cutback week.' : 'Each week grows by 10% or less.';
     const ok = shrinkWeek(wk, Math.max(0, cap), measure, ctx, log, reason);
     if (!ok) {
@@ -971,7 +991,11 @@ export function buildPlan(opts = {}) {
   overlayRaces(plan, o, ctxFor, log, warnings);
   attachGym(plan, o, pattern);
   fixSpacing(plan, ctxFor, log, warnings);
-  enforceWeeks(plan, ctxFor, log, warnings);
+  const rebuildWeek = o.goal === 'runwalk' ? null : (wk, wi, T) => {
+    const w = { ...wk, isos: Array.from({ length: 7 }, (_, k) => addDays(wk.startIso, k)) };
+    return buildRunWeek(w, T, o, G, pattern, ctxFor(wi), log);
+  };
+  enforceWeeks(plan, ctxFor, log, warnings, rebuildWeek);
   placeStrength(plan, o, ctxFor);
   for (const d of allDays(plan)) delete d._pairWarned;
   plan.changesFromRules = log.items;

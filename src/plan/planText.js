@@ -11,3 +11,13 @@ export function dayLine(d, units = "km") {
   return amount && !/^Run/.test(d.title) ? `${d.title} · ${amount}` : d.title + (d.min && /^Run/.test(d.title) ? ` · ${d.min} min` : "");
 }
 
+
+/* New runners choose "minutes a session" (20, 30 or 45). The engine has
+   no cap for the session length, so the Today card shows the choice as
+   the target. Returns null when no note is needed. */
+export function targetMinutesNote(run, profile) {
+  const target = profile && profile.level === "new" ? Number(profile.minutesPerSession) : 0;
+  if (!run || !target || run.type !== "runwalk") return null;
+  if (!run.min || run.min <= target + 2) return `Your target: about ${target} min.`;
+  return `Your target: about ${target} min. The full session is about ${run.min} min. You can stop after ${target} min. Do the full session when it feels easy.`;
+}

@@ -224,11 +224,12 @@ export function ribbonFraction(state, segs, elapsedSec, km) {
 
 const sayDur = (sec) => {
   const s = Math.round(sec);
-  if (s < 60) return `${s} seconds`;
+  const secs = (n) => `${n} second${n === 1 ? "" : "s"}`;
+  if (s < 60) return secs(s);
   const m = Math.floor(s / 60);
   const r = s % 60;
   const ms = `${m} minute${m === 1 ? "" : "s"}`;
-  return r ? `${ms} ${r} seconds` : ms;
+  return r ? `${ms} ${secs(r)}` : ms;
 };
 
 /* Voice text for a split. */

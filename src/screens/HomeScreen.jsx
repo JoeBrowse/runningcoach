@@ -11,7 +11,7 @@ import { DailyQuote } from "../components/DailyQuote.jsx";
 import { FormGauge } from "../components/FormGauge.jsx";
 import { ModeHeader } from "../modes/ModeHeader.jsx";
 import { LiftToday } from "../plan/LiftToday.jsx";
-import { loadSummary, weekStreak } from "../shared/load.js";
+import { loadSummary, weekStreak, runnerMaxHR } from "../shared/load.js";
 import { listActivities } from "../shared/store.js";
 
 export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, onStartTemplate, onResumeWorkout, onViewSettings, onViewSuggested, onViewVolume, onViewStreak, onViewOneRM, onViewExerciseDb, onOpenProgramme, onStartProgrammeDay, onViewProgrammeStats, onNewProgramme, reloadKey, activeProgramme, settings, mode, onModeChange }) {
@@ -49,7 +49,7 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
       setDates(map);
       // One list for the Form gauge and the week streak (src/shared/).
       const everything = await listActivities(settings);
-      setForm(loadSummary(everything, { settings }));
+      setForm(loadSummary(everything, { settings, maxHR: await runnerMaxHR() }));
       setStreak(weekStreak(everything));
       setRecentSessions([...hist].reverse().slice(0, 3));
       setTemplates(tpls);

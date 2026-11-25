@@ -177,6 +177,11 @@ export function AfterRace({ nav }) {
                   </Btn>
                 </div>
                 <div style={{ ...st.body(), fontSize: 12, marginTop: 8 }}>A new goal starts from your new fitness. Your done runs stay done.</div>
+                {plan && plan.raceIso && plan.raceIso > race.date && (
+                  <div data-testid="goal-kept-note" style={{ ...st.body(), fontSize: 12, marginTop: 6, color: COLORS.accent }}>
+                    Your goal ({plan.goalName}, {engine.fmtDate(plan.raceIso)}) stays in the plan when you rejoin. "Keep fit" removes it.
+                  </div>
+                )}
               </Card>
             </>
           )}

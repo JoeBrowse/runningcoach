@@ -3,7 +3,8 @@ import { Check, ChevronRight } from "lucide-react";
 import { hexToRgba, COLORS } from "../theme.js";
 import { TopBar } from "../components/TopBar.jsx";
 import * as engine from "../run/engine.js";
-import { KEYS, getKey } from "../shared/store.js";
+import { KEYS, getKey, listActivities } from "../shared/store.js";
+import { runWeeks } from "../runui/runData.js";
 import { loadPlanState, showJargon, localToday } from "./planState.js";
 import { dayLine } from "./planText.js";
 
@@ -346,6 +347,19 @@ export function StepsList({ workout, units = "km", showPace }) {
   );
 }
 
+/* The engine writes ISO dates ("2026-12-02") in some reasons. Show
+   them as "Wed 2 Dec", the same as the rest of the screen. */
+export function niceDates(text) {
+  if (typeof text !== "string") return text;
+  return text.replace(/\b(\d{4}-\d{2}-\d{2})\b/g, (m) => {
+    try {
+      return engine.fmtDate(m);
+    } catch (e) {
+      return m;
+    }
+  });
+}
+
 export function ChangeList({ changes, testId }) {
   if (!changes || !changes.length) return <div style={st.body()}>No days changed.</div>;
   return (
@@ -360,7 +374,7 @@ export function ChangeList({ changes, testId }) {
               {c.after ? <span>{c.after}</span> : null}
             </div>
           )}
-          {c.reason && <div style={{ ...st.body(), fontSize: 12.5 }}>{c.reason}</div>}
+          {c.reason && <div style={{ ...st.body(), fontSize: 12.5 }}>{niceDates(c.reason)}</div>}
         </div>
       ))}
     </div>
@@ -376,7 +390,7 @@ export function SafetyList({ checks, testId }) {
           <span style={{ ...st.mono(11), color: c.ok ? COLORS.ok : COLORS.bad, minWidth: 34, fontWeight: 600 }}>{c.ok ? "PASS" : "FAIL"}</span>
           <span style={{ flex: 1 }}>
             <span style={{ ...st.text(), fontSize: 13, display: "block" }}>{c.rule}</span>
-            <span style={{ ...st.body(), fontSize: 11.5 }}>{c.ok ? c.detail : (c.failures || []).slice(0, 2).join(" ")}</span>
+            <span style={{ ...st.body(), fontSize: 11.5 }}>{c.ok ? c.detail : niceDates((c.failures || []).slice(0, 2).join(" "))}</span>
           </span>
         </div>
       ))}
@@ -394,11 +408,11 @@ export function usePlanData(nav) {
   useEffect(() => {
     let off = false;
     (async () => {
-      const [state, profile, master, races] = await Promise.all([loadPlanState(), getKey(KEYS.runProfile, null), getKey(KEYS.masterPlan, null), getKey(KEYS.races, [])]);
+      const [state, profile, master, races, acts] = await Promise.all([loadPlanState(), getKey(KEYS.runProfile, null), getKey(KEYS.masterPlan, null), getKey(KEYS.races, []), listActivities().catch(() => [])]);
       if (off) return;
       const today = localToday();
       const units = (profile && profile.units) || "km";
-      const jargon = showJargon(nav.settings, state.plan, today);
+      const jargon = showJargon(nav.settings, state.plan, today, runWeeks(acts, today));
       setData({ state, plan: state.plan, profile, master, races: races || [], today, units, jargon });
     })();
     return () => {

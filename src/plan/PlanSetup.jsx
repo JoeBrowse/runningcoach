@@ -4,7 +4,7 @@ import { COLORS } from "../theme.js";
 import * as engine from "../run/engine.js";
 import { KEYS, getKey, setKey, getRaces } from "../shared/store.js";
 import { previewPlan, rebuildPlan, seedHistory, localToday, GYM_TYPE_LABEL } from "./planState.js";
-import { Screen, Card, Btn, Chip, Row, Label, Field, TextInput, Segmented, Toggle, TickBox, Notice, SafetyList, DayPicker, Loading, parseTime, st, DAY_LONG, WEEK_ORDER } from "./ui.jsx";
+import { Screen, Card, Btn, Chip, Row, Label, Field, TextInput, Segmented, Toggle, TickBox, Notice, SafetyList, DayPicker, Loading, parseTime, st, DAY_LONG, WEEK_ORDER, niceDates } from "./ui.jsx";
 import { RACE_DISTANCES } from "./RacesScreen.jsx";
 
 /* ---------------------------------------------------------------
@@ -137,6 +137,9 @@ function GymRow({ g, onChange, onRemove, idx }) {
 export function PlanResult({ plan, units, jargon }) {
   if (!plan) return null;
   const w1 = plan.weeks[0];
+  // Simple mode shows effort words, not paces, so a note about pace
+  // estimates only confuses.
+  const warnings = jargon ? plan.warnings : plan.warnings.filter((w) => !/^No recent result\. Paces are estimates/.test(w));
   return (
     <div data-testid="plan-result">
       <Card accent>
@@ -164,12 +167,12 @@ export function PlanResult({ plan, units, jargon }) {
           Week 1: {w1.days.filter(engine.isRun).map((d) => `${engine.DAY_NAMES[d.dow]} ${d.title.toLowerCase()}`).join(", ") || "rest"}.
         </div>
       </Card>
-      {plan.warnings.length > 0 && (
+      {warnings.length > 0 && (
         <>
           <Label>Warnings</Label>
-          {plan.warnings.map((w, i) => (
+          {warnings.map((w, i) => (
             <Notice key={i} testId="plan-warning">
-              {w}
+              {niceDates(w)}
             </Notice>
           ))}
         </>
@@ -179,8 +182,8 @@ export function PlanResult({ plan, units, jargon }) {
           <Label>Gym and run clashes</Label>
           {plan.conflicts.map((c, i) => (
             <Notice key={i} testId="plan-conflict" title="Clash">
-              {c.reason}
-              <div style={{ ...st.body(), marginTop: 4 }}>Suggestion: {c.suggestion}</div>
+              {niceDates(c.reason)}
+              <div style={{ ...st.body(), marginTop: 4 }}>Suggestion: {niceDates(c.suggestion)}</div>
             </Notice>
           ))}
         </>
@@ -191,8 +194,14 @@ export function PlanResult({ plan, units, jargon }) {
           <Card testId="plan-rule-changes">
             {plan.changesFromRules.map((c, i) => (
               <div key={i} style={{ padding: "7px 0", borderTop: i ? `1px solid ${COLORS.line}` : "none" }}>
-                <div style={{ ...st.text(), fontSize: 13 }}>{c.change}</div>
-                <div style={{ ...st.body(), fontSize: 12 }}>{c.reason}</div>
+                <div style={{ ...st.text(), fontSize: 13 }}>{niceDates(c.change)}</div>
+                {c.dates && c.dates.length > 0 && (
+                  <div style={{ ...st.mono(11.5), color: COLORS.textDim }}>
+                    {c.dates.slice(0, 3).map((d) => engine.fmtDate(d)).join(", ")}
+                    {c.dates.length > 3 ? ` and ${c.dates.length - 3} more` : ""}
+                  </div>
+                )}
+                <div style={{ ...st.body(), fontSize: 12 }}>{niceDates(c.reason)}</div>
               </div>
             ))}
           </Card>
@@ -374,7 +383,7 @@ export function PlanSetup({ nav }) {
                     Runs used: {seed.runsUsed.volume.length} for distance, {seed.runsUsed.score.length} for the best effort.
                   </div>
                   {seed.notes.map((n, i) => (
-                    <div key={i} style={{ ...st.body(), fontSize: 12, marginTop: 4 }}>{n}</div>
+                    <div key={i} style={{ ...st.body(), fontSize: 12, marginTop: 4 }}>{niceDates(n)}</div>
                   ))}
                   <div style={{ ...st.body(), fontSize: 12, marginTop: 8 }}>Check the values below. You can change them.</div>
                 </>

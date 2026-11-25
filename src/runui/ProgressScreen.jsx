@@ -76,7 +76,7 @@ export function ProgressScreen({ nav }) {
     // Easy / hard
     const hrVals = { maxHR: Number(profile.maxHR) || undefined, restHR: Number(profile.restHR) || undefined, lthr: Number(profile.lthr) || undefined };
     const split = engine.easyHardSplit(
-      inRange.map((a) => ({ min: a.minutes || 0, avgHR: a.avgHR || undefined, maxHR: hrVals.maxHR ? undefined : a.maxHR || undefined, type: (a.raw && a.raw.workoutType) || "easy", zoneSec: a.raw && a.raw.zoneSec })),
+      inRange.map((a) => ({ min: a.minutes || 0, avgHR: a.avgHR || undefined, type: (a.raw && a.raw.workoutType) || "easy", zoneSec: a.raw && a.raw.zoneSec })),
       hrVals
     );
     // Goal against predicted (best run in the 6 weeks before each week end)
@@ -109,7 +109,7 @@ export function ProgressScreen({ nav }) {
   const adv = jargonOn(nav.settings, plan, acts, iso);
   const { series, weeks, weekKm, split, trend, inRange } = derived;
   const records = computeRecords(acts);
-  const milestones = computeMilestones(acts);
+  const milestones = computeMilestones(acts, unitsOf(profile));
   const earned = milestones.filter((m) => m.done).sort((a, b) => b.date.localeCompare(a.date));
   const next = milestones.filter((m) => !m.done).slice(0, 3);
   const last = series[series.length - 1];
@@ -152,7 +152,7 @@ export function ProgressScreen({ nav }) {
             <div style={{ ...S.label(), marginTop: 8 }}>Information only. It cannot predict injury.</div>
           </>
         ) : (
-          <div style={S.body()}>No training in this range yet.</div>
+          <div style={S.body()}>{series.length === 1 ? "You have one day of training. The chart starts after the second day." : "No training in this range yet."}</div>
         )}
       </div>
 

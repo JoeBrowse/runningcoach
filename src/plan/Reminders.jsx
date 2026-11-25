@@ -47,7 +47,7 @@ export function RemindersCard({ nav }) {
         <Bell size={16} color={COLORS.accent} />
         <div style={st.title(14)}>Night-before reminder</div>
       </Row>
-      <Toggle testId="reminder-on" on={r.on} onChange={(on) => update({ ...r, on })} label="Remind me the evening before" detail='For example: "Tomorrow: Easy run 5 km. Gym: Legs (heavy)."' />
+      <Toggle testId="reminder-on" on={r.on} onChange={(on) => update({ ...r, on })} label="Remind me the evening before" detail='For example: "Tomorrow: Easy run. Gym: Legs (heavy)."' />
       {r.on && (
         <>
           <Field label="Time">{timeInput("time")}</Field>

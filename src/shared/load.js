@@ -1,7 +1,7 @@
 import { activitySeconds } from "../lib/activities.js";
 import { dateStrOf, todayStr } from "../lib/dates.js";
 import { ASSUMED_SESSION_RPE, sessionTrainingLoad } from "../lib/load.js";
-import { listActivities } from "./store.js";
+import { listActivities, getKey, KEYS } from "./store.js";
 
 /* ---------------------------------------------------------------
    UNIFIED TRAINING LOAD
@@ -176,9 +176,22 @@ export function weekStreak(activities, now = new Date()) {
 
 export async function loadFormSummary(settings, maxHR) {
   const activities = await listActivities(settings);
-  return loadSummary(activities, { settings, maxHR });
+  return loadSummary(activities, { settings, maxHR: maxHR || (await runnerMaxHR()) });
 }
 
 export async function loadWeekStreak() {
   return weekStreak(await listActivities());
+}
+
+/* The runner's maximum heart rate from the run profile (or undefined).
+   Every screen that shows fitness, fatigue or form passes it, so that a
+   run with heart rate but no effort gets the same load everywhere. */
+export async function runnerMaxHR() {
+  try {
+    const p = await getKey(KEYS.runProfile, null);
+    const m = Number(p && p.maxHR);
+    return m > 0 ? m : undefined;
+  } catch (e) {
+    return undefined;
+  }
 }

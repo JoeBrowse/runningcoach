@@ -77,6 +77,6 @@ export const DEFAULT_SETTINGS = {
 // rather than a prop drilled everywhere, since it only touches a handful
 // of screens (SelectScreen, WorkoutScreen, ExerciseCard).
 export const APP_MODES = [
-  { value: "simple", label: "Simple", desc: "Only the basic features. Select a muscle and record your sets." },
-  { value: "advanced", label: "Advanced", desc: "All features: implement choice, supersets, drop sets, effort, machine and grip records, and templates." },
+  { value: "simple", label: "Simple", desc: "Only the basic features. Select a muscle and record your sets. Runs use effort words, not paces." },
+  { value: "advanced", label: "Advanced", desc: "All features: implement choice, supersets, drop sets, effort, machine and grip records, and templates. Runs show paces, zones, plan phases and the running fitness score." },
 ];

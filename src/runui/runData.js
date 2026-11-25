@@ -151,7 +151,7 @@ export function computeRecords(activities) {
 
 /* Milestones that keep coming. Each: { id, label, done, date } in order.
    No streak goals: a missed week never takes a badge away. */
-export function computeMilestones(activities) {
+export function computeMilestones(activities, units = "km") {
   const runs = (activities || []).filter(isRunActivity).sort((a, b) => (a.startedAt || a.date || "").localeCompare(b.startedAt || b.date || ""));
   const firstWhere = (fn) => {
     const r = runs.find(fn);
@@ -161,22 +161,25 @@ export function computeMilestones(activities) {
   const items = [
     { id: "first", label: "First run", date: firstWhere(() => true) },
     { id: "30min", label: "First 30 minutes without a stop", date: firstWhere(nonStop) },
-    { id: "5k", label: "First 5 km", date: firstWhere((a) => a.km >= 4.98) },
-    { id: "10k", label: "First 10 km", date: firstWhere((a) => a.km >= 9.97) },
-    { id: "15k", label: "First 15 km", date: firstWhere((a) => a.km >= 14.95) },
+    { id: "5k", label: "First 5K", date: firstWhere((a) => a.km >= 4.98) },
+    { id: "10k", label: "First 10K", date: firstWhere((a) => a.km >= 9.97) },
+    { id: "15k", label: "First 15K", date: firstWhere((a) => a.km >= 14.95) },
     { id: "half", label: "First half marathon distance", date: firstWhere((a) => a.km >= 21.05) },
-    { id: "30k", label: "First 30 km", date: firstWhere((a) => a.km >= 29.9) },
+    { id: "30k", label: "First 30K", date: firstWhere((a) => a.km >= 29.9) },
     { id: "marathon", label: "First marathon distance", date: firstWhere((a) => a.km >= 42.1) },
   ];
   for (const n of [10, 25, 50, 100, 200, 300, 500, 1000]) items.push({ id: `runs${n}`, label: `${n} runs`, date: runs[n - 1] ? runs[n - 1].date : null });
   let tot = 0;
-  const kmMarks = [100, 250, 500, 1000, 2500, 5000, 10000];
+  // Total distance marks in the user's units (miles: 50, 100, 250, ...).
+  const mi = units === "mi";
+  const marks = mi ? [50, 100, 250, 500, 1000, 2500, 5000] : [100, 250, 500, 1000, 2500, 5000, 10000];
+  const toKm = (m) => (mi ? m * 1.609344 : m);
   const kmDates = {};
   for (const a of runs) {
     tot += a.km || 0;
-    for (const k of kmMarks) if (!kmDates[k] && tot >= k) kmDates[k] = a.date;
+    for (const k of marks) if (!kmDates[k] && tot >= toKm(k)) kmDates[k] = a.date;
   }
-  for (const k of kmMarks) items.push({ id: `km${k}`, label: `${k.toLocaleString("en-GB")} km in total`, date: kmDates[k] || null });
+  for (const k of marks) items.push({ id: `${mi ? "mi" : "km"}${k}`, label: `${k.toLocaleString("en-GB")} ${mi ? "mi" : "km"} in total`, date: kmDates[k] || null });
   // Personal bests: each time a distance record improves.
   for (const d of RECORD_DISTANCES.slice(0, 2)) {
     let best = null;

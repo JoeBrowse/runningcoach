@@ -5,7 +5,7 @@ import { loadRecoveryMap } from "../lib/recovery.js";
 import { BodyMap } from "../components/BodyMap.jsx";
 import { FormGauge } from "../components/FormGauge.jsx";
 import { ActivityPanel } from "../components/ActivityPanel.jsx";
-import { loadSummary } from "../shared/load.js";
+import { loadSummary, runnerMaxHR } from "../shared/load.js";
 import { listActivities } from "../shared/store.js";
 import { Screen, Card, Btn, Loading, st } from "./ui.jsx";
 
@@ -27,9 +27,10 @@ export function BodyScreen({ nav }) {
     (async () => {
       const map = await loadRecoveryMap();
       const all = await listActivities(nav.settings);
+      const maxHR = await runnerMaxHR();
       if (off) return;
       setDates(map);
-      setForm(loadSummary(all, { settings: nav.settings }));
+      setForm(loadSummary(all, { settings: nav.settings, maxHR }));
     })();
     return () => {
       off = true;

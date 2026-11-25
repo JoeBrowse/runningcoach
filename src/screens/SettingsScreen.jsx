@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ChevronRight, History as HistoryIcon, Sparkles, BookOpen } from "lucide-react";
 import { APP_VERSION, releaseNotesFor } from "../data/releaseNotes.js";
 import { APP_MODES } from "../lib/settings.js";
@@ -5,6 +6,46 @@ import { hexToRgba, COLORS } from "../theme.js";
 import { BackupPanel } from "../components/BackupPanel.jsx";
 import { SettingsToggleRow } from "../components/SettingsToggleRow.jsx";
 import { TopBar } from "../components/TopBar.jsx";
+import { getRunProfile, setRunProfile } from "../shared/store.js";
+
+/* Running distance units (run-profile.units). Plan, Run and the exports
+   read them. New runners never see the plan wizard, so the choice is
+   here too. */
+function RunUnits() {
+  const [units, setUnits] = useState(null);
+  useEffect(() => {
+    getRunProfile().then((p) => setUnits((p && p.units) || "km")).catch(() => setUnits("km"));
+  }, []);
+  async function pick(u) {
+    setUnits(u);
+    const p = (await getRunProfile()) || {};
+    await setRunProfile({ ...p, units: u });
+  }
+  if (!units) return null;
+  return (
+    <div data-testid="settings-units" style={{ padding: "0 20px 16px" }}>
+      <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
+        Running Distance
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        {[{ value: "km", label: "Kilometres" }, { value: "mi", label: "Miles" }].map((m) => {
+          const active = units === m.value;
+          return (
+            <button
+              key={m.value}
+              data-testid={`settings-units-${m.value}`}
+              aria-pressed={active}
+              onClick={() => pick(m.value)}
+              style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1px solid ${active ? COLORS.accent : COLORS.line}`, background: active ? COLORS.accent : COLORS.surface, color: active ? COLORS.onAccent : COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 14, textTransform: "uppercase", letterSpacing: 0.5 }}
+            >
+              {m.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function SettingsScreen({ settings, onChange, onBack, onViewColour, onViewTraining, onReplayTour, onViewFeatureList, onViewWhatsNew, onViewVersionHistory, onViewData, onViewSampleDemo }) {
   function toggle(key) {
@@ -61,6 +102,8 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
           {APP_MODES.find((m) => m.value === appMode).desc}
         </div>
       </div>
+
+      <RunUnits />
 
       <div style={{ padding: "0 20px 16px" }}>
         <button

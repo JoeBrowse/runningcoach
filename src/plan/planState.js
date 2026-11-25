@@ -1,5 +1,5 @@
 import * as engine from "../run/engine.js";
-import { KEYS, getKey, setKey, listActivities } from "../shared/store.js";
+import { KEYS, getKey, setKey, listActivities, getRunSettings, setRunSettings } from "../shared/store.js";
 import { todayStr, dateStrOf } from "../lib/dates.js";
 
 /* ---------------------------------------------------------------
@@ -171,6 +171,15 @@ export async function undo() {
     if (log[i].undoable && !log[i].undone) {
       // A change that also changed the master week puts the old week back.
       if (log[i].masterBefore !== undefined) await setKey(KEYS.masterPlan, log[i].masterBefore);
+      // An injury report starts the daily pain questions. Undo stops them.
+      if (log[i].kind === "injury" || log[i].kind === "break") {
+        try {
+          const rs = (await getRunSettings()) || {};
+          if (rs.niggle) await setRunSettings({ ...rs, niggle: null });
+        } catch (e) {
+          /* the plan undo still works */
+        }
+      }
       log[i] = { ...log[i], undone: true, masterBefore: undefined };
       break;
     }
@@ -349,9 +358,12 @@ export function gymLabel(g) {
   return `${name} (${light})`;
 }
 
-/* Simple mode hides jargon until 4 weeks of data (spec 1.5). */
-export function showJargon(settings, plan, today) {
+/* Simple mode hides jargon until 4 weeks of data (spec 1.5): a plan 4
+   weeks old, or 4 weeks since the first run. `runWeeks` is the second
+   value (runui/runData.js runWeeks), so Plan and Run screens agree. */
+export function showJargon(settings, plan, today, runWeeks = 0) {
   if (settings && settings.appMode === "advanced") return true;
+  if (runWeeks >= 4) return true;
   if (!plan) return false;
   return engine.daysBetween(plan.createdIso || plan.startIso, localToday(today)) >= 28;
 }

@@ -249,7 +249,8 @@ export function SummaryScreen({ nav }) {
         {run.laps && run.laps.length > 0 && <div style={{ ...S.body(), marginTop: 8 }}>{run.laps.length} lap{run.laps.length === 1 ? "" : "s"}: {run.laps.map((l) => fmtDuration(l.sec)).join(", ")}</div>}
       </div>
 
-      {zoneSec && (
+      {/* Simple mode hides zones, except when the user typed real heart-rate values. */}
+      {zoneSec && (!demo || (nav.settings && nav.settings.appMode === "advanced")) && (
         <div style={S.card()}>
           <div style={{ ...S.title(), marginBottom: 8 }}>Time in heart-rate zones</div>
           <ZoneBars seconds={zoneSec} zones={zones} />

@@ -8,6 +8,7 @@ import { ModeHeader } from "../modes/ModeHeader.jsx";
 import { listActivities, getReadinessLog } from "../shared/store.js";
 import { getCachedWeather, getWeatherSettings } from "../shared/weather.js";
 import { todayInfo, gymLabel } from "../plan/planState.js";
+import { targetMinutesNote } from "../plan/planText.js";
 import { getProfile, getRunPrefs, isRunActivity, jargonOn, stepLines, unitsOf } from "./runData.js";
 import { Btn, Loading, MONO, Note, OSWALD, Ribbon, S } from "./ui.jsx";
 
@@ -222,6 +223,11 @@ export function RunHome({ nav }) {
         </div>
         {info.gym && <div style={{ ...S.body(), marginTop: 2 }}>Also today: {gymLabel(info.gym)}</div>}
         <WorkoutBody w={run} units={units} showPace={showPace} testId="today-body" />
+        {!done && targetMinutesNote(run, profile) && (
+          <div data-testid="today-target" style={{ ...S.body(), marginTop: 6, color: COLORS.text }}>
+            {targetMinutesNote(run, profile)}
+          </div>
+        )}
         {run.adjusted && <div style={{ ...S.body(), marginTop: 8, color: COLORS.text }}>Change: {run.adjusted}</div>}
         <div style={{ marginTop: 10, borderLeft: `3px solid ${COLORS.accent}`, paddingLeft: 10 }}>
           <div style={S.label()}>Why this session</div>

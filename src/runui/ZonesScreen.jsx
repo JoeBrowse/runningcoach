@@ -52,7 +52,7 @@ function ResultBox({ result }) {
         <div style={{ color: COLORS.text }}>{result.text}</div>
         {result.changes && result.changes.length > 0 && (
           <div style={{ marginTop: 6 }}>
-            {result.changes.slice(0, 4).map((c, i) => (
+            {[...result.changes].sort((a, b) => String(a.iso || "").localeCompare(String(b.iso || ""))).slice(0, 4).map((c, i) => (
               <div key={i}>
                 {c.iso ? `${engine.fmtDate(c.iso)}: ` : ""}
                 {c.reason}

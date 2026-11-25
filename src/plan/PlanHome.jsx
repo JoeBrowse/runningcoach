@@ -7,6 +7,8 @@ import { KEYS, getKey, setKey, getRunSettings, setRunSettings, listActivities } 
 import { todayInfoFor, gymLabel, saveMasterAndRebuild, ranWithinHours } from "./planState.js";
 import { st, oswald, Card, Label, Btn, Chip, Row, WorkoutShape, StepsList, Notice, LinkRow, WarmupBlock, dayLine, usePlanData, Loading, WEEK_ORDER, DAY_SHORT, DAY_LONG } from "./ui.jsx";
 import { RemindersCard } from "./Reminders.jsx";
+import { targetMinutesNote } from "./planText.js";
+import { loadTempC, warmupContext } from "../runui/RunHome.jsx";
 
 /* ---------------------------------------------------------------
    PLAN HOME
@@ -35,9 +37,10 @@ export function phaseName(week) {
   return PHASE_WORD[week.phase] || PHASE_WORD[week.kind] || "";
 }
 
-function RunBlock({ run, units, jargon, plan, nav, testId, compact }) {
+function RunBlock({ run, units, jargon, plan, nav, testId, compact, profile, tempC }) {
   const showPace = jargon && run.showPace;
-  const warm = engine.warmupFor(run, { experience: plan.settings && plan.settings.experience, goal: plan.goal });
+  const warm = engine.warmupFor(run, warmupContext(plan, profile, tempC));
+  const target = targetMinutesNote(run, profile);
   const done = !!run.done;
   return (
     <div data-testid={testId}>
@@ -54,6 +57,11 @@ function RunBlock({ run, units, jargon, plan, nav, testId, compact }) {
       </div>
       <WorkoutShape workout={run} paces={plan.paces} testId={`${testId}-shape`} />
       <div style={{ ...st.text(), marginTop: 10 }}>{run.effortText}</div>
+      {target && !done && (
+        <div data-testid={`${testId}-target`} style={{ ...st.body(), marginTop: 6, color: COLORS.text }}>
+          {target}
+        </div>
+      )}
       {showPace && (
         <div style={{ marginTop: 8 }}>
           <StepsList workout={run} units={units} showPace />
@@ -113,8 +121,8 @@ function GymBlock({ gym, nav, afterRun, testId }) {
   );
 }
 
-function TodayCard({ data, nav, afterRun }) {
-  const { plan, master, units, jargon, today } = data;
+function TodayCard({ data, nav, afterRun, tempC }) {
+  const { plan, master, units, jargon, today, profile } = data;
   const info = todayInfoFor(plan, today, master);
   const notStarted = plan && today < plan.startIso;
   const ended = plan && !info.day && !notStarted;
@@ -126,7 +134,7 @@ function TodayCard({ data, nav, afterRun }) {
       </Row>
       {notStarted && <div style={{ ...st.text(), marginBottom: 10 }}>Your plan starts on {engine.fmtDate(plan.startIso)}. Rest or do an easy activity until then.</div>}
       {ended && <div style={{ ...st.text(), marginBottom: 10 }}>Your plan has ended. Choose a new goal in Plan setup.</div>}
-      {info.run && <RunBlock run={info.run} units={units} jargon={jargon} plan={plan} nav={nav} testId="today-run" />}
+      {info.run && <RunBlock run={info.run} units={units} jargon={jargon} plan={plan} nav={nav} testId="today-run" profile={profile} tempC={tempC} />}
       {info.run && info.gym && <div style={{ height: 1, background: COLORS.line, margin: "14px 0" }} />}
       {info.gym && <GymBlock gym={info.gym} nav={nav} afterRun={afterRun} testId="today-gym" />}
       {!info.run && !info.gym && info.day && (
@@ -139,7 +147,7 @@ function TodayCard({ data, nav, afterRun }) {
       {!info.run && info.nextRun && (
         <div data-testid="next-run" style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${COLORS.line}` }}>
           <div style={{ ...st.label(), marginBottom: 6 }}>Next run · {engine.fmtDate(info.nextRun.iso)}</div>
-          <RunBlock run={info.nextRun} units={units} jargon={jargon} plan={plan} nav={nav} testId="next-run-block" compact />
+          <RunBlock run={info.nextRun} units={units} jargon={jargon} plan={plan} nav={nav} testId="next-run-block" compact profile={profile} tempC={tempC} />
         </div>
       )}
     </Card>
@@ -412,6 +420,11 @@ function SetupCard({ data, nav }) {
 export function PlanHome({ nav }) {
   const [data, refresh] = usePlanData(nav);
   const [afterRun, setAfterRun] = useState(false);
+  // The warm-up changes in the cold, so read the weather cache as Run home does.
+  const [tempC, setTempC] = useState(null);
+  useEffect(() => {
+    loadTempC().then(setTempC).catch(() => setTempC(null));
+  }, [nav.reloadKey]);
   useEffect(() => {
     listActivities()
       .then((l) => ranWithinHours(2, l))
@@ -427,7 +440,7 @@ export function PlanHome({ nav }) {
       ) : (
         <>
           {(!data.plan || !(data.profile && data.profile.onboarded)) && <SetupCard data={data} nav={nav} />}
-          {(data.plan || (data.master && data.master.gymDays && data.master.gymDays.length > 0)) && <TodayCard data={data} nav={nav} afterRun={afterRun} />}
+          {(data.plan || (data.master && data.master.gymDays && data.master.gymDays.length > 0)) && <TodayCard data={data} nav={nav} afterRun={afterRun} tempC={tempC} />}
           <NiggleFollowUp data={data} nav={nav} />
           <ConflictNotice data={data} nav={nav} refresh={refresh} />
           {data.plan && (

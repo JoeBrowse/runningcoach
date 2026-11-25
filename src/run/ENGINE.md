@@ -54,7 +54,7 @@ Other plan functions: `todayWorkout(plan, iso)`, `weekOf(plan, iso)`, `allDays(p
 ### Rules that the engine keeps
 
 1. Week 1 is at most the current weekly distance + 10% (a small starter floor of 3 km a run day, at most 9 km, applies only below that, with a warning).
-2. Each week grows by 10% or less against the last normal week. Every 4th week is a cutback week. The taper follows the target. The peak is the largest normal training week.
+2. Each week grows by 10% or less against the last normal week. Every 4th week is a cutback week. The taper follows the target. The peak is the largest normal training week. A week that is much larger than its 10% limit (for example after a race lowered the week before) is planned again at the limit. Cuts to fit a limit shrink the easy runs and the long run by the same share.
 3. No two hard days touch, also across week ends. No hard day before the long run. At most 1 hard session a week for new runners, 2 for others. Races count as hard sessions.
 4. The long run is the longest run of the week, about one third of the week or less (more with 2 or 3 run days), and 3 hours or less.
 5. About 80% of running time is easy. Hard time is time at marathon pace or faster.

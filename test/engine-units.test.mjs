@@ -417,3 +417,26 @@ test('dates: a race inside the lead-in week is still in the plan', () => {
   assert.ok(plan.safety.every((c) => c.ok));
   assert.equal(isoAdd('2026-12-31', 1), '2027-01-01');
 });
+
+// QA bug (V1): a B race on a weekday lowered the week before it. Later weeks
+// then grew from that low week, and the cuts to fit the 10% rule made each
+// week smaller again (a half marathon plan fell to 11 km weeks in its peak).
+test('a B or C race does not make the later weeks fall away', () => {
+  const cases = [
+    { goal: 'half', runDays: [2, 4, 6, 0], race: '2027-01-05', pr: 'B' },
+    { goal: 'half', runDays: [2, 4, 6, 0], race: '2027-01-04', pr: 'C' },
+    { goal: 'marathon', runDays: [1, 3, 5, 0], race: '2027-01-04', pr: 'B' },
+    { goal: '10k', runDays: [2, 4, 6, 0], race: '2026-12-15', pr: 'B' },
+  ];
+  for (const c of cases) {
+    const base = { goal: c.goal, today: TODAY, raceDate: '2027-04-18', experience: 'experienced', runDays: c.runDays, longRunDay: 0, gymDays: [], currentWeeklyKm: 40, score: 45 };
+    const p0 = E.buildPlan(base);
+    const p = E.buildPlan({ ...base, races: [{ date: c.race, distKm: 10, priority: c.pr, name: 'Test race' }] });
+    assert.ok(allOk(p), `${c.goal} ${c.pr} ${c.race}: safety`);
+    const wi = p.weeks.findIndex((w) => c.race >= w.startIso && c.race <= E.addDays(w.startIso, 6));
+    for (let i = wi + 2; i < p.weeks.length; i++) {
+      if (['taper', 'race', 'recovery'].includes(p0.weeks[i].kind)) continue;
+      assert.ok(p.weeks[i].km >= p0.weeks[i].km * 0.6, `${c.goal} ${c.pr} ${c.race}: week ${i + 1} has ${p.weeks[i].km} km, the plan without the race has ${p0.weeks[i].km} km`);
+    }
+  }
+});

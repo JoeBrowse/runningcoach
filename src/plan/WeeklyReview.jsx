@@ -3,7 +3,7 @@ import { Check, X } from "lucide-react";
 import { COLORS } from "../theme.js";
 import * as engine from "../run/engine.js";
 import { listActivities, getRunSettings, setRunSettings } from "../shared/store.js";
-import { dailyLoads, loadSummary } from "../shared/load.js";
+import { dailyLoads, loadSummary, runnerMaxHR } from "../shared/load.js";
 import { FormGauge } from "../components/FormGauge.jsx";
 import { gymLabel } from "./planState.js";
 import { Screen, Card, Btn, Label, Loading, Notice, usePlanData, dayLine, st, monoFont } from "./ui.jsx";
@@ -51,8 +51,8 @@ function Mark({ ok }) {
   return ok ? <Check size={15} color={COLORS.ok} /> : <X size={15} color={COLORS.textDim} />;
 }
 
-function LoadBars({ activities, today }) {
-  const byDay = dailyLoads(activities, {});
+function LoadBars({ activities, today, options }) {
+  const byDay = dailyLoads(activities, options || {});
   const monday = engine.mondayOf(today);
   const weeks = Array.from({ length: 8 }, (_, i) => {
     const start = engine.addDays(monday, -7 * (7 - i));
@@ -83,8 +83,10 @@ export function WeeklyReview({ nav }) {
   const [data] = usePlanData(nav);
   const [acts, setActs] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [maxHR, setMaxHR] = useState(undefined);
   useEffect(() => {
     listActivities(nav.settings).then(setActs);
+    runnerMaxHR().then(setMaxHR);
   }, [nav.reloadKey]);
   if (!data || !acts) return <Screen title="Weekly review" onBack={nav.back}><Loading /></Screen>;
   const { plan, today, units, jargon } = data;
@@ -93,7 +95,7 @@ export function WeeklyReview({ nav }) {
   const rv = weekReview(plan, acts, weekStart);
   const nextStart = engine.addDays(weekStart, 7);
   const next = plan ? plan.weeks.find((w) => w.startIso === nextStart) : null;
-  const summary = loadSummary(acts, { settings: nav.settings });
+  const summary = loadSummary(acts, { settings: nav.settings, maxHR });
 
   async function accept() {
     const s = (await getRunSettings()) || {};
@@ -156,7 +158,7 @@ export function WeeklyReview({ nav }) {
 
       <Label>Training load</Label>
       <Card>
-        <LoadBars activities={acts} today={today} />
+        <LoadBars activities={acts} today={today} options={{ settings: nav.settings, maxHR }} />
         <div style={{ ...st.body(), fontSize: 11.5, marginTop: 8 }}>Weekly load is effort (1 to 10) x minutes for runs, lifts and other sports. It is information only. It cannot predict injury.</div>
         {jargon && summary.ready && (
           <div style={{ marginTop: 10 }}>

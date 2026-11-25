@@ -109,6 +109,7 @@ function NewRunner({ nav, appMode }) {
   const [gymDay, setGymDay] = useState(1);
   const [consent, setConsent] = useState(false);
   const [plan, setPlan] = useState(null);
+  const [units, setUnits] = useState("km");
   const [busy, setBusy] = useState(false);
   const gymClash = gym && runDays.includes(gymDay);
 
@@ -141,6 +142,7 @@ function NewRunner({ nav, appMode }) {
     await setKey(KEYS.masterPlan, master);
     const { plan: p } = await rebuildPlan(profile, master, await getRaces(), { message: "New plan: run/walk to 5K." });
     if (appMode && nav.settings.appMode !== appMode) await nav.updateSettings({ ...nav.settings, appMode, mode: "plan" });
+    setUnits(profile.units);
     setPlan(p);
     setBusy(false);
     nav.reload();
@@ -150,9 +152,9 @@ function NewRunner({ nav, appMode }) {
     return (
       <>
         <Notice tone="ok" title="Your plan is ready">
-          Run/walk sessions of about {minutes} minutes, {runDays.length} days a week. The run parts get longer as you get fitter. There is no race date.
+          Run/walk sessions on {runDays.length} days a week. Your target is about {minutes} minutes a session. The Today card shows it. The run parts get longer as you get fitter. There is no race date.
         </Notice>
-        <PlanResult plan={plan} units="km" jargon={false} />
+        <PlanResult plan={plan} units={units} jargon={false} />
         <Btn testId="onboarding-finish" onClick={() => nav.home()}>
           See today
         </Btn>
@@ -229,6 +231,8 @@ export function Onboarding({ nav }) {
       const prev = (await getKey(KEYS.runProfile, null)) || {};
       await setKey(KEYS.runProfile, { ...prev, level: "gym-only", onboarded: true });
       await nav.updateSettings({ ...nav.settings, appMode: c.appMode, mode: "lift" });
+      // Open Lift home. The onboarding screen must not stay open.
+      nav.home();
       return;
     }
     setChoice(c);
