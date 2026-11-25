@@ -1,0 +1,8 @@
+{
+  "appId": "com.skidmarks.app",
+  "appName": "Skid Marks",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}
