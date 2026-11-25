@@ -197,8 +197,10 @@ export function engineActivities(list) {
     iso: a.date,
     date: a.date,
     type: a.type,
-    title: a.name,
-    name: a.name,
+    // The run's own name (for example "Parkrun" from Strava) helps the
+    // seed find races. a.name is only the type label.
+    title: (a.raw && a.raw.name) || a.name,
+    name: (a.raw && a.raw.name) || a.name,
     km: a.km == null ? 0 : a.km,
     min: a.minutes == null ? 0 : a.minutes,
     rpe: a.rpe == null ? undefined : a.rpe,
@@ -217,7 +219,13 @@ const num = (v) => (v === null || v === undefined || v === "" || !Number.isFinit
 
 /* engine.buildPlan options from the stored profile, master plan and races.
    `seed` is the seedFromHistory result (optional). Values that the user
-   typed win over the seed. */
+   typed win over the seed.
+
+   Weekly distance and usual long run: the profile keeps a typed value with
+   `weeklyKmTyped: true` (or `usualLongRunTyped: true`). A profile saved by an
+   older version has no flag. Its value is often a copy of an old seed (for
+   example 0 from a time before a Strava import), so the fresh seed wins when
+   the profile uses the run history. */
 export function planOptions(profile = {}, master = {}, races = [], { today, seed } = {}) {
   const t = localToday(today);
   const p = profile || {};
@@ -228,11 +236,24 @@ export function planOptions(profile = {}, master = {}, races = [], { today, seed
   const runDays = Array.isArray(m.runDays) && m.runDays.length ? m.runDays : p.runDays;
   const longRunDay = Number.isInteger(m.longRunDay) ? m.longRunDay : p.longRunDay;
   const gymDays = (Array.isArray(m.gymDays) ? m.gymDays : []).map((g) => ({ day: g.day, type: g.type, intensity: g.intensity, note: g.note || "" }));
-  let currentWeeklyKm = num(p.currentWeeklyKm);
-  if (currentWeeklyKm === null && seed && level !== "new") currentWeeklyKm = num(seed.currentWeeklyKm);
-  if (currentWeeklyKm === null && level === "new") currentWeeklyKm = 0;
+  const historyMode = p.fitnessSource === "history" || p.useHistory === true;
+  const useSeed = !!seed && (level !== "new" || historyMode) && p.fitnessSource !== "new";
+  const typed = (value, flag) => {
+    const v = num(value);
+    if (v === null || flag === false) return null;
+    if (flag === true) return v;
+    // No flag: an older profile. In history mode the stored value is an old seed copy.
+    return historyMode && useSeed ? null : v;
+  };
+  let currentWeeklyKm = typed(p.currentWeeklyKm, p.weeklyKmTyped);
+  const weeklyTyped = currentWeeklyKm !== null;
+  if (currentWeeklyKm === null && useSeed) currentWeeklyKm = num(seed.currentWeeklyKm);
+  if (currentWeeklyKm === null && (level === "new" || p.fitnessSource === "new")) currentWeeklyKm = 0;
+  let usualLongRunKm = typed(p.usualLongRunKm, p.usualLongRunTyped === undefined ? (p.usualLongRunKm == null ? undefined : true) : p.usualLongRunTyped);
+  const longTyped = usualLongRunKm !== null && usualLongRunKm > 0;
+  if (!longTyped && useSeed) usualLongRunKm = num(seed.usualLongRunKm);
   let score = num(p.score);
-  if (score === null && seed && level !== "new" && p.useHistory !== false) score = num(seed.score);
+  if (score === null && useSeed && p.useHistory !== false) score = num(seed.score);
   if (score !== null && !engine.isValidScore(score)) score = null;
   const raceList = (races || [])
     .filter((r) => r && r.date && r.date >= t && !r.resultSec && Number(r.distKm) > 0)
@@ -249,6 +270,12 @@ export function planOptions(profile = {}, master = {}, races = [], { today, seed
   };
   if (currentWeeklyKm !== null) opts.currentWeeklyKm = currentWeeklyKm;
   if (score !== null) opts.score = score;
+  // Habits from the run history. They shape week 1: the usual long run and new run days.
+  if (usualLongRunKm !== null && usualLongRunKm > 0) opts.usualLongRunKm = usualLongRunKm;
+  if (useSeed && num(seed.runsPerWeek) > 0) opts.runsPerWeek = num(seed.runsPerWeek);
+  if (useSeed && !weeklyTyped && num(seed.peak12WeeksKm) > 0) opts.peakWeekKm = num(seed.peak12WeeksKm);
+  // A typed long run wins over the history, so the cap from the longest recent run applies only to the seed value.
+  if (useSeed && !longTyped && num(seed.longestRecentKm) > 0) opts.longestRecentKm = num(seed.longestRecentKm);
   const G = engine.GOALS[goal];
   if (G && !G.noDate) {
     if (p.raceDate && p.raceDate > t) opts.raceDate = p.raceDate;
@@ -261,7 +288,9 @@ export function planOptions(profile = {}, master = {}, races = [], { today, seed
 }
 
 export async function previewPlan(profile, master, races, { today, seed } = {}) {
-  const s = seed || (profile && profile.level !== "new" ? await seedHistory(today) : null);
+  const p = profile || {};
+  const wantsHistory = p.fitnessSource !== "new" && (p.level !== "new" || p.fitnessSource === "history" || p.useHistory === true);
+  const s = seed || (profile && wantsHistory ? await seedHistory(today) : null);
   const opts = planOptions(profile, master, races, { today, seed: s });
   return { plan: engine.buildPlan(opts), seed: s, opts };
 }

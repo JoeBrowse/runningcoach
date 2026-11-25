@@ -19,7 +19,7 @@ export {
 
 export {
   GOALS, SAFETY, LEG_TYPES, longShareCap, normalizeOpts, buildPlan, extendPlan, reconcile, safetyChecks, safetyOk, allDays, todayWorkout, weekOf,
-  weekStats, classifyWeek, trainingKm, weekKm, isHeavyLegsDay, isHardDay, recoveryDaysFor,
+  weekStats, classifyWeek, trainingKm, weekKm, isHeavyLegsDay, isHardDay, recoveryDaysFor, week1Limit, newRunKmFor,
 } from './engine/plan.js';
 
 export { adapt, checkMove, suggestDays, returnLadder, afterRace, goalGap, timeTrialDue } from './engine/adapt.js';

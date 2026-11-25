@@ -112,6 +112,13 @@ export function normalizeOpts(opts = {}) {
     if (opts.currentWeeklyKm != null) warnings.push('The current weekly distance was not valid. The plan uses a default value.');
   }
   currentWeeklyKm = Math.min(currentWeeklyKm, 250);
+  // Habits from the run history (all optional). They shape week 1 only.
+  const pos = (v, max) => { if (v == null || v === '') return null; const n = Number(v); return Number.isFinite(n) && n > 0 ? Math.min(n, max) : null; };
+  const usualLongRunKm = pos(opts.usualLongRunKm, 60);
+  const longestRecentKm = pos(opts.longestRecentKm, 100);
+  const peakWeekKm = pos(opts.peakWeekKm, 300);
+  const rpw = pos(opts.runsPerWeek, 14);
+  const runsPerWeek = rpw == null ? null : Math.max(1, Math.round(rpw));
 
   let score = opts.score; let scoreSource = 'given';
   if (score == null) { score = goal === 'runwalk' ? 25 : DEFAULT_SCORE[experience]; scoreSource = 'default'; warnings.push('No recent result. Paces are estimates. Use effort words, or add a race or time trial.'); }
@@ -135,6 +142,7 @@ export function normalizeOpts(opts = {}) {
 
   return {
     goal, today, experience, runDays, longRunDay, gymDays, usesLift, currentWeeklyKm, score, scoreSource,
+    usualLongRunKm, longestRecentKm, peakWeekKm, runsPerWeek,
     raceIso, raceName: opts.raceName || null, goalTimeSec, races, blocks: clamp(Math.round(opts.blocks || 3), 1, 26),
     startIso: opts.startDate ? toISO(opts.startDate) : null, _warnings: warnings, _changes: changes,
   };
@@ -343,13 +351,51 @@ function qualityCount(w, o, pattern) {
 
 function longCapKm(o, G, p) { return Math.min(G.longCap[o.experience], (SAFETY.longRunMaxMin * 60) / p.long); }
 
+/** Distance of a new run day in week 1: about 25 minutes at easy pace, 3 to 5 km. */
+export function newRunKmFor(p) { return clamp(Math.floor(((25 * 60) / p.easy) * 10) / 10, 3, 5); }
+
+/** The week 1 limit. The safety check uses this function with the values in plan.settings.
+    - base: the current weekly distance + 10% (or the starter floor of 3 km a run day, at most 9 km,
+      when the current distance is near zero).
+    - new run days: when the plan has more run days than the runner's recent runs a week, the limit
+      can also be the current distance + one short easy run for each new day. This part is never more
+      than the current distance + 25% and never more than the recent peak week. */
+export function week1Limit({ currentWeeklyKm, nRunDays, runsPerWeek = null, peakWeekKm = null, newRunKm = 3 }) {
+  const C = currentWeeklyKm || 0;
+  const floorKm = Math.min(nRunDays, 3) * 3;
+  const starter = C * 1.1 < floorKm;
+  const baseKm = round(Math.max(C * 1.1, floorKm), 1);
+  const extraDays = !starter && runsPerWeek >= 1 ? Math.max(0, nRunDays - runsPerWeek) : 0;
+  const addOnKm = extraDays ? round(Math.min(C + extraDays * newRunKm, C * 1.25, peakWeekKm > 0 ? peakWeekKm : Infinity), 1) : 0;
+  const maxKm = round(Math.max(baseKm, addOnKm), 1);
+  return { maxKm, baseKm, floorKm, starter, extraDays, newRunKm, addOnKm, rule: maxKm > baseKm ? 'newDays' : starter ? 'floor' : 'base' };
+}
+
+/* The usual long run, inside the safety caps: 3 hours or less, 32 km or less, the goal cap,
+   the longest recent run + 10% and the current weekly distance. */
+function longFloorKm(o, G, p) {
+  if (!o.usualLongRunKm) return 0;
+  let f = Math.min(o.usualLongRunKm, longCapKm(o, G, p), 32, o.currentWeeklyKm);
+  if (o.longestRecentKm) f = Math.min(f, o.longestRecentKm * 1.1);
+  return Math.floor(f * 10) / 10;
+}
+
 function buildRunWeek(w, T, o, G, pattern, ctx, log) {
   const days = new Map();
   const isos = w.isos;
   const pre = (iso) => iso < o.today;
   let runIsos = isos.filter((iso) => pattern.runSet.has(weekdayOf(iso)) && !pre(iso));
   const longIso = runIsos.find((iso) => weekdayOf(iso) === pattern.longDay) || null;
-  const qN = qualityCount(w, o, pattern);
+  // Week 1 with more run days than the runner's recent runs a week: the new days start as short
+  // easy runs. The future quality days come first, then the days just before the long run.
+  const w1 = w.idx === 0 && o._w1 && o._w1.extraDays > 0 ? o._w1 : null;
+  let newIsos = [];
+  if (w1) {
+    const qRank = (iso) => { const k = pattern.quality.indexOf(weekdayOf(iso)); return k < 0 ? 9 : k; };
+    const toLong = (iso) => (pattern.longDay - weekdayOf(iso) + 7) % 7;
+    newIsos = runIsos.filter((iso) => iso !== longIso).sort((a, b) => qRank(a) - qRank(b) || toLong(a) - toLong(b)).slice(0, w1.extraDays);
+  }
+  const qN = newIsos.length ? 0 : qualityCount(w, o, pattern);
   const qIsos = pattern.quality.slice(0, qN).map((d) => runIsos.find((iso) => weekdayOf(iso) === d)).filter(Boolean);
   // fewer runs when the week is small
   const maxRuns = Math.max(1, Math.floor(T / SAFETY.minRunKm));
@@ -361,12 +407,19 @@ function buildRunWeek(w, T, o, G, pattern, ctx, log) {
     log.add('Low distance', 'Fewer runs this week.', `Each run must be ${SAFETY.minRunKm} km or more. Fewer, longer runs suit a small weekly distance.`, cand[0]);
   }
   const p = ctx.p;
+  const history = w.idx === 0 && (o.usualLongRunKm || o.runsPerWeek);
   let longKm = 0; let workouts = [];
   const build = () => {
     workouts = [];
     const n = runIsos.length;
     const share = ['half', 'marathon', 'ultra50'].includes(o.goal) && n > 1 ? Math.max(longShareTarget(n), longShareCap(n) * 0.94) : longShareTarget(n);
-    longKm = longIso && runIsos.includes(longIso) ? Math.min(T * share, longCapKm(o, G, p)) : 0;
+    const capKm = longCapKm(o, G, p);
+    longKm = longIso && runIsos.includes(longIso) ? Math.min(T * share, capKm) : 0;
+    // Week 1 long run: not more than the longest recent run + 10%, and not less than the usual long run.
+    let longTop = capKm;
+    if (longKm && history && o.longestRecentKm) longTop = Math.min(capKm, Math.max(o.longestRecentKm * 1.1, longFloorKm(o, G, p)));
+    if (longKm) longKm = Math.min(longKm, longTop);
+    if (longKm && !w.cutback && o.usualLongRunKm) longKm = Math.max(longKm, Math.min(longFloorKm(o, G, p), n > 1 ? longShareCap(n) * T * 0.98 : Infinity));
     longKm = round(longKm, 1);
     let qKm = 0; const qW = [];
     qIsos.filter((x) => runIsos.includes(x)).forEach((iso, k) => {
@@ -382,10 +435,45 @@ function buildRunWeek(w, T, o, G, pattern, ctx, log) {
       qW.push(wk); qKm += wk.km;
     });
     const qDone = new Set(qW.map((x) => x.iso));
-    const easyIsos = runIsos.filter((iso) => iso !== longIso && !qDone.has(iso));
-    let E = easyIsos.length ? (T - longKm - qKm) / easyIsos.length : 0;
+    const fresh = newIsos.filter((iso) => runIsos.includes(iso) && !qDone.has(iso));
+    const easyIsos = runIsos.filter((iso) => iso !== longIso && !qDone.has(iso) && !fresh.includes(iso));
+    const nE = easyIsos.length;
+    // The runner's usual runs keep their distance. The new days get the rest: 2.5 km to about 5 km each.
+    const lo = fresh.length ? Math.floor(Math.min(w1.newRunKm, Math.max(SAFETY.minRunKm, (T - Math.min(o.currentWeeklyKm, T)) / fresh.length)) * 10) / 10 : 0;
+    let newKm = longKm ? Math.min(lo, Math.floor(longKm * 9.5) / 10) : lo;
+    if (history && longKm && !w.cutback) {
+      // Week 1 from the run history. The long run must stay the longest run and a safe share of the
+      // real week. The easy runs must not pass it. The long run takes more of the week, inside its caps,
+      // so the week keeps its distance. Longer new runs (up to about 5 km) are used only when the share
+      // rule would otherwise cut the week.
+      const capS = n > 1 ? longShareCap(n) : 1;
+      const solve = (nk) => {
+        const fixed = qKm + nk * fresh.length;
+        let L = longKm;
+        const want = nE ? (T - fixed) / (1 + 0.95 * nE) : T - fixed;
+        if (want > L) L = Math.min(want, longTop);
+        let e = 0;
+        for (let i = 0; i < 30; i++) {
+          e = nE ? Math.max(0, Math.min((T - L - fixed) / nE, 0.95 * L)) : 0;
+          const maxL = capS < 1 ? (capS / (1 - capS)) * (fixed + nE * e) * 0.99 : Infinity;
+          if (L <= maxL + 1e-9) break;
+          L = maxL;
+        }
+        L = Math.floor(L * 10) / 10;
+        e = nE ? Math.floor(Math.max(0, Math.min((T - L - fixed) / nE, 0.95 * L)) * 10) / 10 : 0;
+        return { nk, L, total: L + fixed + nE * e, ok: nk <= 0.95 * L + 1e-9 || nk === newKm };
+      };
+      let best = solve(newKm);
+      for (let nk = lo + 0.1; fresh.length && nk <= w1.newRunKm + 1e-9; nk = round(nk + 0.1, 1)) {
+        const c = solve(round(nk, 1));
+        if (c.ok && c.total > best.total + 0.05) best = c;
+      }
+      longKm = best.L; newKm = best.nk;
+    }
+    const fixedKm = qKm + newKm * fresh.length;
+    let E = easyIsos.length ? (T - longKm - fixedKm) / easyIsos.length : 0;
     if (longKm) E = Math.min(E, longKm * 0.95);
-    return { qW, easyIsos, E };
+    return { qW, easyIsos, E, fresh, newKm };
   };
   let r = build();
   while (r.easyIsos.length && r.E < SAFETY.minRunKm) {
@@ -395,6 +483,8 @@ function buildRunWeek(w, T, o, G, pattern, ctx, log) {
     r = build();
   }
   for (const q of r.qW) days.set(q.iso, q);
+  for (const iso of r.fresh) days.set(iso, makeWorkout(iso, { type: 'easy', km: r.newKm, why: 'A new run day. It starts as a short easy run.' }, ctx));
+  if (w1) w1.newIsos = r.fresh.slice();
   if (longKm) {
     const finish = (w.kind === 'build' || w.kind === 'peak') && (o.goal === 'half' || o.goal === 'marathon') && !w.cutback && o.experience !== 'new' && w.idx % 2 === 0;
     days.set(longIso, makeWorkout(longIso, { type: finish ? 'longfinish' : 'long', km: longKm }, ctx));
@@ -914,6 +1004,23 @@ export function reconcile(plan) {
   return plan;
 }
 
+/* Plain reasons for the week 1 values that come from the run history. */
+function logWeek1History(plan, o, w1, log) {
+  const wk = plan.weeks[0]; if (!wk || !wk.days) return;
+  const runs = wk.days.filter((d) => isRun(d) && d.intensity !== 'race');
+  const fresh = (w1.newIsos || []).map((iso) => wk.days.find((d) => d.iso === iso)).filter((d) => d && d.type === 'easy');
+  if (fresh.length) {
+    log.add('Run days', 'Week 1 has no hard session.', 'Week 1 adds a new run day. One change at a time is safer.');
+    for (const d of fresh) log.add('Run days', `${DAY_NAMES_LONG[d.dow]} is a short easy run of ${d.km} km in week 1.`, 'A new run day starts as a short easy run. Your usual runs keep their distance.', d.iso);
+  }
+  if (w1.rule === 'newDays') log.add('Week 1', `Week 1 can have up to ${w1.maxKm} km, not ${w1.baseKm} km.`, `Your current distance (${o.currentWeeklyKm} km) plus the new short runs. This is not more than your current distance + 25% or your recent peak week.`);
+  const long = runs.find((d) => d.intensity === 'long');
+  if (long && o.usualLongRunKm) {
+    if (long.km + 0.3 >= o.usualLongRunKm) log.add('Long run', `The week 1 long run is ${long.km} km.`, `It starts at about your usual long run (${o.usualLongRunKm} km), inside the safety caps.`, long.iso);
+    else log.add('Long run', `The week 1 long run is ${long.km} km, not your usual ${o.usualLongRunKm} km.`, 'A safety cap limits it: 3 hours or less, the goal cap, your longest recent run + 10%, or a safe share of the week.', long.iso);
+  }
+}
+
 export function buildPlan(opts = {}) {
   const o = normalizeOpts(opts);
   const G = GOALS[o.goal];
@@ -925,10 +1032,13 @@ export function buildPlan(opts = {}) {
   const pattern = weeklyPattern(o, log, conflicts);
   const tl = makeTimeline(o, G, warnings, log);
   const nRuns = o.runDays.length;
-  const floorKm = Math.min(nRuns, 3) * 3;
-  const week1MaxKm = round(Math.max(o.currentWeeklyKm * 1.1, floorKm), 1);
-  if (o.currentWeeklyKm * 1.1 < floorKm) warnings.push(o.goal === 'runwalk' ? `Week 1 starts at about ${week1MaxKm} km, with walking included.` : `Your current weekly distance is low for this goal. Week 1 starts at up to ${week1MaxKm} km. A run/walk plan is a gentler start.`);
-  const limits = { week1MaxKm, floorKm, currentWeeklyKm: o.currentWeeklyKm, maxHardPerWeek: SAFETY.maxHardPerWeek[o.experience], gentleWeeks: tl.gentleN, hardShareMax: SAFETY.hardShareMax, longRunMaxMin: SAFETY.longRunMaxMin, longCapKm: round(longCapKm(o, G, p), 1) };
+  const newRunKm = newRunKmFor(p);
+  const w1 = week1Limit({ currentWeeklyKm: o.currentWeeklyKm, nRunDays: nRuns, runsPerWeek: o.goal === 'runwalk' ? null : o.runsPerWeek, peakWeekKm: o.peakWeekKm, newRunKm });
+  o._w1 = w1;
+  const floorKm = w1.floorKm;
+  const week1MaxKm = w1.maxKm;
+  if (w1.starter) warnings.push(o.goal === 'runwalk' ? `Week 1 starts at about ${week1MaxKm} km, with walking included.` : `Your current weekly distance is low for this goal. Week 1 starts at up to ${week1MaxKm} km. A run/walk plan is a gentler start.`);
+  const limits = { week1MaxKm, week1Rule: w1.rule, week1BaseKm: w1.baseKm, newRunDays: w1.extraDays, newRunKm, floorKm, currentWeeklyKm: o.currentWeeklyKm, maxHardPerWeek: SAFETY.maxHardPerWeek[o.experience], gentleWeeks: tl.gentleN, hardShareMax: SAFETY.hardShareMax, longRunMaxMin: SAFETY.longRunMaxMin, longCapKm: round(longCapKm(o, G, p), 1) };
   computeTargets(tl, o, G, limits, warnings);
   const racePace = racePaceFor(o, G, p);
   if (o.goalTimeSec) {
@@ -985,7 +1095,7 @@ export function buildPlan(opts = {}) {
     version: 1, kind: 'plan', id: `plan-${o.goal}-${tl.start}`, createdIso: o.today, startIso: tl.start,
     goal: o.goal, goalName: G.name, raceIso: tl.goalRace ? tl.goalRace.iso : null, goalKm: G.km || null, goalTimeSec: o.goalTimeSec,
     score: o.score, scoreSource: o.scoreSource, scoreIso: o.today, paces: p, racePace,
-    opts: { ...opts, today: o.today }, settings: { runDays: o.runDays, longRunDay: o.longRunDay, effectiveLongRunDay: pattern.longDay, qualityDays: pattern.quality, gymDays: o.gymDays, usesLift: o.usesLift, experience: o.experience, currentWeeklyKm: o.currentWeeklyKm },
+    opts: { ...opts, today: o.today }, settings: { runDays: o.runDays, longRunDay: o.longRunDay, effectiveLongRunDay: pattern.longDay, qualityDays: pattern.quality, gymDays: o.gymDays, usesLift: o.usesLift, experience: o.experience, currentWeeklyKm: o.currentWeeklyKm, runsPerWeek: o.goal === 'runwalk' ? null : o.runsPerWeek, usualLongRunKm: o.usualLongRunKm, longestRecentKm: o.longestRecentKm, peakWeekKm: o.peakWeekKm, newRunKm },
     limits, races, weeks, warnings, conflicts, changesFromRules: log.items, activeLadder: null, gymAdvice: [], safety: [],
   };
   overlayRaces(plan, o, ctxFor, log, warnings);
@@ -996,6 +1106,7 @@ export function buildPlan(opts = {}) {
     return buildRunWeek(w, T, o, G, pattern, ctxFor(wi), log);
   };
   enforceWeeks(plan, ctxFor, log, warnings, rebuildWeek);
+  logWeek1History(plan, o, w1, log);
   placeStrength(plan, o, ctxFor);
   for (const d of allDays(plan)) delete d._pairWarned;
   plan.changesFromRules = log.items;
@@ -1024,8 +1135,15 @@ export function safetyChecks(plan) {
   const cls = (wk) => classifyWeek(wk);
 
   // volume
-  const f1 = []; if (weeks.length && !weeks[0].exempt && km(weeks[0]) > (L.week1MaxKm ?? Infinity) + eps) f1.push(`Week 1 has ${km(weeks[0])} km. The limit is ${L.week1MaxKm} km.`);
-  add('week1', 'Week 1 is at most your current distance plus 10%', `Limit: ${L.week1MaxKm} km.`, f1);
+  const S = plan.settings || {};
+  const lim1 = S.runDays && Number.isFinite(S.currentWeeklyKm)
+    ? week1Limit({ currentWeeklyKm: S.currentWeeklyKm, nRunDays: S.runDays.length, runsPerWeek: S.runsPerWeek, peakWeekKm: S.peakWeekKm, newRunKm: S.newRunKm || L.newRunKm || 3 })
+    : { maxKm: L.week1MaxKm ?? Infinity, baseKm: L.week1MaxKm, rule: 'base', extraDays: 0 };
+  const f1 = [];
+  if (L.week1MaxKm != null && Math.abs(L.week1MaxKm - lim1.maxKm) > 0.05) f1.push(`The plan uses a week 1 limit of ${L.week1MaxKm} km, but the rule gives ${lim1.maxKm} km.`);
+  if (weeks.length && !weeks[0].exempt && km(weeks[0]) > lim1.maxKm + eps) f1.push(`Week 1 has ${km(weeks[0])} km. The limit is ${lim1.maxKm} km.`);
+  add('week1', lim1.rule === 'newDays' ? 'Week 1 is at most your current distance plus 10%, or plus the short new runs' : 'Week 1 is at most your current distance plus 10%',
+    lim1.rule === 'newDays' ? `Limit: ${lim1.maxKm} km. Your current distance plus ${lim1.extraDays} short easy run${lim1.extraDays === 1 ? '' : 's'} for the new run day${lim1.extraDays === 1 ? '' : 's'}. Never more than your current distance + 25% or your recent peak week.` : `Limit: ${lim1.maxKm} km.`, f1);
   const fg = [], fc = [], ft = []; let lastNormal = null; let peak = 0; let run = 0; let prevT = null;
   weeks.forEach((wk, i) => {
     const c = cls(wk); const k = km(wk);

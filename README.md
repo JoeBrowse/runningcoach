@@ -61,6 +61,7 @@ Skid Marks gives general training information. It is not medical advice. It cann
 1. On your Android phone, open the [APK download link](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk).
 2. Open the file. Allow your browser or file manager to install apps when Android asks.
 3. Open Skid Marks.
+4. Optional: install the Wear OS watch app to run with only the watch and headphones. See [docs/wear-os.md](docs/wear-os.md).
 
 This is a test build signed with a public test key (see [signing/README.md](signing/README.md)), so Android shows a warning. All builds use the same key, so a new build installs over an old one and keeps your data. The app installs next to Iron Log and does not change Iron Log's data. To move your Iron Log data, save a backup in Iron Log and restore it in Skid Marks.
 

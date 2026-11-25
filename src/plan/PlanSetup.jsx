@@ -34,6 +34,17 @@ const STEPS = ["Goal", "Days", "Gym", "Fitness", "About you", "Check"];
 export const DISCLAIMER =
   "Skid Marks gives general training information. It is not medical advice and it cannot diagnose or predict injury. Talk to a doctor before you start if you have a heart condition, chest pain, dizziness, a long-term illness, an injury or if you are pregnant. Stop and get help if you feel unwell during exercise.";
 
+/* A weekly distance or long run that the user typed, in the user's units, for the form.
+   A value with no flag comes from an older version. In history mode it is
+   usually a copy of an old seed (for example 0 from before an import), so the
+   form leaves it empty and the plan uses the fresh history. */
+function typedForForm(value, flag, p) {
+  if (value == null || !Number.isFinite(Number(value))) return "";
+  const legacyTyped = flag === undefined && p.fitnessSource !== "history" && p.fitnessSource !== "new" && Number(value) > 0;
+  if (flag !== true && !legacyTyped) return "";
+  return String(Math.round(engine.kmToUnits(Number(value), p.units || "km") * 10) / 10);
+}
+
 function defaultsFrom(profile, master, level) {
   const p = profile || {};
   const m = master || {};
@@ -50,7 +61,8 @@ function defaultsFrom(profile, master, level) {
     fitness: p.fitnessSource || (lvl === "new" ? "new" : "history"),
     resultKm: p.resultKm || 5,
     resultText: p.resultSec ? engine.fmtTime(p.resultSec) : "",
-    weeklyKm: p.currentWeeklyKm != null ? String(p.currentWeeklyKm) : "",
+    weeklyKm: typedForForm(p.currentWeeklyKm, p.weeklyKmTyped, p),
+    longRunKm: typedForForm(p.usualLongRunKm, p.usualLongRunTyped, p),
     experience: p.experience || (lvl === "new" ? "new" : lvl === "racer" ? "experienced" : "some"),
     units: p.units || "km",
     maxHR: p.maxHR || "",
@@ -62,22 +74,34 @@ function defaultsFrom(profile, master, level) {
 
 const numOrNull = (v) => (v === "" || v == null || !Number.isFinite(Number(v)) ? null : Number(v));
 
-/* The profile and master week that the form describes. */
+/* A typed distance in the user's units to km, or null when the field is empty. */
+const typedKm = (v, units) => {
+  const n = numOrNull(v);
+  if (n === null || n < 0) return null;
+  return units === "mi" ? Math.round(engine.unitsToKm(n, "mi") * 10) / 10 : n;
+};
+
+/* The profile and master week that the form describes.
+   Only typed values go into currentWeeklyKm and usualLongRunKm (with
+   weeklyKmTyped / usualLongRunTyped). With an empty field, the plan reads
+   the run history each time it is made, so an old copy cannot hide new runs. */
 export function formToProfile(f, prev, seed) {
   const G = engine.GOALS[f.goal];
   const resultSec = parseTime(f.resultText);
   let score = null;
-  let currentWeeklyKm = numOrNull(f.weeklyKm);
+  let currentWeeklyKm = typedKm(f.weeklyKm, f.units);
+  const weeklyKmTyped = currentWeeklyKm !== null;
+  const usualLongRunKm = f.fitness === "new" ? null : typedKm(f.longRunKm, f.units);
   if (f.fitness === "result" && resultSec) score = engine.fitnessScore(Number(f.resultKm), resultSec);
   if (f.fitness === "history" && seed) {
-    score = resultSec && f.resultText !== (seed.scoreRun ? engine.fmtTime(seed.scoreRun.sec) : "") ? engine.fitnessScore(Number(f.resultKm), resultSec) : seed.score;
-    if (currentWeeklyKm === null) currentWeeklyKm = seed.currentWeeklyKm;
+    // Save the score only when the user typed a different result. Else
+    // keep it empty, so each new plan reads the score fresh from history.
+    score = resultSec && f.resultText !== (seed.scoreRun ? engine.fmtTime(seed.scoreRun.sec) : "") ? engine.fitnessScore(Number(f.resultKm), resultSec) : null;
   }
   if (f.fitness === "new") {
     score = null;
     if (currentWeeklyKm === null) currentWeeklyKm = 0;
   }
-  if (f.units === "mi" && currentWeeklyKm !== null && f.weeklyKm !== "") currentWeeklyKm = Math.round(engine.unitsToKm(currentWeeklyKm, "mi") * 10) / 10;
   const profile = {
     ...(prev || {}),
     level: f.level,
@@ -93,6 +117,9 @@ export function formToProfile(f, prev, seed) {
     lthr: numOrNull(f.lthr),
     score: score,
     currentWeeklyKm,
+    weeklyKmTyped,
+    usualLongRunKm: usualLongRunKm !== null && usualLongRunKm > 0 ? usualLongRunKm : null,
+    usualLongRunTyped: usualLongRunKm !== null && usualLongRunKm > 0,
     fitnessSource: f.fitness,
     useHistory: f.fitness === "history",
     resultKm: Number(f.resultKm),
@@ -130,6 +157,64 @@ function GymRow({ g, onChange, onRemove, idx }) {
       <div style={{ marginTop: 8 }}>
         <TextInput testId={`gym-${idx}-note`} value={g.note} onChange={(v) => onChange({ ...g, note: v })} placeholder="Note: strength, hypertrophy, calisthenics" />
       </div>
+    </Card>
+  );
+}
+
+/* "From your history" on the result screen. It shows the values that the
+   plan uses. Edit lets the user change the weekly distance and the usual
+   long run before the save. Typed values win over the history. */
+export function HistoryCard({ seed, f, units, onApply }) {
+  const [editing, setEditing] = useState(false);
+  const [weekly, setWeekly] = useState(f.weeklyKm);
+  const [longRun, setLongRun] = useState(f.longRunKm);
+  if (!seed) return null;
+  const inKm = (v) => typedKm(v, units);
+  const weeklyKm = inKm(f.weeklyKm) !== null ? inKm(f.weeklyKm) : seed.currentWeeklyKm;
+  const longKm = inKm(f.longRunKm) !== null && inKm(f.longRunKm) > 0 ? inKm(f.longRunKm) : seed.usualLongRunKm;
+  const resultSec = parseTime(f.resultText);
+  const result = resultSec && Number(f.resultKm) > 0 ? `${engine.fmtKm(Number(f.resultKm), units)} in ${engine.fmtTime(resultSec)}` : null;
+  const bad = (v) => v !== "" && v != null && (numOrNull(v) === null || numOrNull(v) < 0);
+  const mine = " (your value)";
+  return (
+    <Card testId="history-card">
+      <Row style={{ justifyContent: "space-between", marginBottom: 6 }}>
+        <div style={st.title(14)}>From your history</div>
+        {!editing && (
+          <button data-testid="history-edit" onClick={() => { setWeekly(f.weeklyKm); setLongRun(f.longRunKm); setEditing(true); }} style={{ ...st.label(), color: COLORS.accent, minHeight: 44, padding: "0 4px" }}>
+            Edit
+          </button>
+        )}
+      </Row>
+      <div data-testid="history-summary" style={st.text()}>
+        {seed.runsPerWeek === 0 && inKm(f.weeklyKm) === null ? "Your history has no runs in the last 6 weeks. " : ""}You run about {engine.fmtKm(weeklyKm, units)} a week{inKm(f.weeklyKm) !== null ? mine : ""}, {seed.runsPerWeek} run{seed.runsPerWeek === 1 ? "" : "s"} a week. Your usual long run is {engine.fmtKm(longKm, units)}{inKm(f.longRunKm) !== null && inKm(f.longRunKm) > 0 ? mine : ""}. Your best recent result: {result || "none in the last 12 weeks"}.
+      </div>
+      {seed.weeklyKmSource && seed.weeklyKmSource !== "last4" && inKm(f.weeklyKm) === null && (
+        <div data-testid="history-weekly-note" style={{ ...st.body(), fontSize: 12, marginTop: 4 }}>
+          {seed.weeklyKmSource === "steady"
+            ? `One or more of your last 4 weeks is low or empty. The plan uses the middle value of your last 6 weeks with a run. Your last 4 weeks give ${engine.fmtKm(seed.avg4WeeksKm, units)} a week. Your 12-week average is ${engine.fmtKm(seed.avg12WeeksKm, units)} a week.`
+            : `Most of your last 4 weeks have almost no running. The plan starts from your last 4 weeks (${engine.fmtKm(seed.avg4WeeksKm, units)} a week). This is safer after a break.`}
+        </div>
+      )}
+      {editing && (
+        <div style={{ marginTop: 10 }}>
+          <Field label={`Distance a week (${units})`} hint={`Empty: the plan uses ${engine.fmtKm(seed.currentWeeklyKm, units)} from your runs.`}>
+            <TextInput testId="history-weekly" type="number" inputMode="decimal" value={weekly} onChange={setWeekly} />
+          </Field>
+          <Field label={`Usual long run (${units})`} hint={`Empty: the plan uses ${engine.fmtKm(seed.usualLongRunKm, units)} from your runs.`}>
+            <TextInput testId="history-long" type="number" inputMode="decimal" value={longRun} onChange={setLongRun} />
+          </Field>
+          {(bad(weekly) || bad(longRun)) && <div style={{ ...st.body(), color: COLORS.bad, marginBottom: 8 }}>Type a number, or leave the field empty.</div>}
+          <Row gap={8}>
+            <Btn kind="secondary" small testId="history-cancel" onClick={() => setEditing(false)}>
+              Cancel
+            </Btn>
+            <Btn small testId="history-apply" disabled={bad(weekly) || bad(longRun)} onClick={() => { setEditing(false); onApply({ weeklyKm: weekly == null ? "" : String(weekly).trim(), longRunKm: longRun == null ? "" : String(longRun).trim() }); }}>
+              Use these values
+            </Btn>
+          </Row>
+        </div>
+      )}
     </Card>
   );
 }
@@ -226,6 +311,7 @@ export function PlanSetup({ nav }) {
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -258,7 +344,7 @@ export function PlanSetup({ nav }) {
     } catch (e) {
       setError(e.message || String(e));
     }
-  }, [step]);
+  }, [step, previewKey]);
 
   if (!f) return <Screen title="Plan setup" onBack={nav.back}><Loading /></Screen>;
 
@@ -377,8 +463,13 @@ export function PlanSetup({ nav }) {
                     <div style={st.text()}>No usable best effort in the last 12 weeks.</div>
                   )}
                   <div style={{ ...st.text(), marginTop: 4 }}>
-                    Weekly distance: {engine.fmtKm(seed.currentWeeklyKm, units)} (last 4 weeks), {engine.fmtKm(seed.avg12WeeksKm, units)} (last 12 weeks).
+                    Weekly distance: {engine.fmtKm(seed.avg4WeeksKm != null ? seed.avg4WeeksKm : seed.currentWeeklyKm, units)} (last 4 weeks), {engine.fmtKm(seed.avg12WeeksKm, units)} (last 12 weeks). The plan uses {engine.fmtKm(seed.currentWeeklyKm, units)}.
                   </div>
+                  {seed.runsPerWeek > 0 && (
+                    <div style={{ ...st.text(), marginTop: 4 }}>
+                      {seed.runsPerWeek} run{seed.runsPerWeek === 1 ? "" : "s"} a week. Usual long run: {engine.fmtKm(seed.usualLongRunKm, units)}. Longest recent run: {engine.fmtKm(seed.longestRecentKm, units)}.
+                    </div>
+                  )}
                   <div data-testid="seed-runs" style={{ ...st.body(), fontSize: 12, marginTop: 4 }}>
                     Runs used: {seed.runsUsed.volume.length} for distance, {seed.runsUsed.score.length} for the best effort.
                   </div>
@@ -457,6 +548,15 @@ export function PlanSetup({ nav }) {
         <>
           {error && <Notice tone="bad" title="The plan could not be made">{error}</Notice>}
           {!preview && !error && <Loading />}
+          {f.fitness === "history" && seed && (
+            <HistoryCard
+              key={`${f.weeklyKm}|${f.longRunKm}`}
+              seed={seed}
+              f={f}
+              units={units}
+              onApply={(v) => { setPreview(null); set(v); setPreviewKey((k) => k + 1); }}
+            />
+          )}
           {preview && <PlanResult plan={preview} units={units} jargon={jargon || f.level === "racer"} />}
         </>
       )}

@@ -1,0 +1,22 @@
+{
+  "name": "skid-marks-wear-bridge",
+  "version": "1.0.0",
+  "description": "Local Capacitor plugin: sends the Skid Marks plan to the watch and takes runs from the watch (Wear OS Data Layer).",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "main": "index.js",
+  "module": "index.js",
+  "files": [
+    "index.js",
+    "android/src/main/",
+    "android/build.gradle"
+  ],
+  "peerDependencies": {
+    "@capacitor/core": ">=8.0.0"
+  },
+  "capacitor": {
+    "android": {
+      "src": "android"
+    }
+  }
+}

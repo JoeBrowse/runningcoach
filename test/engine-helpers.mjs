@@ -83,7 +83,17 @@ export function verdicts(plan) {
   out.week1 = [];
   const n = Math.min(plan.settings.runDays.length, 4);
   const floor = Math.min(n, 3) * 3;
-  const cap1 = Math.max(plan.settings.currentWeeklyKm * 1.1, floor);
+  const C = plan.settings.currentWeeklyKm;
+  let cap1 = Math.max(C * 1.1, floor);
+  // New run days (from the run history): current + one short easy run for each new day,
+  // never more than current + 25% or the recent peak week. Not for runners near zero.
+  const S = plan.settings;
+  if (C * 1.1 >= floor && S.runsPerWeek >= 1 && S.runDays.length > S.runsPerWeek) {
+    if (!(S.newRunKm >= 3 && S.newRunKm <= 5)) out.week1.push(`new run day distance ${S.newRunKm} km is not 3 to 5 km`);
+    const extra = S.runDays.length - S.runsPerWeek;
+    cap1 = Math.max(cap1, Math.min(C + extra * S.newRunKm, C * 1.25, S.peakWeekKm > 0 ? S.peakWeekKm : Infinity));
+  }
+  if (cap1 > Math.max(C * 1.25, floor) + 1e-9) out.week1.push(`limit ${r1(cap1)} is more than current + 25%`);
   if (Math.abs(plan.limits.week1MaxKm - r1(cap1)) > 0.05) out.week1.push(`limit ${plan.limits.week1MaxKm} != ${r1(cap1)}`);
   if (!plan.weeks[0].exempt && weekKm(plan.weeks[0]) > cap1 + EPS) out.week1.push(`week 1 ${weekKm(plan.weeks[0])} > ${r1(cap1)}`);
 

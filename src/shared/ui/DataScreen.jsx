@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CloudSun, Download, Link2, RefreshCw } from "lucide-react";
+import { CloudSun, Download, Link2, RefreshCw, Watch } from "lucide-react";
 import { TopBar } from "../../components/TopBar.jsx";
 import { SettingsToggleRow } from "../../components/SettingsToggleRow.jsx";
 import { COLORS } from "../../theme.js";
@@ -8,6 +8,7 @@ import { getIntervalsSettings, maskKey, saveIntervalsSettings, syncIntervals } f
 import { getCachedWeather, getWeather, getWeatherSettings, saveWeatherSettings, validLatLon } from "../weather.js";
 import { exportActivitiesCsv, exportFullBackup, exportLastRunGpx, exportSetsCsv } from "../export.js";
 import { HistoryImport } from "./HistoryImport.jsx";
+import { WEAR_GUIDE_URL, pullWatchRuns, pushPlanToWatch, watchStatus } from "../wear.js";
 import { body, card, cardTitle, field, fmtInt, legend, mono, primaryBtn, resultBox, resultDetail, resultTitle, secondaryBtn, sectionLabel } from "./dataStyles.js";
 
 /* ---------------------------------------------------------------
@@ -123,6 +124,70 @@ function IntervalsCard({ onSynced, reloadKey }) {
       </div>
       <div style={{ ...body(), fontSize: 11, marginTop: 6 }}>
         Intervals.icu does not share activities that came from Strava. The app skips them and tells you.
+      </div>
+      <Result result={result} />
+    </div>
+  );
+}
+
+/* ---------- Wear OS watch ---------- */
+
+function WatchCard({ onSynced, reloadKey }) {
+  const [status, setStatus] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    let live = true;
+    watchStatus().then((s) => {
+      if (live) setStatus(s);
+    });
+    return () => {
+      live = false;
+    };
+  }, [reloadKey]);
+
+  async function sendNow() {
+    setBusy(true);
+    setResult(null);
+    const runs = await pullWatchRuns();
+    const sent = await pushPlanToWatch();
+    setStatus(await watchStatus());
+    const lines = [];
+    if (sent.sent) lines.push(`The phone sent ${fmtInt(sent.days)} run days to the watch. The watch gets them when it is connected.`);
+    if (runs.saved && runs.saved.length) lines.push(`Runs from the watch saved: ${fmtInt(runs.saved.length)}.`);
+    if (sent.sent) setResult({ ok: true, title: "Plan sent", detail: lines.join("\n") });
+    else setResult({ ok: false, title: "Plan not sent", detail: sent.reason === "unavailable" ? "The watch link works only in the Android app." : sent.reason });
+    if (runs.saved && runs.saved.length && onSynced) onSynced();
+    setBusy(false);
+  }
+
+  const available = !!(status && status.available);
+  const names = status && status.nodes ? status.nodes.map((n) => n.name).filter(Boolean).join(", ") : "";
+  let line = "Looking for the watch…";
+  if (status && !available) line = "The watch link works only in the Android app.";
+  else if (status && status.connected) line = `Connected${names ? `: ${names}` : ""}.`;
+  else if (status) line = "No watch found. Install Skid Marks on the watch and keep the watch near the phone.";
+
+  return (
+    <div data-testid="watch-card" style={card()}>
+      <div style={{ ...cardTitle(), display: "flex", alignItems: "center", gap: 8 }}>
+        <Watch size={15} color={COLORS.accent} /> Wear OS watch
+      </div>
+      <div style={{ ...body(), marginBottom: 10 }}>
+        Run with only the watch and headphones. The watch gets the plan for the next 7 days and speaks the coach cues. Your runs come back to this phone. No account is necessary.
+      </div>
+      <div data-testid="watch-status" style={{ ...body(), color: COLORS.text, marginBottom: 12 }}>
+        {line}
+      </div>
+      <button data-testid="watch-send" onClick={sendNow} disabled={busy || !available} style={{ ...primaryBtn(busy || !available), marginBottom: 8 }}>
+        <RefreshCw size={14} /> {busy ? "Working…" : "Send Plan to Watch Now"}
+      </button>
+      <div style={{ ...body(), fontSize: 11.5, marginTop: 6 }}>
+        How to install the watch app:{" "}
+        <a href={WEAR_GUIDE_URL} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }}>
+          docs/wear-os.md
+        </a>
       </div>
       <Result result={result} />
     </div>
@@ -383,6 +448,7 @@ export function DataScreen({ nav }) {
           The app has no direct Strava link. To bring your Strava activities, use the Strava bulk export in "Bring your history".
         </div>
       </div>
+      <WatchCard onSynced={changed} reloadKey={nav.reloadKey} />
       <div style={card()}>
         <div style={cardTitle()}>Health Connect and HealthKit</div>
         <div style={body()}>Not in this version. Export files from your health app or your watch app, and import them above.</div>

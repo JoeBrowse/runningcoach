@@ -25,7 +25,8 @@
     "fit-file-parser": "^6.2.10",
     "lucide-react": "^0.383.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "skid-marks-wear-bridge": "file:native/wear-bridge"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.7",
