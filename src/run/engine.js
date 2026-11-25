@@ -29,3 +29,5 @@ export { LOAD_NOTE, FITNESS_DAYS, FATIGUE_DAYS, rpeFromHR, activityMinutes, sess
 export { seedFromHistory } from './engine/history.js';
 
 export { STRENGTH, DRILLS, CYCLE, audioCues, simulateRun, loopRoute, toICS, toGPX, toCSV, toWorkoutJSON, coachAnswer, sample } from './engine/extras.js';
+
+export { WARMUP_MOVES, warmupFor, liftWarmup, warmupCues } from './engine/warmup.js';
