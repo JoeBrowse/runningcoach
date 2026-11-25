@@ -214,3 +214,47 @@ test('buildSegments: run/walk warm-up moves follow the brisk walk, with no secon
   const texts = segmentCueTexts(rw, segs, 'km', wu);
   assert.match(texts[1], /^Easy moves\./);
 });
+
+import { paceBand, paceGuidance, PACE_GUIDE } from '../src/runui/recorder.js';
+
+test('pace guidance: band from target pace and step class', () => {
+  assert.equal(paceBand({ walk: true, pace: 600 }), null);
+  assert.equal(paceBand({ role: 'warmup-phase', pace: 300 }), null);
+  assert.equal(paceBand({ cls: 'hard' }), null);
+  const b = paceBand({ cls: 'hard', pace: 300 });
+  assert.ok(Math.abs(b.lo - 288) < 0.01 && Math.abs(b.hi - 312) < 0.01);
+  const r = paceBand({ cls: 'steady', pace: 300, step: { paceLo: 290, paceHi: 310 } });
+  assert.deepEqual([r.lo, r.hi], [290, 310]);
+});
+
+function run(seg, paces, opts = {}) {
+  let g = null; const out = [];
+  paces.forEach((pace, i) => {
+    const t = 40 + i * 5;
+    const r = paceGuidance(g, { seg, pace, segElapsed: t, now: t, showPace: opts.showPace, units: 'km' });
+    g = r.g; if (r.text) out.push({ t, text: r.text });
+  });
+  return out;
+}
+
+test('pace guidance: speaks after 20 s off target, then waits 60 s', () => {
+  const seg = { cls: 'hard', pace: 300, effort: 'Hard but controlled.' };
+  const cues = run(seg, Array(30).fill(270), { showPace: true });
+  assert.equal(cues[0].t, 60);
+  assert.match(cues[0].text, /^Slow down\. Target .* per kilometre\. You are at 4:30 per kilometre\.$/);
+  assert.ok(cues.length >= 2 && cues[1].t - cues[0].t >= PACE_GUIDE.gapSec);
+});
+
+test('pace guidance: no cue inside the band, in the first 30 s, or for slow easy running', () => {
+  assert.equal(run({ cls: 'hard', pace: 300 }, Array(20).fill(305)).length, 0);
+  const early = paceGuidance(null, { seg: { cls: 'hard', pace: 300 }, pace: 250, segElapsed: 10, now: 10 });
+  assert.equal(early.text, null);
+  assert.equal(run({ cls: 'easy', pace: 360 }, Array(20).fill(420)).length, 0);
+  const fastEasy = run({ cls: 'easy', pace: 360 }, Array(20).fill(300));
+  assert.match(fastEasy[0].text, /slowly enough to talk/);
+});
+
+test('pace guidance: Simple mode uses effort words, slow quality step says speed up', () => {
+  const cues = run({ cls: 'hard', pace: 300, effort: 'Hard but controlled.' }, Array(20).fill(340));
+  assert.equal(cues[0].text, 'Speed up a little. Hard but controlled.');
+});

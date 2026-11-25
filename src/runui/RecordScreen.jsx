@@ -496,6 +496,7 @@ export function RecordScreen({ nav }) {
             <Toggle label={units === "mi" ? "Every mile" : "Every kilometre"} value={v.km} onToggle={() => setVoice({ km: !v.km })} testId="voice-km" />
             <Toggle label="Every step" desc="Warm-up, reps, recoveries and cool-down." value={v.step} onToggle={() => setVoice({ step: !v.step })} testId="voice-step" />
             <Toggle label="Half-way" value={v.half} onToggle={() => setVoice({ half: !v.half })} testId="voice-half" />
+            <Toggle label="Pace guidance" desc="The app says speed up or slow down when you are off the target for 20 seconds." value={v.pace !== false} onToggle={() => setVoice({ pace: v.pace === false })} testId="voice-pace" />
             {source === "gps" && <Toggle label="Auto-pause" desc="The time stops when you stop." value={prefs.autoPause} onToggle={() => saveRunPrefs({ autoPause: !prefs.autoPause }).then(setPrefs)} testId="auto-pause" />}
           </div>
         )}

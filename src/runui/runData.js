@@ -14,7 +14,7 @@ import { todayStr } from "../lib/dates.js";
 --------------------------------------------------------------- */
 
 export const RUN_PREF_DEFAULTS = {
-  voice: { on: true, rate: 1, km: true, step: true, half: true },
+  voice: { on: true, rate: 1, km: true, step: true, half: true, pace: true },
   autoPause: true,
   dailyCheckin: false,
   keepOnNoteSeen: false,

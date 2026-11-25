@@ -238,6 +238,46 @@ export function splitCueText(split, units, totalSec) {
   return `${split.n} ${unitName}. Time ${sayDur(totalSec)}. Last ${units === "mi" ? "mile" : "kilometre"} ${sayDur(split.sec)}.`;
 }
 
+/* ---- Live pace guidance ----
+   After a step has run for `settleSec`, a pace that stays outside the
+   target band for `holdSec` gives one cue. Cues come at most once each
+   `gapSec`. Easy steps get only "slow down": slower is fine on easy runs.
+   Walk steps, warm-up moves and steps with no target get no cue. */
+export const PACE_GUIDE = { holdSec: 20, gapSec: 60, settleSec: 30, tol: { hard: 0.04, race: 0.04, steady: 0.05, easy: 0.08 } };
+
+export function paceBand(seg, guide = PACE_GUIDE) {
+  if (!seg || seg.walk || seg.cls === "walk" || seg.role === "warmup-phase") return null;
+  const st = seg.step || {};
+  if (st.paceLo && st.paceHi) return { lo: Math.min(st.paceLo, st.paceHi), hi: Math.max(st.paceLo, st.paceHi), cls: seg.cls };
+  if (!seg.pace) return null;
+  const tol = guide.tol[seg.cls] != null ? guide.tol[seg.cls] : guide.tol.steady;
+  return { lo: seg.pace * (1 - tol), hi: seg.pace * (1 + tol), cls: seg.cls };
+}
+
+function spokenPace(sec, units) {
+  return engine.fmtPace(sec, units).replace("/km", "per kilometre").replace("/mi", "per mile");
+}
+
+export function paceGuidance(g, { seg, pace, segElapsed, now, showPace, units = "km" }, guide = PACE_GUIDE) {
+  const state = g || { side: null, since: null, lastAt: -Infinity };
+  const band = paceBand(seg, guide);
+  if (!band || pace == null || !Number.isFinite(pace) || segElapsed < guide.settleSec) {
+    return { g: { ...state, side: null, since: null }, text: null };
+  }
+  let side = pace < band.lo ? "fast" : pace > band.hi ? "slow" : null;
+  if (side === "slow" && band.cls === "easy") side = null;
+  if (side !== state.side) return { g: { ...state, side, since: side ? now : null }, text: null };
+  if (!side || now - state.since < guide.holdSec || now - state.lastAt < guide.gapSec) return { g: state, text: null };
+  const target = `Target ${spokenPace(band.lo, units)} to ${spokenPace(band.hi, units)}. You are at ${spokenPace(pace, units)}.`;
+  let text;
+  if (side === "fast") {
+    text = showPace ? `Slow down. ${target}` : band.cls === "easy" ? "Slow down. Run slowly enough to talk." : "Slow down a little. Keep this part controlled.";
+  } else {
+    text = showPace ? `Speed up. ${target}` : `Speed up a little. ${seg.effort || "This part is strong running."}`;
+  }
+  return { g: { side, since: now, lastAt: now }, text };
+}
+
 /* Voice text for one step, when the engine text does not fit. */
 export function stepCueText(seg, units, showPace) {
   if (!seg) return "";
@@ -354,6 +394,7 @@ export class RunSession {
     this.lastAcc = null;
     this.splitsSpoken = 0;
     this.halfSpoken = false;
+    this.paceGuide = null;
     this.completeSpoken = false;
     this.startedAt = null;
     this.endedAt = null;
@@ -473,6 +514,20 @@ export class RunSession {
       }
     }
     const v = this.opts.voice || {};
+    // Live pace guidance (not on a treadmill: the belt sets the pace)
+    if (v.pace !== false && this.opts.source !== "treadmill" && !this.autoPaused && this.currentSeg) {
+      const w = this.opts.workout;
+      const r = paceGuidance(this.paceGuide, {
+        seg: this.currentSeg,
+        pace: this.pace,
+        segElapsed: this.elapsed - this.step.startSec,
+        now: this.elapsed,
+        showPace: !!(w && w.showPace !== false),
+        units: this.units,
+      });
+      this.paceGuide = r.g;
+      if (r.text) this.say(r.text);
+    }
     // Splits
     const n = Math.floor(this.km / this.unitKm + 1e-9);
     if (n > this.splitsSpoken) {
