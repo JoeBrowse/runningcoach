@@ -1,4 +1,5 @@
 import { tourDemoValue } from "../data/tourDemo.js";
+import { isNativeRuntime } from "./platform.js";
 
 /* ---------------------------------------------------------------
    STORAGE HELPERS
@@ -43,6 +44,10 @@ export function lsDelete(key) {
 // phone — window.storage doesn't exist there, and WebView localStorage can be
 // evicted by the OS.
 export function capPrefs() {
+  // Only in the APK. In a browser, @capacitor/core also loads a web
+  // Preferences plugin. Its key list holds only its own keys, so a
+  // backup in an upgraded web app would miss the older data.
+  if (!isNativeRuntime()) return null;
   try {
     const C = typeof window !== "undefined" ? window.Capacitor : null;
     if (C && C.Plugins && C.Plugins.Preferences) return C.Plugins.Preferences;
