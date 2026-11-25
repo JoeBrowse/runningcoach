@@ -53,7 +53,9 @@ jobs:
         run: npm run build
 
       - name: Create the Android project
-        run: npx cap add android
+        run: |
+          npx cap add android
+          node scripts/android-permissions.mjs
 
       - name: Make the app icons and splash screens
         run: npx @capacitor/assets generate --android || echo "Icon generation failed. The build uses the default icon."
