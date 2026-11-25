@@ -1,6 +1,7 @@
 # Builds the Skid Marks Android app (APK).
 #
-# Every push builds a debug APK and keeps it as a workflow artifact.
+# Every push builds a debug APK (and the Wear OS watch APK) and keeps them
+# as workflow artifacts.
 # A push to main also publishes the APK on a GitHub Release, so the
 # latest build is always at:
 #   https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk
@@ -88,6 +89,24 @@ jobs:
           name: skid-marks-apk
           path: skid-marks.apk
 
+      # The Wear OS watch app (wear/). It uses the same fixed key as the
+      # phone app, so the two apps can send data to each other.
+      - name: Build and test the watch app
+        working-directory: wear
+        env:
+          WEAR_VERSION_CODE: ${{ github.run_number }}
+          WEAR_VERSION_NAME: ${{ env.VERSION }}
+        run: ./gradlew assembleDebug testDebugUnitTest --no-daemon
+
+      - name: Rename the watch APK
+        run: cp wear/app/build/outputs/apk/debug/app-debug.apk skid-marks-wear.apk
+
+      - name: Keep the watch APK as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: skid-marks-wear-apk
+          path: skid-marks-wear.apk
+
       - name: Publish the APK on a release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -98,5 +117,8 @@ jobs:
             Test build of Skid Marks, made from commit ${{ github.sha }}.
             Download skid-marks.apk and open it on an Android phone.
             Android asks you to allow apps from unknown sources. This is a test build signed with a debug key.
-          files: skid-marks.apk
+            skid-marks-wear.apk is the Wear OS watch app. To install it, see docs/wear-os.md.
+          files: |
+            skid-marks.apk
+            skid-marks-wear.apk
           make_latest: true

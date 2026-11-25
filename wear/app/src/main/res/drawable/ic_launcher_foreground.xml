@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Skid Marks mark: two orange stripes (see assets/icon-foreground.png). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M32.9,65.5 Q48.6,46.8 66.5,33.2"
+        android:strokeWidth="6.2"
+        android:strokeColor="#FF6A1A"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M42.1,75.6 Q57.8,57.2 75.6,43.1"
+        android:strokeWidth="6.2"
+        android:strokeColor="#FF6A1A"
+        android:strokeLineCap="round" />
+</vector>

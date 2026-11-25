@@ -35,6 +35,8 @@ Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on 
 | `src/shared/` | `store.js` (one activity store and storage keys), `load.js` (one load model), `import/` (GPX, TCX, FIT, ZIP, Strava CSV), `intervals.js`, `weather.js` (Open-Meteo), `export.js`, `ui/DataScreen.jsx`. |
 | `src/modes/` | Mode switch and screen registry. How to add a screen: `src/modes/README.md`. |
 | `src/screens/`, `src/components/`, `src/lib/`, `src/data/`, `src/theme.js` | Lift mode (Iron Log). Storage prefix stays `iron-log:` so Iron Log data still loads. |
+| `wear/` | Wear OS watch app (Kotlin, Compose for Wear OS, Health Services). Own Gradle project: `cd wear && ./gradlew assembleDebug testDebugUnitTest`. `app/src/main/java/com/skidmarks/app/coach/` is a pure Kotlin port of the recorder logic; `ParityTest` checks it against `parity.json`, which `test/wear.test.mjs` writes (`UPDATE_WEAR_FIXTURE=1 npm test`). Guide: `docs/wear-os.md`. |
+| `native/wear-bridge/` | Local Capacitor plugin `WearBridge` (Wear OS Data Layer): plan to the watch, runs from the watch. JS side: `src/shared/wear.js`. |
 | `test/` | `node:test` suites. `test/index.js` loads every `*.test.mjs`. |
 | `docs/` | `v1-spec.md`, privacy policy, product page, `research/` (market report, notes, six user reviews). |
 
