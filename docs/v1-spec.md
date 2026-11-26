@@ -1,8 +1,8 @@
 # Skid Marks V1 specification
 
-Skid Marks is a free running coach and gym tracker in one app. It joins the Iron Log gym tracker with the running coach designed in this repository. This document gives the decisions for version 1 (app version 2.0.0, which follows Iron Log 1.29.0).
+Skid Marks is a free running coach and gym tracker in one app. It joins a gym tracker with the running coach designed in this repository. This document gives the decisions for version 1 (app version 2.0.0).
 
-The decisions come from the market research (`docs/research/`) and from six user reviews of three running prototypes and Iron Log (beginner, intermediate and advanced; new and long-term users).
+The decisions come from the market research (`docs/research/`) and from six user reviews of three running prototypes and the gym tracker (beginner, intermediate and advanced; new and long-term users).
 
 ## 1. Principles
 
@@ -11,7 +11,7 @@ The decisions come from the market research (`docs/research/`) and from six user
 3. **One week, one load.** Run sessions and gym sessions share one plan and one training load. Each side respects the other.
 4. **Safe and honest.** Every plan change shows its reason. Safety checks test the real plan. A check never shows "Pass" when the plan breaks the rule. The load numbers are information only. They cannot predict injury.
 5. **Simple first.** Simple mode hides jargon (fitness score, form, zones, phases, predictions) until the user has 4 or more weeks of data or turns on Advanced mode.
-6. **Iron Log look.** Dark theme by default, light theme and colour-blind schemes. Orange accent `#FF6A1A`. Oswald for headings, JetBrains Mono for numbers.
+6. **One look.** Dark theme by default, light theme and colour-blind schemes. Orange accent `#FF6A1A`. Oswald for headings, JetBrains Mono for numbers.
 7. **ASD-STE100.** All text is in Simplified Technical English.
 
 ## 2. Structure
@@ -22,7 +22,7 @@ The app has three modes. A switch at the top of each home screen shows **Plan ·
 |---|---|---|
 | Plan | The master week: run days and gym days together | Today, Week, Weekly review, Goals and races, Body (muscle readiness) |
 | Run | The running coach | Run home (today's run, GO), Record, Plan weeks, Progress, Zones and prediction, Races, Fuel, Weather, Routes, Coach, Shoes |
-| Lift | Iron Log | All Iron Log screens, plus runner presets |
+| Lift | The gym tracker | All gym tracker screens, plus runner presets |
 
 Shared: Settings, Data (import and export), Women's health, About.
 
@@ -30,7 +30,7 @@ Shared: Settings, Data (import and export), Women's health, About.
 
 > Replaced in version 2.1. See `docs/v1.1-spec.md` section 1.
 
-1. A short intro (once only; the Iron Log animation does not repeat on each launch).
+1. A short intro (once only; the animation does not repeat on each launch).
 2. "Who are you?": **I am new to running**, **I run sometimes**, **I train for races**, or **Only the gym**.
 3. **New to running**: three questions (days a week, minutes a session, gym yes/no). No race date. A run/walk plan starts.
 4. **Runs sometimes / Races**: "Bring your history" (import files or link Intervals.icu; optional), then the plan setup.
@@ -68,10 +68,10 @@ Shared: Settings, Data (import and export), Women's health, About.
 
 - One activity store. Runs (recorded, imported or typed), gym sessions and other sports are each saved once. Plan, Run and Lift read the same store.
 - Duplicate check: the same start time (within 2 minutes) and the same distance (within 3%) count as one activity.
-- One load model: session effort (RPE 1-10) × minutes, the Iron Log scale, for every activity. Heart rate gives effort when it is present.
+- One load model: session effort (RPE 1-10) × minutes, the gym tracker scale, for every activity. Heart rate gives effort when it is present.
 - One fitness / fatigue / form chart (Banister model, 42 and 7 days) for both modes. It replaces the separate acute:chronic gauge on the home screens. It stays "information only".
 - One streak, counted in weeks. Rest days never break it.
-- The muscle readiness map from Iron Log is the shared body screen. Runs and other sports feed it.
+- The muscle readiness map from Lift is the shared body screen. Runs and other sports feed it.
 
 ## 7. Run features
 
@@ -87,7 +87,7 @@ Shared: Settings, Data (import and export), Women's health, About.
 - Shoes with distance limits.
 - Night-before reminder with quiet hours (local notification).
 
-## 8. Lift changes (Iron Log)
+## 8. Lift changes
 
 - Paywall and billing removed.
 - Intro animation on first launch only. Tour: 4 cards in Simple mode; the full tour stays in Settings.
@@ -102,12 +102,12 @@ Shared: Settings, Data (import and export), Women's health, About.
 - Strava export: reads `activities.csv` and the activity files in the archive.
 - Intervals.icu: the user's own API key; pulls activities and wellness (HRV, resting heart rate, sleep).
 - Strava data is shown only to the user and never goes to an AI.
-- Export: full JSON backup (Iron Log format plus the run data), CSV of all activities and all sets, GPX per run, calendar (.ics) of the plan.
+- Export: full JSON backup (the Lift format plus the run data), CSV of all activities and all sets, GPX per run, calendar (.ics) of the plan.
 - Not in V1: Health Connect and HealthKit links, Garmin workout push (the Garmin developer program is closed to new applications), FIT workout export, street maps. These are listed as future work.
 
 ## 10. Repository
 
-- `src/` app code: `lib/`, `data/`, `components/`, `screens/` (Iron Log), `run/` (engine and run screens), `plan/` (master week), `shared/` (store, load, import, native).
+- `src/` app code: `lib/`, `data/`, `components/`, `screens/` (Lift), `run/` (engine and run screens), `plan/` (master week), `shared/` (store, load, import, native).
 - `docs/research/` market research and user reviews; `docs/v1-spec.md` this file.
 - `npm test` runs engine tests, including safety invariants for many goal, day and experience combinations.
 - GitHub Actions builds a debug APK on every push and publishes it on a release for `main`.

@@ -41,7 +41,7 @@ export async function collectBackup() {
   };
 }
 
-// Accepts backups from Skid Marks and from Iron Log. Both use format 1 and
+// Accepts new and old Skid Marks backups. Both use format 1 and
 // the same keys, so the `app` field is not checked.
 export function isBackupFile(parsed) {
   return !!(parsed && parsed.data && typeof parsed.data === "object" && parsed.format === BACKUP_FORMAT);
@@ -50,12 +50,12 @@ export function isBackupFile(parsed) {
 // Replaces rather than merges: a half-restored account with today's
 // history and last year's programme would be worse than either.
 export async function restoreBackup(parsed) {
-  if (!isBackupFile(parsed)) throw new Error("That file is not a Skid Marks or Iron Log backup.");
+  if (!isBackupFile(parsed)) throw new Error("That file is not a Skid Marks backup.");
   const existing = await safeList("");
   for (const key of existing) await safeDelete(key);
   const entries = Object.entries(parsed.data);
   for (const [key, value] of entries) {
-    // The licence record came from the old paid Iron Log. Skid Marks is free.
+    // Old backups can hold a licence record. Skid Marks is free, so skip it.
     if (key === "license") continue;
     await safeSet(key, value);
   }

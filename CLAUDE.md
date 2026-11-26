@@ -2,9 +2,9 @@
 
 ## What this is
 
-**Skid Marks** is a free running coach and gym tracker in one Android app (React 18 + Vite, wrapped with Capacitor 8). It has three modes: **Plan** (the master week), **Run** (the running coach) and **Lift** (the gym tracker, based on Iron Log). All features are free. No ads, no accounts, no data sales. Data stays on the phone. Licence: GPL-3.0-or-later.
+**Skid Marks** is a free running coach and gym tracker in one Android app (React 18 + Vite, wrapped with Capacitor 8). It has three modes: **Plan** (the master week), **Run** (the running coach) and **Lift** (the gym tracker). All features are free. No ads, no accounts, no data sales. Data stays on the phone. Licence: GPL-3.0-or-later.
 
-- Package ID: `com.skidmarks.app`. App version: see `package.json` (2.x continues Iron Log 1.29).
+- Package ID: `com.skidmarks.app`. App version: see `package.json`.
 - The decisions for V1 are in `docs/v1-spec.md`, and for 2.1 in `docs/v1.1-spec.md` (first open, hybrid week, setups). Read them before you change behaviour. The rules for running and lifting together come from `docs/research/concurrent-training.md`.
 
 ## Writing style
@@ -37,7 +37,7 @@ Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on 
 | `src/shared/` | `store.js` (one activity store and storage keys), `load.js` (one load model), `import/` (GPX, TCX, FIT, ZIP), `intervals.js`, `weather.js` (Open-Meteo), `export.js`, `ui/DataScreen.jsx`, `ui/WebInstall.jsx` (install hint and the web version panel). |
 | `src/modes/` | Mode switch and screen registry. How to add a screen: `src/modes/README.md`. |
 | `src/lib/webApp.js` | Web version: browser or app, installed or not, the install prompt, install steps and `WEB_LIMITS`. |
-| `src/screens/`, `src/components/`, `src/lib/`, `src/data/`, `src/theme.js` | Lift mode (Iron Log). Storage prefix stays `iron-log:` so Iron Log data still loads. |
+| `src/screens/`, `src/components/`, `src/lib/`, `src/data/`, `src/theme.js` | Lift mode. The storage key prefix stays `iron-log:` (`STORAGE_PREFIX` in `src/lib/storage.js`) so that old data still loads. Do not change it. |
 | `wear/` | Wear OS watch app (Kotlin, Compose for Wear OS, Health Services). Own Gradle project: `cd wear && ./gradlew assembleDebug testDebugUnitTest`. `app/src/main/java/com/skidmarks/app/coach/` is a pure Kotlin port of the recorder logic; `ParityTest` checks it against `parity.json`, which `test/wear.test.mjs` writes (`UPDATE_WEAR_FIXTURE=1 npm test`). Guide: `docs/wear-os.md`. |
 | `native/wear-bridge/` | Local Capacitor plugin `WearBridge` (Wear OS Data Layer): plan to the watch, runs from the watch. JS side: `src/shared/wear.js`. |
 | `test/` | `node:test` suites. `test/index.js` loads every `*.test.mjs`. |
@@ -45,7 +45,7 @@ Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on 
 
 ## Design rules
 
-- **Look:** Iron Log style. Use `COLORS`/`THEME` from `src/theme.js` (never hard-coded colours; every colour scheme and light/dark must work), Oswald uppercase labels, JetBrains Mono numbers, orange accent `#FF6A1A`.
+- **Look:** Use `COLORS`/`THEME` from `src/theme.js` (never hard-coded colours; every colour scheme and light/dark must work), Oswald uppercase labels, JetBrains Mono numbers, orange accent `#FF6A1A`.
 - **Simple and Advanced:** Simple mode hides fitness score, form, zones, phase names and predictions, and uses effort words.
 - **One store, one load:** every activity is saved once through `src/shared/store.js`. Load is RPE × minutes for every activity, with fitness / fatigue / form from `src/shared/load.js`. Do not add a second load model.
 - **Safety:** every plan change has a reason. Safety checks test the real planned days and must be honest. Keep the tests that check thousands of generated plans green.

@@ -5,7 +5,7 @@ import { flattenSteps } from "./steps.js";
 /* ---------------------------------------------------------------
    RUN MODE UI PARTS
 
-   Iron Log look: COLORS from theme.js at render time (never fixed
+   App look: COLORS from theme.js at render time (never fixed
    colours), Oswald uppercase labels, JetBrains Mono numbers, 44 px
    touch targets. Style helpers are functions because COLORS changes
    in place when the theme changes.

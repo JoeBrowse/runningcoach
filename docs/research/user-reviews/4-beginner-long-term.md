@@ -11,7 +11,7 @@ I am Sam, 38. Four months ago I could not run for two minutes. I did the run/wal
 | A "Coach" | 6/10 | Friendliest daily screen. Best explanations. No plan for life after the race. |
 | B "Logbook" | 5/10 | Only design that shows my months before the plan. Too many numbers for daily use. |
 | C "Track" | 6/10 | Best "just go" screen. "Too hard or too easy" is easy to find. Feels thin after month 2. |
-| Iron Log (Lift) | 4/10 | Good muscle map and cardio logging. Bodybuilding presets. Day streak punishes rest days. |
+| Lift (gym tracker) | 4/10 | Good muscle map and cardio logging. Bodybuilding presets. Day streak punishes rest days. |
 
 ## 3. What works
 
@@ -21,7 +21,7 @@ I am Sam, 38. Four months ago I could not run for two minutes. I did the run/wal
 
 **C**: The red Today screen with the big GO button suits a cold morning. "Something changed" item 6, "Sessions feel too hard or too easy", matters because I get fitter every month. "Add 20 min strength after this run" is a good nudge.
 
-**Iron Log**: Cardio & Activity logs a run with distance and RPE, and a run marks quads, calves and hamstrings on the muscle map. This is the base for "no heavy legs before a long run". Simple mode suits me.
+**Lift**: Cardio & Activity logs a run with distance and RPE, and a run marks quads, calves and hamstrings on the muscle map. This is the base for "no heavy legs before a long run". Simple mode suits me.
 
 ## 4. What fails or is missing
 
@@ -40,7 +40,7 @@ I am Sam, 38. Four months ago I could not run for two minutes. I did the run/wal
 **A**: "Too hard / too easy" is hidden in Zones. The More menu has 14 items; I use four.
 **B**: "Form -9" still means nothing to me for Saturday's run. It is a desktop layout on a phone.
 **C**: The Me tab is 15 rows, with Progress buried. The GO screen is the same every day; by month 3 it feels like a timer, not a coach.
-**Iron Log**: Presets are Push Pull Legs, Bro Split, Arnold Split, Project Arms. Nothing for "once a week, for runners". "Full Body B" puts squat and deadlift together. The "DAY STREAK" counts days in a row, while the run side counts "11 weeks in a row" and says rest builds fitness.
+**Lift**: Presets are Push Pull Legs, Bro Split, Arnold Split, Project Arms. Nothing for "once a week, for runners". "Full Body B" puts squat and deadlift together. The "DAY STREAK" counts days in a row, while the run side counts "11 weeks in a row" and says rest builds fitness.
 
 ## 5. Long-term grievances and wishes
 
@@ -73,4 +73,4 @@ I am Sam, 38. Four months ago I could not run for two minutes. I did the run/wal
 - **Life events**: Keep A's "What changed and why" sheet and return ladder. Ask the questions before the change.
 - **Progress**: Take B's season chart with "Before the plan", and show all past plans in a row (run/walk, 5K, next). Keep B's density off daily screens.
 - **Menus**: Cut A's More (14) and C's Me (15) to about six items. Hide fuel, routes and 50K for beginners.
-- **From Iron Log**: Keep Simple/Advanced modes, the muscle map, the cardio-to-muscle rules and the JSON backup. Add a "runner strength, once a week" preset. Replace the day streak with a week streak. Feed every recorded run into the map automatically.
+- **From Lift**: Keep Simple/Advanced modes, the muscle map, the cardio-to-muscle rules and the JSON backup. Add a "runner strength, once a week" preset. Replace the day streak with a week streak. Feed every recorded run into the map automatically.

@@ -1,5 +1,5 @@
 /* Training load. One model for runs, gym sessions and other sports:
-   load = session effort (RPE 1-10) x minutes. This is the Iron Log scale (Foster session RPE).
+   load = session effort (RPE 1-10) x minutes. This is the Lift scale (Foster session RPE).
    Fitness (42 days), fatigue (7 days) and form (fitness - fatigue) follow the Banister model.
    INFORMATION ONLY. The load numbers cannot predict injury. */
 

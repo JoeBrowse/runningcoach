@@ -18,7 +18,7 @@ Every mode home shows the switch "Plan · Run · Lift" at the top.
 | `src/modes/sharedScreens.js` | Screens for all modes (`SHARED_SCREENS`), for example Data. |
 
 The run engine (no UI) is in `src/run/`. Run screens go in `src/runui/`.
-Lift is the Iron Log app. Its screens stay in `src/screens/` and use the old `setScreen` routing in `App.jsx`.
+Lift is the gym tracker. Its screens stay in `src/screens/` and use the old `setScreen` routing in `App.jsx`.
 
 ## Add a screen to a mode
 
@@ -71,7 +71,7 @@ You do not need to edit `App.jsx`.
 | `nav.back()` | Goes back one screen. With an empty stack, it opens the mode home. |
 | `nav.home()` | Clears the stack and opens the mode home. |
 | `nav.openSettings()` | Opens Settings. Its back button opens the mode home. |
-| `nav.openLiftScreen(id)` | Opens an Iron Log screen by id (`"history"`, `"streak"`, `"progress"`, ...). Its back button opens the mode home. |
+| `nav.openLiftScreen(id)` | Opens a Lift screen by id (`"history"`, `"streak"`, `"progress"`, ...). Its back button opens the mode home. |
 | `nav.settings` | The app settings object. |
 | `nav.updateSettings(next)` | Saves new settings (pass the full object). |
 | `nav.reloadKey` | A number that changes when data changes. Use it as an effect dependency. |

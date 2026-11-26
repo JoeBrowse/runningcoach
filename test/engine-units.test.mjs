@@ -313,7 +313,7 @@ test('seedFromHistory: race or time trial first, no threshold sessions, a 12-wee
   assert.equal(E.seedFromHistory([], TODAY).score, null);
 });
 
-test('load: RPE x minutes (Iron Log scale), HR mapping, Banister series', () => {
+test('load: RPE x minutes (Lift scale), HR mapping, Banister series', () => {
   assert.equal(E.sessionLoad({ rpe: 6, min: 50 }), 300);
   assert.equal(E.sessionLoad({ rpe: 3, sec: 3600 }), 180);
   const hr = E.sessionRpe({ avgHR: 150, maxHR: 190, restHR: 50, min: 60 });

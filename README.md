@@ -28,7 +28,7 @@ Use the switch at the top of the screen: **Plan · Run · Lift**.
 |---|---|
 | **Plan** | Your master week. Run days and gym days are in one plan. Today's session, the week, a weekly review, races and goals, and the muscle readiness map. |
 | **Run** | The running coach. Today's run, GPS recording with voice cues, the season chart, progress, zones and race prediction, fuel, weather, routes and the coach. |
-| **Lift** | The gym tracker (based on Iron Log). Log sets, follow programmes, see 1RM progress and which muscles have recovered. Runner presets are included. |
+| **Lift** | The gym tracker. Log sets, follow programmes, see 1RM progress and which muscles have recovered. Runner presets are included. |
 
 Each session goes into one shared log. A run that you record appears in all three modes and on the muscle map. You never log a session twice.
 
@@ -81,7 +81,7 @@ The same list is in the app (Settings > Web version) and on the [product page](h
 3. Open Skid Marks.
 4. Optional: install the Wear OS watch app to run with only the watch and headphones. See [docs/wear-os.md](docs/wear-os.md).
 
-This is a test build signed with a public test key (see [signing/README.md](signing/README.md)), so Android shows a warning. All builds use the same key, so a new build installs over an old one and keeps your data. The app installs next to Iron Log and does not change Iron Log's data. To move your Iron Log data, save a backup in Iron Log and restore it in Skid Marks.
+This is a test build signed with a public test key (see [signing/README.md](signing/README.md)), so Android shows a warning. All builds use the same key, so a new build installs over an old one and keeps your data.
 
 ## Build from source
 
@@ -118,14 +118,13 @@ The website (`.github/workflows/pages.yml`) puts `docs/index.html` at the site r
 | `src/runui/` | Run mode: today's run, recording, progress, zones, fuel, weather, routes, coach, shoes. |
 | `src/shared/` | Shared activity store, load model, file import, Intervals.icu, weather and export. |
 | `src/modes/` | The mode switch and the screen registry. See [src/modes/README.md](src/modes/README.md). |
-| `src/screens/`, `src/components/`, `src/lib/`, `src/data/` | Lift mode (Iron Log). |
+| `src/screens/`, `src/components/`, `src/lib/`, `src/data/` | Lift mode. |
 | `test/` | Tests (`npm test`). |
 | `docs/v1-spec.md` | The V1 specification. |
 | `docs/research/` | Market research of 37 apps and six user reviews. |
 
 ## Credits
 
-- Lift mode is based on [Iron Log](https://github.com/JoeBrowse/IronLogV3).
 - The muscle readiness map uses region data from [body-muscles](https://github.com/vulovix/body-muscles) by Ivan Vulović, under the Apache License 2.0. See [NOTICE](NOTICE).
 - Race prediction uses the published Daniels and Gilbert equations and the Riegel formula. The app is not linked to or endorsed by their authors.
 

@@ -4,7 +4,7 @@
 
 I am Sam, 31. I run once or twice a week, 5 to 8 km, with no plan (about 12 km a week; 10K in about 55:00). I lift upper/lower: Monday upper, Wednesday lower, Friday upper when I can. I wear a Garmin Forerunner 265 with an Android phone. I want a sub-50 10K by March 2027, then a half marathon in October 2027. I keep the gym. I want one app that knows both sides. I will not log a session twice or fill in a daily survey.
 
-Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00, 12 km a week, 3 days) and checked the engine output. In Iron Log I took Simple, logged a run, used "Train ready muscles" and opened the programme builder. Screenshots: `personas/p2/`.
+Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00, 12 km a week, 3 days) and checked the engine output. In Lift I took Simple, logged a run, used "Train ready muscles" and opened the programme builder. Screenshots: `personas/p2/`.
 
 ## 2. Fit scores
 
@@ -13,7 +13,7 @@ Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00,
 | A Coach | 6 | The best daily screen and honest week targets. The plan ignores my gym days. |
 | B Logbook | 6 | The season chart suits a goal that is months away. It is dense on a phone, and the long run can only be on Sat, Sun or Wed. |
 | C Track | 5 | The clearest week list. Its strength is audio-first running, which I need least. The peak number it shows is wrong. |
-| Iron Log (Lift) | 7 | The only part that knows a run made my legs tired. Programmes do not use weekdays, and it does not ask if I run. |
+| Lift (gym tracker) | 7 | The only part that knows a run made my legs tired. Programmes do not use weekdays, and it does not ask if I run. |
 
 ## 3. What works
 
@@ -23,7 +23,7 @@ Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00,
 
 **C Track.** The "Week" tab is the best week overview: day, session, distance and a shape bar on one row. "Move" swaps two days and checks that hard days do not touch.
 
-**Iron Log.** After a logged 7 km run at RPE 6, quads and hamstrings turned red, and "Train ready muscles" gave me an upper-body session. This is the run-and-gym link I want. Logging took about 20 seconds.
+**Lift.** After a logged 7 km run at RPE 6, quads and hamstrings turned red, and "Train ready muscles" gave me an upper-body session. This is the run-and-gym link I want. Logging took about 20 seconds.
 
 ## 4. What fails or is missing
 
@@ -42,7 +42,7 @@ Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00,
 **B:** The wizard "Safety" step shows four green ticks before the plan exists; the result then shows a red X. Heavy scrolling on a phone.
 **C:** On a rest day the Run tab is a giant red "Rest" and a GO button. It says nothing about my gym session.
 
-**Iron Log:**
+**Lift:**
 - "Upper Lower" assumes 4 sessions a week; I do 2 or 3. Programmes are a session list, not weekdays, so they cannot line up with a run plan.
 - The guided wizard never asks "Do you also run? Which days?".
 - Runs are typed by hand, though my Garmin already has them.
@@ -50,7 +50,7 @@ Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00,
 
 ## 5. What I predict will annoy me in month 2
 
-1. **Logging twice.** A lower day done in Lift leaves the Run plan's strength day open. Garmin runs must be retyped into Iron Log.
+1. **Logging twice.** A lower day done in Lift leaves the Run plan's strength day open. Garmin runs must be retyped into Lift.
 2. **Weekly swaps.** Thursday hills always follow Wednesday legs. I swap days every Sunday; the app never learns my pattern.
 3. **Red legs.** If every easy run paints my legs red, I will stop trusting the map or skip lower days.
 4. **Duplicate strength.** "Add 20 min strength after this run" when I already lift three times a week.
@@ -70,7 +70,7 @@ Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00,
 7. **Let me choose run days, not only the count.** Allow any long-run day (B allows only three).
 8. **Show honest summary numbers.** "Peak week" is the largest planned training week, not the target and not the race week.
 9. **Make check-ins optional and light.** Use watch sleep/HRV when it is available. Ask one question after a run. Do not ask a daily survey.
-10. **Iron Log onboarding for runners.** Ask "Do you run? Which days?". Offer Upper/Lower 2x and 3x a week, linked to weekdays. Shorten the 20-step tour, and do not show toasts over form fields.
+10. **Lift onboarding for runners.** Ask "Do you run? Which days?". Offer Upper/Lower 2x and 3x a week, linked to weekdays. Shorten the 20-step tour, and do not show toasts over form fields.
 
 ## 7. Design verdict
 
@@ -78,4 +78,4 @@ Method: I ran the wizard in A, B and C with my answers (10K, 14 Mar 2027, 55:00,
 - **Week view: C.** Use its Week tab as the **Plan** master week, with run and gym rows mixed ("Wed: Lower body").
 - **Long-term goals: B.** Use its season chart; keep its table for desktop.
 - **C's GO and audio** belong on the recording screen only.
-- **From Iron Log, keep:** the run-fed body map, "Train ready muscles", fast logging, "load is information only" and Simple/Advanced. Merge its dark style with the prototypes into one visual system.
+- **From Lift, keep:** the run-fed body map, "Train ready muscles", fast logging, "load is information only" and Simple/Advanced. Merge its dark style with the prototypes into one visual system.

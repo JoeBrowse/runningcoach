@@ -63,7 +63,7 @@ export function liftAreas(session) {
 }
 
 /* 'hard' or 'easy' from the session RPE (10 - RIR of each set). A
-   session with no RIR uses the Iron Log value 7, so it counts as hard.
+   session with no RIR uses the Lift default value 7, so it counts as hard.
    That is the safe side for a leg session. */
 export function liftIntensity(session) {
   const rpe = sessionRPE(session || {});

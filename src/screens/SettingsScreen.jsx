@@ -291,7 +291,7 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
       <div style={{ padding: "0 20px 40px", textAlign: "center" }}>
         <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>Skid Marks v{APP_VERSION}</div>
         <div data-testid="about-text" style={{ color: COLORS.textDim, fontSize: 11.5, marginTop: 6, lineHeight: 1.5 }}>
-          Skid Marks is free and open source (GPL-3.0). Lift mode is based on Iron Log.
+          Skid Marks is free and open source (GPL-3.0).
         </div>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, marginTop: 6, opacity: 0.8, lineHeight: 1.5 }}>
           The muscle map artwork is from Body Muscles, © 2024 Ivan Vulović.

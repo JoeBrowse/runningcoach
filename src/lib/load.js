@@ -3,7 +3,7 @@ import { activitySeconds } from "./activities.js";
 import { restSecondsFor } from "./rest.js";
 
 /* ---------------------------------------------------------------
-   SESSION LOAD (Iron Log)
+   SESSION LOAD (Lift)
 
    LOAD — session RPE. Foster's method: how hard the session felt, 0-10,
    multiplied by how many minutes it lasted. One number in arbitrary

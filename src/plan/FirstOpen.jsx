@@ -17,7 +17,7 @@ import { WEB_LIMITS_SHORT, isWebApp } from "../lib/webApp.js";
    Save writes the master week and run-profile.use. App.jsx then opens
    Plan (Both), Run (Running) or Lift (Lifting).
 
-   Upgraded Iron Log users never see this flow (App.jsx skips it).
+   Users who upgrade with old gym data never see this flow (App.jsx skips it).
 
    <FirstOpen onDone={({ use, appMode }) => ...} />
 --------------------------------------------------------------- */

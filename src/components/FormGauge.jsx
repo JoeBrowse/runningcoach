@@ -7,7 +7,7 @@ import { COLORS, STAGE_COLORS } from "../theme.js";
 
    One scale with a marker. The colour belongs to the scale, and the
    marker shows where you are. The words are behind the info button.
-   It is information only, the same as the old Iron Log load gauge. */
+   It is information only, the same as the old load gauge. */
 
 const FORM_SOURCES = [
   {

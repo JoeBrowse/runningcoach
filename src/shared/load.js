@@ -9,12 +9,12 @@ import { listActivities, getKey, KEYS } from "./store.js";
    One load model for Plan, Run and Lift (spec section 6).
 
    LOAD of one activity = effort (RPE 1-10) x minutes. This is Foster's
-   session-RPE method, the same scale that Iron Log used.
-   - A lift session uses Iron Log's sessionTrainingLoad (effort from the
+   session-RPE method, the same scale that Lift uses.
+   - A lift session uses Lift's sessionTrainingLoad (effort from the
      logged RIR, minutes from the timer or from the sets).
    - Any other activity uses its RPE. When there is no RPE but there is an
      average heart rate and a maximum heart rate (from the run profile),
-     the heart rate gives the effort. Else the app uses RPE 7, as Iron Log
+     the heart rate gives the effort. Else the app uses RPE 7, as Lift
      did.
 
    FITNESS, FATIGUE AND FORM (Banister impulse-response model):
@@ -47,7 +47,7 @@ export function effortFromHeartRate(avgHR, maxHR) {
   return Math.max(1, Math.min(10, Math.round(((share - 0.5) / 0.5) * 10 * 10) / 10));
 }
 
-/* Load of one item from listActivities(), or of one raw Iron Log record.
+/* Load of one item from listActivities(), or of one raw Lift record.
    options: { settings, maxHR } — maxHR is the runner's maximum heart rate. */
 export function activityLoad(item, options = {}) {
   if (!item) return 0;

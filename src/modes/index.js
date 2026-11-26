@@ -14,8 +14,8 @@ export { ModeHeader, ModeSwitch } from "./ModeHeader.jsx";
    See src/modes/README.md for the extension pattern.
 
    MODES: each mode with its home component. Lift has no `Home` here:
-   App.jsx renders the Iron Log HomeScreen for it, because that screen
-   needs many Iron Log callbacks.
+   App.jsx renders the Lift HomeScreen for it, because that screen
+   needs many Lift callbacks.
 
    MODE_SCREENS: every extra screen, keyed by a namespaced id
    ("plan:week", "run:record", "shared:data"). App.jsx renders the
