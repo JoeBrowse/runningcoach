@@ -59,8 +59,6 @@ export async function restoreBackup(parsed) {
     if (key === "license") continue;
     await safeSet(key, value);
   }
-  // A restore is not a first launch. Old backups have no intro flag.
-  await safeSet("intro-seen", true);
   return entries.length;
 }
 

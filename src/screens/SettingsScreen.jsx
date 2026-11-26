@@ -112,7 +112,6 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
     // switches scattered down a list.
     { key: "stravaShare", label: "Share to Strava", desc: "Add a share button at the end of each workout and on each past workout. The button puts your lifts into text and sends the text to the share sheet. Then it opens Strava. Paste the text into the activity." },
     { key: "randomizeSelection", label: "Randomize Exercise Selection", desc: "Off: the app selects exercises in ranked order. On: the app selects them in random order for variety." },
-    { key: "introEachLaunch", label: "Opening Animation at Each Start", desc: "The app shows a geometric animation on the first start only. Turn this on to see it each time that the app starts. Tap the animation to skip it. If your phone uses the reduce motion setting, the app skips it automatically." },
   ];
 
   const appMode = settings.appMode === "advanced" ? "advanced" : "simple";

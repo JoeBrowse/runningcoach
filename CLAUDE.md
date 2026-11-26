@@ -11,7 +11,7 @@
 
 The owner asks for **ASD-STE100 Simplified Technical English** everywhere: UI text, documents, comments in new code, commit messages and replies. Short sentences (about 20 words or fewer), active voice, common words, one fact or instruction per sentence, no contractions, no idioms.
 
-Do not change these when you edit text: the daily quotes (real quotations), exercise, muscle and split names, technical terms (RIR, RPE, 1RM), and any string that code stores, compares or uses as a key.
+Do not change these when you edit text: exercise, muscle and split names, technical terms (RIR, RPE, 1RM), and any string that code stores, compares or uses as a key.
 
 ## Commands
 

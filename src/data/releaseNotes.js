@@ -23,6 +23,21 @@ export const LAST_SEEN_VERSION_KEY = "last-seen-version";
 
 export const RELEASE_NOTES = [
   {
+    version: "2.1.1",
+    released: "2026-11-26",
+    headline: "The app opens faster.",
+    items: [
+      {
+        title: "No opening animation",
+        body: "The opening animation is removed. The app opens directly.",
+      },
+      {
+        title: "No quote on Lift home",
+        body: "The daily quote is removed from Lift home. The screen shows your training first.",
+      },
+    ],
+  },
+  {
     version: "2.1.0",
     released: "2026-11-26",
     headline: "Choose running, lifting or both. The app plans one week for you.",
