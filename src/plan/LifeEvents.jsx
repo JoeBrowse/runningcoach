@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { COLORS } from "../theme.js";
 import * as engine from "../run/engine.js";
 import { getRunSettings, setRunSettings } from "../shared/store.js";
@@ -22,6 +22,7 @@ const TITLES = {
   holiday: "Holiday",
   break: "Back after a break",
   legs: "Legs feel heavy",
+  tired: "I feel really tired",
   feedback: "Too hard or too easy",
 };
 
@@ -93,6 +94,23 @@ export function LifeEvents({ nav }) {
   const [legIso, setLegIso] = useState(null);
   const [holiday, setHoliday] = useState({ fromIso: "", toIso: "", canRun: false });
   const [fb, setFb] = useState(null);
+  const tiredSent = useRef(false);
+
+  // "I feel really tired" changes the plan at once (spec v1.1 section 4):
+  // today's hard run or heavy lift becomes easy or light, and the next day
+  // stays easy. The result shows each change with Undo.
+  useEffect(() => {
+    if (!data || !data.plan || kind !== "tired" || tiredSent.current || (nav.params && nav.params.applied)) return;
+    tiredSent.current = true;
+    if (nav.params) nav.params.applied = true;
+    setBusy(true);
+    applyEvent({ type: "tired" }, { today: data.today }).then(({ result: r }) => {
+      setBusy(false);
+      setResult(r);
+      nav.reload();
+      refresh();
+    });
+  }, [data, kind]);
 
   useEffect(() => {
     if (!data || !data.plan || !["illness", "injury", "break"].includes(kind) || questions) return;
@@ -107,7 +125,7 @@ export function LifeEvents({ nav }) {
     return (
       <Screen title="Something changed" onBack={nav.back} testId="life-screen">
         <Notice>You have no running plan yet. Make a plan first.</Notice>
-        <Btn onClick={() => nav.go("plan:onboarding", {})}>Make a plan</Btn>
+        <Btn onClick={() => nav.go("plan:setup", {})}>Make a plan</Btn>
       </Screen>
     );
   }
@@ -169,6 +187,11 @@ export function LifeEvents({ nav }) {
           <div style={{ ...st.body(), marginBottom: 12 }}>We ask how you feel each day for the next {result.followUps.length} days.</div>
         )}
         {kind === "injury" && !result.undone && <Notice title="Medical note">This app cannot diagnose an injury. See a physio or doctor if the pain is sharp, gets worse, or makes you limp.</Notice>}
+        {kind === "tired" && !result.undone && (
+          <Notice testId="tired-note" title="Rest well">
+            Sleep, food and water help you recover. Talk to a doctor if you feel very tired for more than a few days.
+          </Notice>
+        )}
         <Btn testId="life-done" onClick={() => nav.home()}>
           Back to today
         </Btn>
@@ -184,6 +207,12 @@ export function LifeEvents({ nav }) {
   return (
     <Screen title={TITLES[kind]} onBack={nav.back} testId="life-screen">
       <ResultPanel result={result} />
+
+      {kind === "tired" && (
+        <div data-testid="tired-busy">
+          {busy ? <Loading /> : <div style={{ ...st.body(), marginBottom: 12 }}>The plan makes today easy. The next day stays easy too.</div>}
+        </div>
+      )}
 
       {kind === "missed" && (
         <>

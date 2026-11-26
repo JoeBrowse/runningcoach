@@ -26,6 +26,7 @@ export const LIFE_CHIPS = [
   { kind: "holiday", label: "Holiday" },
   { kind: "break", label: "Back after a break" },
   { kind: "legs", label: "Legs feel heavy" },
+  { kind: "tired", label: "I feel really tired" },
   { kind: "feedback", label: "Too hard / too easy" },
 ];
 
@@ -383,7 +384,7 @@ function SetupCard({ data, nav }) {
   if (!checked) return null;
   if (hidden) {
     return (
-      <LinkRow testId="setup-running-link" onClick={() => nav.go("plan:onboarding", {})}>
+      <LinkRow testId="setup-running-link" onClick={() => nav.go("plan:setup", {})}>
         Set up running
       </LinkRow>
     );
@@ -409,9 +410,16 @@ function SetupCard({ data, nav }) {
           <X size={18} />
         </button>
       </Row>
-      <Btn testId="setup-running-go" onClick={() => nav.go("plan:onboarding", {})}>
+      <Btn testId="setup-running-go" onClick={() => nav.go("plan:setup", {})}>
         Start
       </Btn>
+      {!(data.master && data.master.use) && (
+        <div style={{ marginTop: 8 }}>
+          <Btn kind="secondary" small testId="setup-week-go" onClick={() => nav.go("plan:your-week", { use: "both" })}>
+            Plan my week first
+          </Btn>
+        </div>
+      )}
       {data.master && data.master.gymDays && data.master.gymDays.length > 0 && <div style={{ ...st.body(), fontSize: 12, marginTop: 8 }}>Your gym days are already in your master week.</div>}
     </Card>
   );
@@ -484,7 +492,7 @@ export function PlanHome({ nav }) {
               What changed and why
             </LinkRow>
           )}
-          <LinkRow testId="link-setup" icon={<Settings2 size={17} color={COLORS.accent} />} onClick={() => nav.go(data.profile && data.profile.onboarded ? "plan:setup" : "plan:onboarding", {})}>
+          <LinkRow testId="link-setup" icon={<Settings2 size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:setup", {})}>
             {data.plan ? "Change goal or plan setup" : "Make a plan"}
           </LinkRow>
           <Label>Reminders</Label>

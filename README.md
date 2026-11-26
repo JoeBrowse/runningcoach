@@ -15,7 +15,7 @@ Skid Marks plans your runs around your gym days. It adapts the plan when life ch
 <p>
   <img src="docs/screens/run-progress.png" width="180" alt="Run progress: fitness and fatigue, weekly distance">
   <img src="docs/screens/lift-home.png" width="180" alt="Lift mode: the muscle readiness map">
-  <img src="docs/screens/onboarding.png" width="180" alt="First open: Who are you?">
+  <img src="docs/screens/onboarding.png" width="180" alt="First open: running, lifting or both?">
 </p>
 
 ---
@@ -39,7 +39,7 @@ Each session goes into one shared log. A run that you record appears in all thre
 - **Changes with reasons.** Tell the app that you missed a run, were ill, have a pain, go on holiday or are back after a break. It asks its questions first. Then it changes the plan and shows each change with its reason. You can undo any change.
 - **Goals with or without a race.** Run/walk to your first 5K, 5K to marathon, a 50K trail race, or goals with no date: keep fit, get faster at 5K, build to 10K. A, B and C races, a recovery block after each race, and a "What next?" step.
 - **Simple or Advanced.** Simple mode uses plain effort words ("slow enough to talk") and hides scores and phases. Advanced mode shows the fitness score, zones, predictions and the fitness / fatigue / form chart.
-- **Bring your history.** Import Strava and Garmin export files, and FIT, GPX and TCX files, many at once. Duplicates are skipped. Optional link to Intervals.icu with your own API key.
+- **Bring your history.** Import FIT, GPX and TCX files (also as GZ or ZIP files, for example the Garmin account export), many at once. Duplicates are skipped. Optional link to Intervals.icu with your own API key.
 
 ## Privacy
 

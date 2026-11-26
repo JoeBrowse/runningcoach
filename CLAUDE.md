@@ -5,7 +5,7 @@
 **Skid Marks** is a free running coach and gym tracker in one Android app (React 18 + Vite, wrapped with Capacitor 8). It has three modes: **Plan** (the master week), **Run** (the running coach) and **Lift** (the gym tracker, based on Iron Log). All features are free. No ads, no accounts, no data sales. Data stays on the phone. Licence: GPL-3.0-or-later.
 
 - Package ID: `com.skidmarks.app`. App version: see `package.json` (2.x continues Iron Log 1.29).
-- The decisions for V1 are in `docs/v1-spec.md`. Read it before you change behaviour.
+- The decisions for V1 are in `docs/v1-spec.md`, and for 2.1 in `docs/v1.1-spec.md` (first open, hybrid week, setups). Read them before you change behaviour. The rules for running and lifting together come from `docs/research/concurrent-training.md`.
 
 ## Writing style
 
@@ -30,7 +30,7 @@ Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on 
 | Path | Contents |
 |---|---|
 | `src/run/` | Plan engine (pure functions, no DOM). API: `src/run/ENGINE.md`. Warm-ups: `src/run/engine/warmup.js`. |
-| `src/plan/` | Plan mode: onboarding, plan wizard, master week, life events, weekly review, races, reminders. `planState.js` loads, saves, adapts and undoes the plan. |
+| `src/plan/` | First open (`FirstOpen.jsx`: running, lifting or both; tour), "Your week" (`YourWeek.jsx`, `weekSetup.js`), Lift setup card, unplanned-session handling (`unplanned.js`), plan wizard, master week, life events, weekly review, races, reminders. `planState.js` loads, saves, adapts and undoes the plan. |
 | `src/runui/` | Run mode: run home, GPS recorder, summary, season chart, progress, zones, fuel, weather, routes, coach, shoes, cycle log, workout builder. |
 | `src/shared/` | `store.js` (one activity store and storage keys), `load.js` (one load model), `import/` (GPX, TCX, FIT, ZIP, Strava CSV), `intervals.js`, `weather.js` (Open-Meteo), `export.js`, `ui/DataScreen.jsx`. |
 | `src/modes/` | Mode switch and screen registry. How to add a screen: `src/modes/README.md`. |

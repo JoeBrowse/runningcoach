@@ -193,14 +193,32 @@ export function RunHome({ nav }) {
   const startRun = (w) => nav.go("run:record", { iso: w.iso, mode: "plan", workout: w });
 
   let todayCard;
-  if (!plan) {
-    const onboarded = profile && profile.onboarded;
+  // Running is set up after the run setup (spec v1.1 section 2). An old
+  // "Only the gym" profile counts as not set up.
+  const runningSetUp = !!(profile && profile.onboarded && profile.level !== "gym-only");
+  if (!plan && !runningSetUp) {
+    todayCard = (
+      <div data-testid="setup-running-card" style={{ ...S.card(), border: `1px solid ${COLORS.accent}` }}>
+        <div style={{ ...S.title(), fontSize: 20 }}>Set up running</div>
+        <div style={{ ...S.body(), margin: "6px 0 12px" }}>
+          {profile && (profile.use === "run" || profile.use === "both") ? "Your run days come from your week. Tell the app your goal and your fitness. Then it makes your plan." : "Tell the app your goal, your days and your fitness. Then it makes your plan."}
+        </div>
+        <Btn kind="primary" testId="setup-running-start" onClick={() => nav.go("plan:setup", { from: "run" })}>
+          Set up running
+        </Btn>
+        <div style={{ height: 8 }} />
+        <Btn testId="free-run" onClick={() => nav.go("run:record", { mode: "free" })}>
+          Free run
+        </Btn>
+      </div>
+    );
+  } else if (!plan) {
     todayCard = (
       <div data-testid="no-plan" style={S.card()}>
         <div style={S.label()}>Today</div>
         <div style={{ ...S.title(), fontSize: 20, marginTop: 4 }}>No plan yet</div>
         <div style={{ ...S.body(), marginBottom: 12 }}>Make a plan. The coach then shows your run for each day. You can also record a free run now.</div>
-        <Btn kind="primary" testId="make-plan" onClick={() => nav.go(onboarded ? "plan:setup" : "plan:onboarding")}>
+        <Btn kind="primary" testId="make-plan" onClick={() => nav.go("plan:setup")}>
           Make a plan
         </Btn>
         <div style={{ height: 8 }} />

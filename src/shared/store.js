@@ -246,7 +246,8 @@ export async function saveRun(run) {
 
 // Adds many activities (for example an import). Skips each one that
 // matches an existing activity or an earlier one in the same batch.
-// Returns { added, duplicates }. Also writes a line to the import log.
+// Returns { added, duplicates, records } (records: the saved activities).
+// Also writes a line to the import log.
 export async function addActivities(list, options = {}) {
   const existingRaw = (await safeGet(KEYS.activityHistory)) || [];
   const known = await listActivities();
@@ -263,7 +264,7 @@ export async function addActivities(list, options = {}) {
   if (fresh.length) await writeActivityHistory([...existingRaw, ...fresh]);
   const summary = { added: fresh.length, duplicates };
   await appendImportLog({ ...summary, source: options.source || null });
-  return summary;
+  return { ...summary, records: fresh };
 }
 
 /* ---------- other keys ---------- */

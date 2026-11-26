@@ -14,7 +14,7 @@ import { LiftToday } from "../plan/LiftToday.jsx";
 import { loadSummary, weekStreak, runnerMaxHR } from "../shared/load.js";
 import { listActivities } from "../shared/store.js";
 
-export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, onStartTemplate, onResumeWorkout, onViewSettings, onViewSuggested, onViewVolume, onViewStreak, onViewOneRM, onViewExerciseDb, onOpenProgramme, onStartProgrammeDay, onViewProgrammeStats, onNewProgramme, reloadKey, activeProgramme, settings, mode, onModeChange }) {
+export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, onStartTemplate, onResumeWorkout, onViewSettings, onViewSuggested, onViewVolume, onViewStreak, onViewOneRM, onViewExerciseDb, onOpenProgramme, onStartProgrammeDay, onViewProgrammeStats, onNewProgramme, reloadKey, activeProgramme, settings, mode, onModeChange, setupCard }) {
   const [dates, setDates] = useState({});
   const [loading, setLoading] = useState(true);
   const [recentSessions, setRecentSessions] = useState([]);
@@ -108,6 +108,8 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
     <div style={{ padding: "28px 24px 40px" }}>
       <ModeHeader mode={mode || "lift"} onModeChange={onModeChange || (() => {})} onViewSettings={onViewSettings} />
       <DailyQuote />
+      {/* "Set up lifting" (src/plan/LiftSetupCard.jsx), from App.jsx. */}
+      {setupCard || null}
       <LiftToday reloadKey={reloadKey} />
 
       {unfinished && (

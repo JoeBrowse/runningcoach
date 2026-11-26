@@ -1,4 +1,4 @@
-import { gunzipSync, unzipSync, strFromU8 } from "fflate";
+import { gunzipSync, unzipSync } from "fflate";
 import { baseName } from "./common.js";
 
 /* ---------------------------------------------------------------
@@ -7,16 +7,14 @@ import { baseName } from "./common.js";
    expandInputs() turns the files that the user selected into a flat
    list of "sources", one for each activity file:
      { path, kind: "gpx" | "tcx" | "fit", origin, load() -> Uint8Array }
-   and a list of Strava activities.csv texts.
 
    - A .gz file is unpacked. "run.gpx.gz" becomes a GPX source.
    - A .zip file is opened. Files inside it load only when the reader
      asks for them, so a large export does not fill the memory at once.
    - A zip inside a zip (the Garmin account export) is opened too.
-   - A zip with activities.csv is a Strava bulk export (origin "strava").
-     A path with "DI_CONNECT" or "DI-Connect" is a Garmin export
+   - A path with "DI_CONNECT" or "DI-Connect" is a Garmin export
      (origin "garmin"). All other files have origin "file".
-   - Other files inside an archive (JSON, images, profile CSV) are not
+   - Other files inside an archive (JSON, images, CSV) are not
      activities. The reader ignores them and does not report them.
 --------------------------------------------------------------- */
 
@@ -56,21 +54,15 @@ export function readZipEntry(bytes, name) {
   return out[name] || null;
 }
 
-function originFor(path, hasStravaCsv) {
+function originFor(path) {
   if (/DI[_-]CONNECT/i.test(path)) return "garmin";
-  if (hasStravaCsv) return "strava";
   return "file";
 }
 
-function decodeText(bytes) {
-  return strFromU8(unwrap(bytes));
-}
-
 /* inputs: [{ name, bytes }] (bytes as Uint8Array).
-   Returns { sources, csvs: [{ path, text }], skipped: [{ file, reason }] }. */
+   Returns { sources, skipped: [{ file, reason }] }. */
 export async function expandInputs(inputs, options = {}) {
   const sources = [];
-  const csvs = [];
   const skipped = [];
   const yieldNow = options.yieldNow || (() => new Promise((r) => setTimeout(r)));
 
@@ -82,23 +74,16 @@ export async function expandInputs(inputs, options = {}) {
       skipped.push({ file: zipPath, reason: "The app cannot open this ZIP file." });
       return;
     }
-    const hasStravaCsv = names.some((n) => /(^|\/)activities\.csv$/i.test(n.name));
     let count = 0;
     for (const entry of names) {
       const full = `${zipPath}/${entry.name}`;
       const lower = entry.name.toLowerCase();
-      if (/(^|\/)activities\.csv$/i.test(entry.name)) {
-        try {
-          csvs.push({ path: full, prefix: entry.name.replace(/activities\.csv$/i, ""), text: decodeText(readZipEntry(bytes, entry.name)) });
-        } catch (e) {
-          skipped.push({ file: full, reason: "The app cannot read this CSV file." });
-        }
-      } else if (ACTIVITY_EXT.test(lower)) {
+      if (ACTIVITY_EXT.test(lower)) {
         sources.push({
           path: full,
           inner: entry.name,
           kind: kindOf(lower),
-          origin: originFor(full, hasStravaCsv),
+          origin: originFor(full),
           load: () => readZipEntry(bytes, entry.name),
         });
       } else if (lower.endsWith(".zip") && depth < 4) {
@@ -121,12 +106,6 @@ export async function expandInputs(inputs, options = {}) {
       await openZip(bytes, name, 0);
     } else if (ACTIVITY_EXT.test(lower)) {
       sources.push({ path: name, inner: name, kind: kindOf(lower), origin: "file", load: () => bytes });
-    } else if (lower.endsWith(".csv") || lower.endsWith(".csv.gz")) {
-      try {
-        csvs.push({ path: name, prefix: "", text: decodeText(bytes), standalone: true });
-      } catch (e) {
-        skipped.push({ file: name, reason: "The app cannot read this CSV file." });
-      }
     } else if (lower.endsWith(".gz") && isGzip(bytes)) {
       // A .gz file with an unusual name: look at what is inside.
       let inner;
@@ -143,5 +122,5 @@ export async function expandInputs(inputs, options = {}) {
     }
     await yieldNow();
   }
-  return { sources, csvs, skipped };
+  return { sources, skipped };
 }

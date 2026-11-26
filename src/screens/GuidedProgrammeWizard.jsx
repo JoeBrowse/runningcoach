@@ -15,11 +15,16 @@ import { WizardSteps } from "../components/WizardSteps.jsx";
    preview (2), reachable from the "Guided" card on the programme
    builder's split-choice step. Accept creates it immediately; decline
    drops the user back at the normal builder to make their own.
+
+   `prefill` (optional, from the Lift setup card, spec v1.1 section 2):
+   { experience, presetKey, sessions, splitLabel }. It selects the
+   experience and uses the split of the master week (presetKey) in
+   place of the split that the experience gives.
 --------------------------------------------------------------- */
 
-export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
+export function GuidedProgrammeWizard({ onBack, onCreate, onDecline, prefill }) {
   const [step, setStep] = useState(0);
-  const [experience, setExperience] = useState(null);
+  const [experience, setExperience] = useState(prefill && prefill.experience ? prefill.experience : null);
   const [duration, setDuration] = useState(null);
   const [focusMuscles, setFocusMuscles] = useState(new Set());
   const [bodyweightKg, setBodyweightKg] = useState(null);
@@ -44,7 +49,8 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
   }
 
   const canContinue = !!experience && !!duration;
-  const preset = experience ? PROGRAMME_PRESETS.find((p) => p.key === GUIDED_EXPERIENCE_OPTIONS.find((o) => o.value === experience).presetKey) : null;
+  const prefillPreset = prefill && prefill.presetKey ? PROGRAMME_PRESETS.find((p) => p.key === prefill.presetKey) : null;
+  const preset = experience ? prefillPreset || PROGRAMME_PRESETS.find((p) => p.key === GUIDED_EXPERIENCE_OPTIONS.find((o) => o.value === experience).presetKey) : null;
   const exerciseCount = duration ? DURATION_EXERCISE_COUNTS[duration] : null;
   const generatedDays = step === 2 && preset ? buildGuidedDays(preset, exerciseCount, [...focusMuscles]) : [];
 
@@ -72,6 +78,11 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
       <div style={{ padding: "0 20px" }}>
         {step === 0 && (
           <div>
+            {prefill && prefill.sessions > 0 && (
+              <div data-testid="guided-prefill" style={{ background: hexToRgba(COLORS.accent, 0.08), border: `1px solid ${COLORS.accent}`, borderRadius: 12, padding: "12px 14px", marginBottom: 18, color: COLORS.text, fontSize: 13, lineHeight: 1.5 }}>
+                From your week: {prefill.sessions} lift {prefill.sessions === 1 ? "day" : "days"} a week.{prefill.splitLabel ? ` Split: ${prefill.splitLabel.toLowerCase()}.` : ""} You can change your answers.
+              </div>
+            )}
             <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
               How much training experience do you have?
             </div>
@@ -81,6 +92,8 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
                 return (
                   <button
                     key={opt.value}
+                    data-testid={`guided-exp-${opt.value}`}
+                    aria-pressed={active}
                     onClick={() => setExperience(opt.value)}
                     style={{ textAlign: "left", background: active ? hexToRgba(COLORS.accent, 0.1) : COLORS.surface, border: `1px solid ${active ? COLORS.accent : COLORS.line}`, borderRadius: 14, padding: 14 }}
                   >
@@ -100,6 +113,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
                 return (
                   <button
                     key={d.value}
+                    data-testid={`guided-dur-${d.value}`}
                     onClick={() => setDuration(d.value)}
                     style={{ padding: "14px 0", borderRadius: 12, border: `1px solid ${active ? COLORS.accent : COLORS.line}`, background: active ? COLORS.accent : COLORS.surface, color: active ? COLORS.onAccent : COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 14, textTransform: "uppercase" }}
                   >
@@ -129,6 +143,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
             </div>
 
             <button
+              data-testid="guided-continue"
               onClick={() => setStep(1)}
               disabled={!canContinue}
               style={{ width: "100%", background: canContinue ? COLORS.accent : COLORS.surfaceRaised, border: "none", borderRadius: 12, padding: "14px 0", color: canContinue ? COLORS.onAccent : COLORS.textDim, fontSize: 14, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 }}
@@ -152,6 +167,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
               ))}
             </div>
             <button
+              data-testid="guided-show"
               onClick={() => setStep(2)}
               style={{ width: "100%", background: COLORS.accent, border: "none", borderRadius: 12, padding: "14px 0", color: COLORS.onAccent, fontSize: 14, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 }}
             >
@@ -182,6 +198,7 @@ export function GuidedProgrammeWizard({ onBack, onCreate, onDecline }) {
               6-week block · {generatedDays.length} day{generatedDays.length === 1 ? "" : "s"} · you can edit all exercises after you create the programme.
             </div>
             <button
+              data-testid="guided-accept"
               onClick={accept}
               style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: COLORS.accent, border: "none", borderRadius: 12, padding: "16px 0", color: COLORS.onAccent, fontSize: 15, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}
             >

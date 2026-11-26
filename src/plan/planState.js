@@ -383,7 +383,8 @@ export const GYM_TYPE_LABEL = { upper: "Upper body", lower: "Lower body", full: 
 export function gymLabel(g) {
   if (!g) return "";
   const name = GYM_TYPE_LABEL[g.type] || "Gym";
-  const light = g.advice === "skip-heavy" ? "light" : g.advice === "maintenance" ? "maintenance" : g.intensity;
+  // advice "rest" (illness, injury, readiness, tired): the session is a rest day.
+  const light = g.advice === "rest" ? "rest" : g.advice === "skip-heavy" ? "light" : g.advice === "maintenance" ? "maintenance" : g.intensity;
   return `${name} (${light})`;
 }
 

@@ -15,6 +15,11 @@ import { RACE_DISTANCES } from "./RacesScreen.jsx";
    units, heart-rate values (optional), the medical disclaimer. The
    result screen shows the plan, warnings, the engine's changes, the
    safety checks and gym conflicts. Save makes the plan.
+
+   Run setup (spec v1.1 section 2): when the master week came from
+   "Your week" (master.use is set and it has run days), the Days and
+   Gym steps are not shown. The run days, the long-run day and the gym
+   days come from the master week. Save stays in the current mode.
 --------------------------------------------------------------- */
 
 export const GOAL_OPTIONS = [
@@ -29,7 +34,13 @@ export const GOAL_OPTIONS = [
   { id: "build10k", label: "Build to 10K", detail: "No race date. Distance grows slowly." },
 ];
 
-const STEPS = ["Goal", "Days", "Gym", "Fitness", "About you", "Check"];
+const ALL_STEPS = ["Goal", "Days", "Gym", "Fitness", "About you", "Check"];
+const WEEK_STEPS = ["Goal", "Fitness", "About you", "Check"];
+
+/* True when "Your week" set the run days (the run setup skips them). */
+export function weekFromMaster(master) {
+  return !!(master && master.use && master.use !== "lift" && Array.isArray(master.runDays) && master.runDays.length > 0);
+}
 
 export const DISCLAIMER =
   "Skid Marks gives general training information. It is not medical advice and it cannot diagnose or predict injury. Talk to a doctor before you start if you have a heart condition, chest pain, dizziness, a long-term illness, an injury or if you are pregnant. Stop and get help if you feel unwell during exercise.";
@@ -48,7 +59,8 @@ function typedForForm(value, flag, p) {
 function defaultsFrom(profile, master, level) {
   const p = profile || {};
   const m = master || {};
-  const lvl = p.level || level || "some";
+  // "gym-only" is the old "Only the gym" answer. The run setup starts from "some".
+  const lvl = p.level && p.level !== "gym-only" ? p.level : level || "some";
   return {
     level: lvl,
     goal: p.goal || (lvl === "new" ? "runwalk" : lvl === "racer" ? "10k" : "keepfit"),
@@ -312,15 +324,21 @@ export function PlanSetup({ nav }) {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [prevMaster, setPrevMaster] = useState(null);
+  const [steps, setSteps] = useState(ALL_STEPS);
 
   useEffect(() => {
     (async () => {
       const [profile, master, r] = await Promise.all([getKey(KEYS.runProfile, null), getKey(KEYS.masterPlan, null), getRaces()]);
       setPrev(profile);
+      setPrevMaster(master);
+      setSteps(weekFromMaster(master) ? WEEK_STEPS : ALL_STEPS);
       setRacesList(r || []);
       setF(defaultsFrom(profile, master, params.level));
     })();
   }, []);
+  const STEPS = steps;
+  const stepId = STEPS[step];
 
   useEffect(() => {
     if (!f || f.fitness !== "history" || seed) return;
@@ -334,7 +352,7 @@ export function PlanSetup({ nav }) {
   const G = f ? engine.GOALS[f.goal] : null;
 
   useEffect(() => {
-    if (!f || step !== STEPS.length - 1) return;
+    if (!f || stepId !== "Check") return;
     setError("");
     try {
       const { profile, master } = formToProfile(f, prev, seed);
@@ -354,24 +372,26 @@ export function PlanSetup({ nav }) {
   const resultCheck = resultSec && f.fitness !== "new" ? engine.checkResult(Number(f.resultKm), resultSec) : null;
   const longDay = f.longRunDay != null ? f.longRunDay : f.runDays.includes(0) ? 0 : f.runDays.includes(6) ? 6 : f.runDays[f.runDays.length - 1];
 
-  const canNext = [
-    () => !!f.goal && (!f.raceDate || f.raceDate > localToday()),
-    () => f.runDays.length > 0,
-    () => true,
-    () => f.fitness === "new" || f.fitness === "history" || (resultCheck && resultCheck.ok),
-    () => f.consent,
-    () => !!preview && !error,
-  ][step]();
+  const canNext = {
+    Goal: () => !!f.goal && (!f.raceDate || f.raceDate > localToday()),
+    Days: () => f.runDays.length > 0,
+    Gym: () => true,
+    Fitness: () => f.fitness === "new" || f.fitness === "history" || (resultCheck && resultCheck.ok),
+    "About you": () => f.consent,
+    Check: () => !!preview && !error,
+  }[stepId]();
 
   async function save() {
     setSaving(true);
     const { profile, master } = formToProfile({ ...f, longRunDay: longDay }, prev, seed);
-    const p = { ...profile, onboarded: true };
+    // A lifter who sets up running now uses both.
+    const use = prevMaster && prevMaster.use === "lift" ? "both" : (prevMaster && prevMaster.use) || profile.use;
+    const p = { ...profile, onboarded: true, ...(use ? { use } : {}) };
+    // Keys that "Your week" owns (priority, doubles, ...) stay.
+    const nextMaster = { ...(prevMaster || {}), ...master, ...(use ? { use } : {}) };
     await setKey(KEYS.runProfile, p);
-    await setKey(KEYS.masterPlan, master);
-    await rebuildPlan(p, master, races, { seed: f.fitness === "history" ? seed : null, message: `New plan: ${preview.goalName}.` });
-    if (params.appMode && nav.settings.appMode !== params.appMode) await nav.updateSettings({ ...nav.settings, appMode: params.appMode, mode: "plan" });
-    else if (nav.settings.mode !== "plan") await nav.updateSettings({ ...nav.settings, mode: "plan" });
+    await setKey(KEYS.masterPlan, nextMaster);
+    await rebuildPlan(p, nextMaster, races, { seed: f.fitness === "history" ? seed : null, message: `New plan: ${preview.goalName}.` });
     setSaving(false);
     nav.reload();
     nav.home();
@@ -388,7 +408,12 @@ export function PlanSetup({ nav }) {
         Step {step + 1} of {STEPS.length} · {STEPS[step]}
       </div>
 
-      {step === 0 && (
+      {stepId === "Goal" && steps === WEEK_STEPS && (
+        <div data-testid="setup-from-week" style={{ ...st.body(), fontSize: 12.5, marginBottom: 12 }}>
+          Your run days and gym days come from your week. To change them, open Master week in Plan, or Settings.
+        </div>
+      )}
+      {stepId === "Goal" && (
         <>
           <div style={{ display: "grid", gap: 6 }}>
             {GOAL_OPTIONS.map((g) => (
@@ -415,7 +440,7 @@ export function PlanSetup({ nav }) {
         </>
       )}
 
-      {step === 1 && (
+      {stepId === "Days" && (
         <>
           <Label style={{ marginTop: 0 }}>Run days</Label>
           <DayPicker testId="setup-run-days" value={f.runDays} onChange={(v) => set({ runDays: v, longRunDay: v.includes(f.longRunDay) ? f.longRunDay : null })} />
@@ -426,7 +451,7 @@ export function PlanSetup({ nav }) {
         </>
       )}
 
-      {step === 2 && (
+      {stepId === "Gym" && (
         <>
           <div style={{ ...st.body(), marginBottom: 10 }}>Your gym days are real plan days. The plan keeps heavy leg days away from hard runs and the long run.</div>
           {f.gymDays.map((g, i) => (
@@ -443,7 +468,7 @@ export function PlanSetup({ nav }) {
         </>
       )}
 
-      {step === 3 && (
+      {stepId === "Fitness" && (
         <>
           <Segmented testId="setup-fitness" value={f.fitness} onChange={(v) => set({ fitness: v })} options={[{ value: "result", label: "Recent result" }, { value: "history", label: "My past runs" }, { value: "new", label: "I am new" }]} />
           <div style={{ height: 12 }} />
@@ -479,6 +504,9 @@ export function PlanSetup({ nav }) {
                   <div style={{ ...st.body(), fontSize: 12, marginTop: 8 }}>Check the values below. You can change them.</div>
                 </>
               )}
+              <button data-testid="setup-import-link" onClick={() => nav.go("shared:data")} style={{ ...st.label(), color: COLORS.accent, minHeight: 44, padding: "0 2px", marginTop: 4 }}>
+                Import runs from files (Data screen)
+              </button>
             </Card>
           )}
           {f.fitness !== "new" && (
@@ -507,7 +535,7 @@ export function PlanSetup({ nav }) {
         </>
       )}
 
-      {step === 4 && (
+      {stepId === "About you" && (
         <>
           <Field label="Running experience">
             <Segmented testId="setup-experience" value={f.experience} onChange={(v) => set({ experience: v })} options={[{ value: "new", label: "New" }, { value: "some", label: "Some" }, { value: "experienced", label: "A lot" }]} />
@@ -544,7 +572,7 @@ export function PlanSetup({ nav }) {
         </>
       )}
 
-      {step === 5 && (
+      {stepId === "Check" && (
         <>
           {error && <Notice tone="bad" title="The plan could not be made">{error}</Notice>}
           {!preview && !error && <Loading />}

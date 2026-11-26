@@ -23,6 +23,37 @@ export const LAST_SEEN_VERSION_KEY = "last-seen-version";
 
 export const RELEASE_NOTES = [
   {
+    version: "2.1.0",
+    released: "2026-11-26",
+    headline: "Choose running, lifting or both. The app plans one week for you.",
+    items: [
+      {
+        title: "Running, lifting or both",
+        body: "A new first screen asks what you use the app for: running, lifting or both. You can change this later in Settings. A short tour then shows each part.",
+      },
+      {
+        title: "Your week",
+        body: "Tell the app which days you can train, how many runs and lift sessions you want, and what matters most. The app proposes a week and gives a reason for each choice. Heavy leg days stay away from hard runs and the long run. You can change any day.",
+      },
+      {
+        title: "A setup on each page",
+        body: "Run and Lift each have their own setup. Lift asks your level. Then enter your current plan, or let the app make one for you.",
+      },
+      {
+        title: "Unplanned sessions change the plan",
+        body: "Log a run or a lift session on a day with no plan for it, and the week adjusts. For example, an unplanned leg day makes the next hard run easy. You see each change and its reason, and you can undo it.",
+      },
+      {
+        title: "I feel really tired",
+        body: "A new button makes today easier. Illness, injury, readiness and tiredness now also change your gym days.",
+      },
+      {
+        title: "Strava file import removed",
+        body: "The import of Strava export files is removed. You can still import GPX, TCX and FIT files from your watch.",
+      },
+    ],
+  },
+  {
     version: "2.0.0",
     released: "2026-11-25",
     headline: "Iron Log is now Skid Marks. It is a free running coach and gym tracker in one app.",

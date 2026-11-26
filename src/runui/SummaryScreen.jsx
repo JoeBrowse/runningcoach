@@ -4,6 +4,7 @@ import { COLORS, hexToRgba } from "../theme.js";
 import { TopBar } from "../components/TopBar.jsx";
 import { getShoes, saveRun, setShoes } from "../shared/store.js";
 import { markDone } from "../plan/planState.js";
+import { reportUnplannedRun } from "../plan/unplanned.js";
 import { correctDistance, timeInZones } from "./recorder.js";
 import { FEELS, RPE_WORDS, fmtDuration, fromUnit, getProfile, getRunPrefs, unitsOf } from "./runData.js";
 import { Btn, Chip, ChipRow, Confirm, Loading, MONO, NumField, Note, OSWALD, S, Stat, Toggle } from "./ui.jsx";
@@ -176,6 +177,10 @@ export function SummaryScreen({ nav }) {
           /* the run is saved; the plan mark is not important enough to fail */
         }
       }
+      // A run on a day with no planned run can change the next days
+      // (spec v1.1 section 4). A planned run done on another day is not
+      // unplanned. It never throws.
+      if (!(markPlan && run.planIso)) await reportUnplannedRun(record);
       // The back stack keeps this draft: mark it, so a return to this
       // screen shows "saved" and never saves the run twice.
       draft.savedId = record.id;

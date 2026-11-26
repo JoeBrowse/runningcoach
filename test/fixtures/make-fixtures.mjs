@@ -57,33 +57,11 @@ export function makeActivityFit(startIso = "2024-03-10T08:00:00Z") {
   return enc.close();
 }
 
-const STRAVA_CSV = [
-  "Activity ID,Activity Date,Activity Name,Activity Type,Activity Description,Elapsed Time,Distance,Max Heart Rate,Relative Effort,Commute,Activity Private Note,Activity Gear,Filename,Athlete Weight,Bike Weight,Elapsed Time,Moving Time,Distance,Max Speed,Average Speed,Elevation Gain,Elevation Loss,Average Heart Rate",
-  '1001,"Jun 1, 2024, 6:00:00 AM",Morning Run,Run,"Easy run, felt good",125,"0.50",160,12,false,,,activities/1001.gpx.gz,,,125,120,"502.3",4.1,4.0,3,3,150',
-  '1002,"Jun 2, 2024, 5:00:00 PM",Evening Ride,Ride,,3600,"20.10",150,30,false,,,activities/1002.tcx.gz,,,3600,3500,"20100.0",12.0,5.7,120,120,135',
-  '1003,"Jun 3, 2024, 7:15:00 AM",Pool swim,Swim,"Line one\nline two",1800,"1.50",,5,false,,,,,,1800,1700,"1500.0",,,,,',
-].join("\n");
-
 function main() {
   const gpx = read("run.gpx");
-  const tcx = read("ride.tcx");
   writeFileSync(join(here, "run.gpx.gz"), gzipSync(gpx));
   const fit = makeActivityFit();
   writeFileSync(join(here, "run.fit"), fit);
-  // Strava bulk export: activities.csv, activities/<id>.gpx.gz, .tcx.gz.
-  // The GPX in the zip has a different start time from run.gpx, so it is
-  // not a duplicate of it.
-  const gpx2 = strToU8(gpx.toString("utf8").replace(/2024-05-04T07:/g, "2024-06-01T06:"));
-  const tcx2 = strToU8(tcx.toString("utf8").replace(/2024-05-05T/g, "2024-06-02T").replace(/T09:/g, "T17:"));
-  writeFileSync(
-    join(here, "strava-export.zip"),
-    zipSync({
-      "export_123/activities.csv": strToU8(STRAVA_CSV),
-      "export_123/activities/1001.gpx.gz": gzipSync(gpx2),
-      "export_123/activities/1002.tcx.gz": gzipSync(tcx2),
-      "export_123/profile.csv": strToU8("Athlete ID\n1\n"),
-    })
-  );
   // Garmin account export: FIT files inside a zip inside the zip.
   const inner = zipSync({ "123_ACTIVITY.fit": makeActivityFit("2024-04-01T10:00:00Z") });
   writeFileSync(

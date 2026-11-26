@@ -28,6 +28,8 @@ Shared: Settings, Data (import and export), Women's health, About.
 
 ## 3. First open
 
+> Replaced in version 2.1. See `docs/v1.1-spec.md` section 1.
+
 1. A short intro (once only; the Iron Log animation does not repeat on each launch).
 2. "Who are you?": **I am new to running**, **I run sometimes**, **I train for races**, or **Only the gym**.
 3. **New to running**: three questions (days a week, minutes a session, gym yes/no). No race date. A run/walk plan starts.

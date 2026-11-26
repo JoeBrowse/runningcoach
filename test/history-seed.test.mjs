@@ -3,7 +3,7 @@
    - runs a week and the usual long run,
    - new run days start as short easy runs,
    - the week 1 long run starts at about the usual long run, inside the caps,
-   - the path from a Strava import to the plan, with the store's real data shapes,
+   - the path from a file import to the plan, with the store's real data shapes,
    - the user report: a 28:00 5K runner with about 20 km a week got a 9 km first week. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -25,7 +25,9 @@ if (typeof globalThis.localStorage === "undefined") {
 const E = await import("../src/run/engine.js");
 const ps = await import("../src/plan/planState.js");
 const store = await import("../src/shared/store.js");
-const { importFiles } = await import("../src/shared/import/index.js");
+const { importFiles, setDOMParser } = await import("../src/shared/import/index.js");
+const { JSDOM } = await import("jsdom");
+setDOMParser(new JSDOM("").window.DOMParser);
 const { verdicts, CHECK_MAP, isRun, LONG, QUALITY, weekKm } = await import("./engine-helpers.mjs");
 
 const TODAY = "2026-11-25"; // a Wednesday
@@ -208,26 +210,28 @@ test("regression: 28:00 5K, about 20 km a week in 2 runs, usual long run 9 km, h
   assert.equal(old.limits.week1Rule, "floor");
 });
 
-/* ---------- from a Strava import to the plan ---------- */
+/* ---------- from a file import to the plan ---------- */
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const stravaDate = (iso) => {
-  const [y, m, d] = iso.split("-").map(Number);
-  return `"${MONTHS[m - 1]} ${d}, ${y}, 7:05:00 AM"`;
-};
+// One TCX file for each activity. The lap gives the totals.
+function tcxFile(iso, name, sport, km, sec, n) {
+  const start = `${iso}T07:05:00Z`;
+  const text = `<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"><Activities><Activity Sport="${sport}">
+<Id>${start}</Id><Lap StartTime="${start}"><TotalTimeSeconds>${sec}</TotalTimeSeconds><DistanceMeters>${(km * 1000).toFixed(1)}</DistanceMeters></Lap>
+<Notes>${name}</Notes></Activity></Activities></TrainingCenterDatabase>`;
+  return { name: `activity-${n}.tcx`, bytes: new TextEncoder().encode(text) };
+}
 
-function stravaCsv() {
-  const head = "Activity ID,Activity Date,Activity Name,Activity Type,Elapsed Time,Distance,Max Heart Rate,Filename,Elapsed Time,Moving Time,Distance,Average Heart Rate";
-  const rows = [head];
-  let id = 1000;
-  const row = (iso, name, type, km, sec) => rows.push(`${id++},${stravaDate(iso)},${name},${type},${sec + 30},"${km.toFixed(2)}",,,${sec + 30},${sec},"${(km * 1000).toFixed(1)}",`);
+function historyFiles() {
+  const files = [];
+  const add = (iso, name, sport, km, sec) => files.push(tcxFile(iso, name, sport, km, sec, files.length));
   for (let w = 0; w < 12; w++) {
-    row(E.addDays(TODAY, -(w * 7 + 1)), "Morning Run", "Run", 10, 10 * 445); // 7:25 per km
-    row(E.addDays(TODAY, -(w * 7 + 4)), "Weekend Run", "Run", 10, 10 * 440);
-    row(E.addDays(TODAY, -(w * 7 + 3)), "Evening Ride", "Ride", 30, 3600);
+    add(E.addDays(TODAY, -(w * 7 + 1)), "Morning Run", "Running", 10, 10 * 445); // 7:25 per km
+    add(E.addDays(TODAY, -(w * 7 + 4)), "Weekend Run", "Running", 10, 10 * 440);
+    add(E.addDays(TODAY, -(w * 7 + 3)), "Evening Ride", "Biking", 30, 3600);
   }
-  row(E.addDays(TODAY, -16), "Parkrun", "Run", 5, 28 * 60);
-  return rows.join("\n");
+  add(E.addDays(TODAY, -16), "Parkrun", "Running", 5, 28 * 60);
+  return files;
 }
 
 async function freshStore() {
@@ -236,9 +240,9 @@ async function freshStore() {
   await store.setKey(store.KEYS.importLog, []);
 }
 
-test("end to end: a Strava activities.csv import gives the right seed and a fair first week", async () => {
+test("end to end: a file import gives the right seed and a fair first week", async () => {
   await freshStore();
-  const res = await importFiles([{ name: "activities.csv", bytes: new TextEncoder().encode(stravaCsv()) }]);
+  const res = await importFiles(historyFiles());
   assert.equal(res.added, 37);
   const list = await store.listActivities();
   const runs = list.filter((a) => a.type === "run");
@@ -274,7 +278,7 @@ test("end to end: a Strava activities.csv import gives the right seed and a fair
 
 test("root cause: an old profile value of 0 (saved before the import) no longer hides the history", async () => {
   await freshStore();
-  await importFiles([{ name: "activities.csv", bytes: new TextEncoder().encode(stravaCsv()) }]);
+  await importFiles(historyFiles());
   const seed = await ps.seedHistory(TODAY);
   const master = { runDays: [2, 4, 6], longRunDay: 6, gymDays: [] };
   // An older version saved the seed value (0 before the import) in the profile with no flag.

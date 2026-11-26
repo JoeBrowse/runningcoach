@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CloudSun, Download, Link2, RefreshCw, Watch } from "lucide-react";
+import { CloudSun, Download, RefreshCw, Watch } from "lucide-react";
 import { TopBar } from "../../components/TopBar.jsx";
 import { SettingsToggleRow } from "../../components/SettingsToggleRow.jsx";
 import { COLORS } from "../../theme.js";
@@ -8,15 +8,17 @@ import { getIntervalsSettings, maskKey, saveIntervalsSettings, syncIntervals } f
 import { getCachedWeather, getWeather, getWeatherSettings, saveWeatherSettings, validLatLon } from "../weather.js";
 import { exportActivitiesCsv, exportFullBackup, exportLastRunGpx, exportSetsCsv } from "../export.js";
 import { HistoryImport } from "./HistoryImport.jsx";
+import { reportImportedRuns } from "../../plan/unplanned.js";
 import { WEAR_GUIDE_URL, pullWatchRuns, pushPlanToWatch, watchStatus } from "../wear.js";
 import { body, card, cardTitle, field, fmtInt, legend, mono, primaryBtn, resultBox, resultDetail, resultTitle, secondaryBtn, sectionLabel } from "./dataStyles.js";
 
 /* ---------------------------------------------------------------
    DATA SCREEN (shared:data)
 
-   Bring your history (import), links (Intervals.icu, Strava note,
-   Health Connect / HealthKit), local weather, export and the import
-   log. See docs/v1-spec.md section 9.
+   Bring your history (import), links (Intervals.icu, the Wear OS
+   watch, Health Connect / HealthKit), local weather, export and the
+   import log. See docs/v1-spec.md section 9. The Strava import was
+   removed in 2.1 (docs/v1.1-spec.md section 5).
 --------------------------------------------------------------- */
 
 function fmtWhen(iso) {
@@ -26,6 +28,7 @@ function fmtWhen(iso) {
   return d.toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+// "strava" stays for import-log lines from version 2.0.
 const SOURCE_LABEL = { strava: "Strava export", garmin: "Garmin export", file: "Files", mixed: "Files", intervals: "Intervals.icu" };
 
 function Result({ result }) {
@@ -74,6 +77,8 @@ function IntervalsCard({ onSynced, reloadKey }) {
     try {
       await save();
       const r = await syncIntervals();
+      // A run from today or yesterday can change the plan.
+      if (r.records && r.records.length) await reportImportedRuns(r.records);
       const lines = [`Added: ${fmtInt(r.added)}`, `Duplicates: ${fmtInt(r.duplicates)}`, `Wellness days: ${fmtInt(r.wellnessDays)}`];
       if (r.skipped.length) lines.push(`Skipped: ${fmtInt(r.skipped.length)}`, ...[...new Set(r.skipped.map((s) => s.reason))]);
       setResult({ ok: true, title: "Sync complete", detail: lines.join("\n") });
@@ -123,7 +128,7 @@ function IntervalsCard({ onSynced, reloadKey }) {
         Last sync: <span style={{ ...mono(), color: COLORS.text }}>{cfg && cfg.lastSync ? fmtWhen(cfg.lastSync) : "never"}</span>
       </div>
       <div style={{ ...body(), fontSize: 11, marginTop: 6 }}>
-        Intervals.icu does not share activities that came from Strava. The app skips them and tells you.
+        Intervals.icu does not share activities that came from Strava. The app skips them and tells you. <span data-testid="strava-note">Strava data is shown only to you and is never sent to an AI.</span>
       </div>
       <Result result={result} />
     </div>
@@ -437,17 +442,6 @@ export function DataScreen({ nav }) {
 
       <div style={sectionLabel()}>Links</div>
       <IntervalsCard onSynced={changed} reloadKey={nav.reloadKey} />
-      <div style={card()}>
-        <div style={{ ...cardTitle(), display: "flex", alignItems: "center", gap: 8 }}>
-          <Link2 size={15} color={COLORS.accent} /> Strava
-        </div>
-        <div data-testid="strava-note" style={{ ...body(), color: COLORS.text }}>
-          Strava data is shown only to you and is never sent to an AI.
-        </div>
-        <div style={{ ...body(), marginTop: 6 }}>
-          The app has no direct Strava link. To bring your Strava activities, use the Strava bulk export in "Bring your history".
-        </div>
-      </div>
       <WatchCard onSynced={changed} reloadKey={nav.reloadKey} />
       <div style={card()}>
         <div style={cardTitle()}>Health Connect and HealthKit</div>
