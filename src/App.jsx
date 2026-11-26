@@ -11,7 +11,6 @@ import { applyTrainingPrefs, DEFAULT_SETTINGS } from "./lib/settings.js";
 import { safeGet, safeSet, lsGet, requestPersistentStorage } from "./lib/storage.js";
 import { hexToRgba, COLORS, applyTheme } from "./theme.js";
 import { FeatureTour } from "./components/FeatureTour.jsx";
-import { introAlreadyPlayed, OpeningSequence } from "./components/OpeningSequence.jsx";
 import { ColourScreen } from "./screens/ColourScreen.jsx";
 import { CopyPreviousScreen } from "./screens/CopyPreviousScreen.jsx";
 import { DoneScreen } from "./screens/DoneScreen.jsx";
@@ -47,22 +46,6 @@ import { PlanNotice } from "./plan/PlanNotice.jsx";
 import { reportImportedRuns } from "./plan/unplanned.js";
 import { listActivities } from "./shared/store.js";
 
-const INTRO_SEEN_KEY = "intro-seen";
-
-// Read synchronously from the localStorage mirror, so the first frame is
-// right. init() checks the durable store again (native Preferences).
-function introWantedSync() {
-  if (introAlreadyPlayed()) return false;
-  try {
-    const seen = JSON.parse(lsGet(INTRO_SEEN_KEY) || "false");
-    const s = JSON.parse(lsGet("settings") || "null") || {};
-    if (s.showIntro === false) return false;
-    return !seen || !!s.introEachLaunch;
-  } catch (e) {
-    return true;
-  }
-}
-
 /* ---------------------------------------------------------------
    APP
 --------------------------------------------------------------- */
@@ -95,12 +78,6 @@ export default function App() {
   const [showTour, setShowTour] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [whatsNew, setWhatsNew] = useState(null); // release notes to show once after an update
-  // Starts true so the first painted frame is the opening rather than a
-  // flash of Home behind it; switched off immediately once settings load if
-  // the lifter has turned it off, or if it has already run this session.
-  // Plays on the first launch only (spec 3.1), unless the user turns on
-  // "Opening Animation at Each Start" in Settings.
-  const [intro, setIntro] = useState(introWantedSync);
   const [tourStep, setTourStep] = useState(0);
   const [showFeatureListHint, setShowFeatureListHint] = useState(false);
   // Simple mode gets the short tour on first launch; Settings always
@@ -230,18 +207,13 @@ export default function App() {
         // palette rather than flashing the standard one and correcting.
         applyTheme(merged.theme, merged.colourScheme, merged.highContrast);
         setSettings(merged);
-        // Switched off, or already played this session: clear it on the same
-        // pass that reads the setting, before it has drawn anything worth
-        // seeing.
-        if (merged.showIntro === false) setIntro(false);
       } else {
         // A new install has no saved settings. Use the default theme
         // ("system"), so the first-open screens follow the phone's light
         // or dark mode.
         applyTheme(DEFAULT_SETTINGS.theme, DEFAULT_SETTINGS.colourScheme, DEFAULT_SETTINGS.highContrast);
       }
-      const mergedForIntro = { ...DEFAULT_SETTINGS, ...(savedSettings || {}) };
-      if ((await safeGet(INTRO_SEEN_KEY)) && !mergedForIntro.introEachLaunch) setIntro(false);
+      const mergedSettings = { ...DEFAULT_SETTINGS, ...(savedSettings || {}) };
       const active = await getActiveProgramme();
       setCurrentProgramme(active);
       const tourSeen = await safeGet("tour-seen");
@@ -251,14 +223,14 @@ export default function App() {
       // The tour starts once the choice is made (see chooseMode).
       if (!tourSeen) {
         if (await safeGet("mode-chosen")) {
-          setTourSteps(mergedForIntro.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);
+          setTourSteps(mergedSettings.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);
           setTourDemoData(true);
           setShowTour(true);
         } else if (((await safeGet("workout-history")) || []).length) {
           // An upgraded Iron Log user: no onboarding. Lift opens as before
           // and Plan home shows a "Set up running" card.
           await safeSet("mode-chosen", true);
-          setTourSteps(mergedForIntro.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);
+          setTourSteps(mergedSettings.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);
           setTourDemoData(true);
           setShowTour(true);
         } else {
@@ -756,20 +728,6 @@ export default function App() {
           onDone={() => {
             setOneRMTest(null);
             setScreen("home");
-          }}
-        />
-      )}
-
-      {/* The opening runs over the top of a mounted, working app rather
-          than in front of it: by the time it clears, whatever was going to
-          be on screen is already there. It is drawn from the first frame
-          and dismissed as soon as settings say so, so an install with it
-          switched off never sees a flash of it. */}
-      {intro && (
-        <OpeningSequence
-          onDone={() => {
-            setIntro(false);
-            safeSet(INTRO_SEEN_KEY, true);
           }}
         />
       )}

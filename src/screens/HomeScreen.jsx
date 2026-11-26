@@ -7,7 +7,6 @@ import { safeGet, safeSet, safeDelete } from "../lib/storage.js";
 import { COLORS } from "../theme.js";
 import { ActivityPanel } from "../components/ActivityPanel.jsx";
 import { BodyMap } from "../components/BodyMap.jsx";
-import { DailyQuote } from "../components/DailyQuote.jsx";
 import { FormGauge } from "../components/FormGauge.jsx";
 import { ModeHeader } from "../modes/ModeHeader.jsx";
 import { LiftToday } from "../plan/LiftToday.jsx";
@@ -107,7 +106,6 @@ export function HomeScreen({ onStart, onViewHistory, onViewPB, onViewProgress, o
   return (
     <div style={{ padding: "28px 24px 40px" }}>
       <ModeHeader mode={mode || "lift"} onModeChange={onModeChange || (() => {})} onViewSettings={onViewSettings} />
-      <DailyQuote />
       {/* "Set up lifting" (src/plan/LiftSetupCard.jsx), from App.jsx. */}
       {setupCard || null}
       <LiftToday reloadKey={reloadKey} />

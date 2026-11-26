@@ -8,7 +8,7 @@ import { YourWeek, saveYourWeek } from "./YourWeek.jsx";
 /* ---------------------------------------------------------------
    FIRST OPEN (spec v1.1 section 1)
 
-   After the intro animation:
+   When the app opens for the first time:
      1. "What do you want to use Skid Marks for?" Running, Lifting, Both.
      2. Tour cards (Next and Skip): Running, Lifting, or both and one
         card about the shared week.
