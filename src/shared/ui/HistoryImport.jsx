@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Upload } from "lucide-react";
 import { activityType } from "../../lib/activities.js";
 import { COLORS } from "../../theme.js";
 import { groupSkipped, importFiles } from "../import/index.js";
+import { reportImportedRuns } from "../../plan/unplanned.js";
 import { body, cardTitle, fmtInt, legend, mono, primaryBtn, resultBox, resultDetail, resultTitle } from "./dataStyles.js";
 
 /* ---------------------------------------------------------------
@@ -10,10 +11,10 @@ import { body, cardTitle, fmtInt, legend, mono, primaryBtn, resultBox, resultDet
 
    <HistoryImport onDone={(summary) => ...} />
 
-   A file picker for GPX, TCX, FIT, GZ, ZIP and Strava activities.csv
-   files, a progress bar and a summary card. The Data screen and the
-   first-open setup both use it. `bare` removes the card frame, for a
-   parent that has its own frame.
+   A file picker for GPX, TCX, FIT, GZ and ZIP files, a progress bar
+   and a summary card. The Data screen uses it. `bare` removes the card
+   frame, for a parent that has its own frame. Runs dated today or
+   yesterday go to the plan check (src/plan/unplanned.js).
 --------------------------------------------------------------- */
 
 const PHASE_TEXT = {
@@ -23,7 +24,7 @@ const PHASE_TEXT = {
   done: "Done",
 };
 
-export const IMPORT_ACCEPT = ".gpx,.tcx,.fit,.gz,.zip,.csv";
+export const IMPORT_ACCEPT = ".gpx,.tcx,.fit,.gz,.zip";
 
 function StatBox({ label, value, testId }) {
   return (
@@ -96,14 +97,6 @@ function HelpBlock() {
       </button>
       {open && (
         <div style={{ marginTop: 10 }}>
-          <div style={legend()}>Strava</div>
-          <ol style={{ margin: "0 0 10px", paddingLeft: 18 }}>
-            <li style={step}>On the Strava website, open Settings. Then open My Account.</li>
-            <li style={step}>Under "Download or Delete Your Account", select "Get Started".</li>
-            <li style={step}>Select "Request Your Archive".</li>
-            <li style={step}>Strava sends an email with a link. Download the ZIP file.</li>
-            <li style={step}>Select the ZIP file here. Do not unpack it.</li>
-          </ol>
           <div style={legend()}>Garmin</div>
           <ol style={{ margin: "0 0 10px", paddingLeft: 18 }}>
             <li style={step}>On the Garmin website, sign in to your Garmin account.</li>
@@ -113,7 +106,7 @@ function HelpBlock() {
             <li style={step}>Select the ZIP file here. Do not unpack it.</li>
           </ol>
           <div style={body()}>
-            You can also select GPX, TCX or FIT files from other apps and watches. You can select many files at the same time.
+            You can also select GPX, TCX or FIT files from other apps and watches. You can select many files at the same time. A ZIP file of these files is also OK.
           </div>
         </div>
       )}
@@ -144,6 +137,8 @@ export function HistoryImport({ onDone, bare = false }) {
     try {
       const result = await importFiles(files, { onProgress: (p) => setProgress(p) });
       setSummary(result);
+      // A run from today or yesterday can change the plan. Old history does not.
+      if (result.recent && result.recent.length) await reportImportedRuns(result.recent);
       if (onDone) onDone(result);
     } catch (e) {
       setError(String((e && e.message) || e));
@@ -164,7 +159,7 @@ export function HistoryImport({ onDone, bare = false }) {
       <button data-testid="import-pick" onClick={pick} disabled={busy} style={primaryBtn(busy)}>
         <Upload size={14} /> {busy ? "Working…" : "Select Files"}
       </button>
-      <div style={{ ...body(), fontSize: 11, marginTop: 6, textAlign: "center" }}>GPX, TCX, FIT, GZ, ZIP or Strava activities.csv</div>
+      <div style={{ ...body(), fontSize: 11, marginTop: 6, textAlign: "center" }}>GPX, TCX, FIT, GZ or ZIP</div>
       <input data-testid="import-input" ref={fileRef} type="file" multiple accept={IMPORT_ACCEPT} onChange={handleFiles} style={{ display: "none" }} />
 
       {progress && (

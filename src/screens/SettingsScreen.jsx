@@ -6,7 +6,51 @@ import { hexToRgba, COLORS } from "../theme.js";
 import { BackupPanel } from "../components/BackupPanel.jsx";
 import { SettingsToggleRow } from "../components/SettingsToggleRow.jsx";
 import { TopBar } from "../components/TopBar.jsx";
-import { getRunProfile, setRunProfile } from "../shared/store.js";
+import { KEYS, getKey, getRunProfile, setRunProfile } from "../shared/store.js";
+
+/* "I use Skid Marks for" (spec v1.1 section 2). A tap opens "Your week"
+   for that use. The new use is saved only when the week is saved. */
+const USE_OPTIONS = [
+  { value: "run", label: "Running" },
+  { value: "lift", label: "Lifting" },
+  { value: "both", label: "Both" },
+];
+
+function UseChoice({ onChangeUse }) {
+  const [use, setUse] = useState(undefined);
+  useEffect(() => {
+    Promise.all([getRunProfile(), getKey(KEYS.masterPlan, null)])
+      .then(([p, m]) => setUse((m && m.use) || (p && p.use) || null))
+      .catch(() => setUse(null));
+  }, []);
+  if (use === undefined || !onChangeUse) return null;
+  return (
+    <div data-testid="settings-use" style={{ padding: "0 20px 16px" }}>
+      <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
+        I Use Skid Marks For
+      </div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+        {USE_OPTIONS.map((m) => {
+          const active = use === m.value;
+          return (
+            <button
+              key={m.value}
+              data-testid={`settings-use-${m.value}`}
+              aria-pressed={active}
+              onClick={() => onChangeUse(m.value)}
+              style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1px solid ${active ? COLORS.accent : COLORS.line}`, background: active ? COLORS.accent : COLORS.surface, color: active ? COLORS.onAccent : COLORS.text, fontFamily: "'Oswald', sans-serif", fontSize: 14, textTransform: "uppercase", letterSpacing: 0.5 }}
+            >
+              {m.label}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.4 }}>
+        Tap a choice to plan your week again. All three modes stay in the switch.
+      </div>
+    </div>
+  );
+}
 
 /* Running distance units (run-profile.units). Plan, Run and the exports
    read them. New runners never see the plan wizard, so the choice is
@@ -47,7 +91,7 @@ function RunUnits() {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onBack, onViewColour, onViewTraining, onReplayTour, onViewFeatureList, onViewWhatsNew, onViewVersionHistory, onViewData, onViewSampleDemo }) {
+export function SettingsScreen({ settings, onChange, onBack, onViewColour, onViewTraining, onReplayTour, onViewFeatureList, onViewWhatsNew, onViewVersionHistory, onViewData, onViewSampleDemo, onChangeUse }) {
   function toggle(key) {
     onChange({ ...settings, [key]: !settings[key] });
   }
@@ -79,6 +123,8 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
       <div style={{ padding: "0 20px 8px", color: COLORS.textDim, fontSize: 13 }}>
         Select what the app shows while you train.
       </div>
+
+      <UseChoice onChangeUse={onChangeUse} />
 
       <div data-tour="app-mode" style={{ padding: "0 20px 16px" }}>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>

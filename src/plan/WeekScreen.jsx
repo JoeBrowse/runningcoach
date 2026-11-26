@@ -232,7 +232,7 @@ export function WeekScreen({ nav }) {
             </div>
           )}
           <div style={{ marginTop: 12 }}>
-            <Btn onClick={() => nav.go("plan:onboarding", {})}>Make a plan</Btn>
+            <Btn onClick={() => nav.go("plan:setup", {})}>Make a plan</Btn>
           </div>
         </Card>
       </Screen>

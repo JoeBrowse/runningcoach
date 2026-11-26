@@ -4,39 +4,35 @@ import { expandInputs, unwrap } from "./archive.js";
 import { baseName, round } from "./common.js";
 import { parseFit } from "./fit.js";
 import { parseGpx } from "./gpx.js";
-import { isStravaCsv, parseStravaCsv } from "./strava.js";
 import { parseTcx } from "./tcx.js";
 
 export { setDOMParser } from "./common.js";
 export { parseGpx } from "./gpx.js";
 export { parseTcx } from "./tcx.js";
 export { parseFit } from "./fit.js";
-export { parseCsv, parseStravaCsv, parseStravaDate } from "./strava.js";
 
 /* ---------------------------------------------------------------
    IMPORT
 
    importFiles(fileList, { onProgress, DOMParser })
 
-   1. Reads each selected file (GPX, TCX, FIT, their .gz forms, ZIP
-      archives and a Strava activities.csv).
+   1. Reads each selected file: GPX, TCX, FIT, their .gz forms and ZIP
+      archives of these files (for example the Garmin account export).
    2. Reads each activity file in small batches. Between the batches it
       gives the screen time to draw, so 2,000 files do not freeze it.
-   3. Joins Strava CSV rows to their files (name and type come from the
-      CSV, the track data comes from the file).
-   4. Makes one store activity for each:
+   3. Makes one store activity for each:
         { type, startedAt (from the FILE, never today), date, minutes,
           durationSec, km, avgHR, maxHR, name, laps, splits,
-          source: "import", origin: "strava" | "garmin" | "file",
-          sourceFile }
+          source: "import", origin: "garmin" | "file", sourceFile }
       `type` is a store activity id: run, walk, hike, cycle, swim,
       treadmill, stationary-bike, rower, ... or other.
-   5. Saves them with store.addActivities, which skips duplicates
+   4. Saves them with store.addActivities, which skips duplicates
       (same start within 2 minutes and same distance within 3%).
 
    Returns { files, parsed, added, duplicates, skipped: [{ file, reason }],
-             bySport: { run: 3, cycle: 1, ... } }   (bySport counts the
-   activities that were added).
+             bySport: { run: 3, cycle: 1, ... },   (the added activities)
+             recent: [activity] }   (added activities dated today or
+                                     yesterday, for the plan check)
 
    Track points are not saved for imported activities. They would fill
    the phone storage after a large import. Laps and km splits are saved.
@@ -72,7 +68,7 @@ function compactLaps(laps) {
   return laps.slice(0, MAX_LAPS);
 }
 
-// One parsed file (or CSV row) to the store input of saveRun/addActivities.
+// One parsed file to the store input of saveRun/addActivities.
 export function toStoreActivity(p, meta = {}) {
   const startMs = new Date(p.startedAt).getTime();
   const durationSec = Math.max(0, Math.round(p.durationSec || 0));
@@ -98,55 +94,6 @@ export function toStoreActivity(p, meta = {}) {
   if (Array.isArray(p.splits) && p.splits.length) out.splits = p.splits;
   if (meta.externalId) out.externalId = meta.externalId;
   if (p.strength) out.strength = true;
-  return out;
-}
-
-// Joins the CSV rows to the parsed files. Returns store inputs.
-function mergeStrava(csv, parsedByPath, usedPaths) {
-  const out = [];
-  const base = csv.path.replace(/activities\.csv(\.gz)?$/i, "");
-  for (const row of csv.rows) {
-    let match = null;
-    if (row.file) {
-      if (csv.standalone) {
-        const want = baseName(row.file).toLowerCase();
-        for (const [path, value] of parsedByPath) {
-          if (baseName(path).toLowerCase() === want) {
-            match = { path, value };
-            break;
-          }
-        }
-      } else {
-        const path = base + row.file;
-        if (parsedByPath.has(path)) match = { path, value: parsedByPath.get(path) };
-      }
-    }
-    if (match) usedPaths.add(match.path);
-    const file = match && match.value && match.value.list && match.value.list[0];
-    if (file) {
-      const csvTypeKnown = row.type !== "other";
-      const merged = {
-        ...file,
-        type: csvTypeKnown || file.type === "other" ? row.type : file.type,
-        sport: row.sport || file.sport,
-        strength: row.strength || file.strength,
-        name: row.name || file.name,
-        durationSec: row.movingSec || file.durationSec,
-        elapsedSec: row.elapsedSec || file.elapsedSec,
-        km: file.km !== null && file.km !== undefined ? file.km : row.km,
-        avgHR: file.avgHR || row.avgHR,
-        maxHR: file.maxHR || row.maxHR,
-      };
-      out.push(toStoreActivity(merged, { origin: "strava", sourceFile: match.path, externalId: row.id ? `strava:${row.id}` : null }));
-    } else if (row.movingSec || row.elapsedSec) {
-      out.push(
-        toStoreActivity(
-          { ...row, durationSec: row.movingSec || row.elapsedSec },
-          { origin: "strava", sourceFile: row.file || csv.path, externalId: row.id ? `strava:${row.id}` : null }
-        )
-      );
-    }
-  }
   return out;
 }
 
@@ -180,7 +127,9 @@ function insertIndex(index, x) {
 export async function importFiles(fileList, options = {}) {
   const onProgress = typeof options.onProgress === "function" ? options.onProgress : () => {};
   const files = Array.from(fileList || []);
-  const summary = { files: files.length, parsed: 0, added: 0, duplicates: 0, skipped: [], bySport: {} };
+  const summary = { files: files.length, parsed: 0, added: 0, duplicates: 0, skipped: [], bySport: {}, recent: [] };
+  // Activities from today or yesterday can change the plan (src/plan/unplanned.js).
+  const recentFrom = dateStrOf(new Date(Date.now() - 86400000));
   const report = (phase, done, total) => {
     try {
       onProgress({ phase, done, total });
@@ -202,7 +151,7 @@ export async function importFiles(fileList, options = {}) {
   }
   report("read", files.length, files.length);
 
-  const { sources, csvs, skipped } = await expandInputs(inputs);
+  const { sources, skipped } = await expandInputs(inputs);
   summary.skipped.push(...skipped);
 
   // 2. Parse the activity files in batches.
@@ -222,26 +171,14 @@ export async function importFiles(fileList, options = {}) {
   }
   report("parse", sources.length, sources.length);
 
-  // 3. Strava CSV rows.
+  // 3. One store activity for each parsed activity.
   const candidates = [];
-  const usedPaths = new Set();
-  for (const csv of csvs) {
-    if (!isStravaCsv(csv.text)) {
-      if (csv.standalone) summary.skipped.push({ file: csv.path, reason: "This CSV file is not a Strava activities.csv file." });
-      continue;
-    }
-    const { rows, errors } = parseStravaCsv(csv.text);
-    for (const err of errors) summary.skipped.push({ file: `${baseName(csv.path)} line ${err.line}`, reason: err.reason });
-    candidates.push(...mergeStrava({ ...csv, rows }, parsedByPath, usedPaths));
-  }
-  // 4. Files with no CSV row.
   for (const [path, { src, list }] of parsedByPath) {
-    if (usedPaths.has(path)) continue;
     for (const p of list) candidates.push(toStoreActivity(p, { origin: src.origin, sourceFile: path }));
   }
   summary.parsed = candidates.length;
 
-  // 5. Duplicates and saving, in batches.
+  // 4. Duplicates and saving, in batches.
   const known = await listActivities();
   const index = startIndex(known.filter((k) => k.source !== "lift"));
   const liftDates = new Set(known.filter((k) => k.source === "lift").map((k) => k.date));
@@ -255,6 +192,7 @@ export async function importFiles(fileList, options = {}) {
     summary.added += res.added;
     summary.duplicates += res.duplicates;
     for (const f of fresh) summary.bySport[f.type] = (summary.bySport[f.type] || 0) + 1;
+    for (const r of res.records || []) if (r.date && r.date >= recentFrom && summary.recent.length < 20) summary.recent.push(r);
     // addActivities checks again. When it finds a duplicate that this
     // loop did not see, the sport counts are a little high. That is
     // rare (only with an activity typed during the import).
@@ -285,7 +223,7 @@ export async function importFiles(fileList, options = {}) {
   await flush();
   report("save", candidates.length, candidates.length);
 
-  // 6. One import-log line for this import (addActivities wrote one for
+  // 5. One import-log line for this import (addActivities wrote one for
   // each batch).
   const log = await getImportLog();
   const kept = log.filter((e, i) => i < logBefore || e.source !== runTag);

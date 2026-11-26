@@ -1,5 +1,5 @@
-import { Onboarding } from "./Onboarding.jsx";
 import { PlanSetup } from "./PlanSetup.jsx";
+import { YourWeekScreen } from "./YourWeek.jsx";
 import { WeekScreen } from "./WeekScreen.jsx";
 import { LifeEvents } from "./LifeEvents.jsx";
 import { WeeklyReview } from "./WeeklyReview.jsx";
@@ -13,8 +13,8 @@ import "./reminders.js";
 
 /* Plan mode screens. Ids must start with "plan:". See src/modes/README.md. */
 export const PLAN_SCREENS = {
-  "plan:onboarding": { Component: Onboarding },
   "plan:setup": { Component: PlanSetup },
+  "plan:your-week": { Component: YourWeekScreen },
   "plan:week": { Component: WeekScreen },
   "plan:life": { Component: LifeEvents },
   "plan:review": { Component: WeeklyReview },

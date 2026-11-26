@@ -185,7 +185,7 @@ export async function syncIntervals(options = {}) {
     if (m.skip) skipped.push({ file: (a && (a.name || a.id)) || "activity", reason: m.skip });
     else fresh.push(m);
   }
-  const res = fresh.length ? await addActivities(fresh, { source: "intervals" }) : { added: 0, duplicates: 0 };
+  const res = fresh.length ? await addActivities(fresh, { source: "intervals" }) : { added: 0, duplicates: 0, records: [] };
 
   let wellnessDays = 0;
   try {
@@ -198,7 +198,8 @@ export async function syncIntervals(options = {}) {
     skipped.push({ file: "wellness", reason: e.message || INTERVALS_ERRORS.server });
   }
 
-  const result = { added: res.added, duplicates: res.duplicates, skipped, wellnessDays, oldest: isoDay(oldest), newest: isoDay(now) };
+  // `records`: the saved activities. The Data screen checks the newest ones against the plan.
+  const result = { added: res.added, duplicates: res.duplicates, skipped, wellnessDays, oldest: isoDay(oldest), newest: isoDay(now), records: res.records || [] };
   await saveIntervalsSettings({
     lastSync: now.toISOString(),
     lastResult: { added: result.added, duplicates: result.duplicates, skipped: skipped.length, wellnessDays },

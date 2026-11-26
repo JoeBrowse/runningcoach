@@ -41,7 +41,11 @@ import { VolumeScreen } from "./screens/VolumeScreen.jsx";
 import { WhatsNewScreen } from "./screens/WhatsNewScreen.jsx";
 import { WorkoutScreen } from "./screens/WorkoutScreen.jsx";
 import { MODE_SCREENS, isModeScreen, modeById, normaliseMode } from "./modes/index.js";
-import { WhoAreYou, handleFirstChoice } from "./plan/Onboarding.jsx";
+import { FirstOpen, MODE_FOR_USE } from "./plan/FirstOpen.jsx";
+import { LiftSetupCard, LIFT_SETUP_DONE_KEY } from "./plan/LiftSetupCard.jsx";
+import { PlanNotice } from "./plan/PlanNotice.jsx";
+import { reportImportedRuns } from "./plan/unplanned.js";
+import { listActivities } from "./shared/store.js";
 
 const INTRO_SEEN_KEY = "intro-seen";
 
@@ -105,6 +109,10 @@ export default function App() {
   // Back stack and parameters for the registry screens (src/modes/).
   const [navStack, setNavStack] = useState([]);
   const [screenParams, setScreenParams] = useState(null);
+  // "Make a plan for me" from the Lift setup card: the wizard pre-fill
+  // and the screen that its back button opens.
+  const [guidedPrefill, setGuidedPrefill] = useState(null);
+  const [builderOrigin, setBuilderOrigin] = useState("startChoice");
 
   const activeProgrammeMeta = currentProgramme
     ? { name: currentProgramme.name, nextDayName: currentProgramme.days[programmeNextIndex(currentProgramme)] ? currentProgramme.days[programmeNextIndex(currentProgramme)].name : "" }
@@ -163,21 +171,38 @@ export default function App() {
     openLiftScreen: (id) => setScreen(id),
   };
 
-  // First launch: "Who are you?" sets Simple/Advanced and the mode, then
-  // opens the Plan onboarding or, for "Only the gym", the Lift tour.
-  function chooseWho(choice) {
+  // First launch (spec v1.1 section 1): FirstOpen saves the master week
+  // and run-profile.use. Then the app opens Plan (Both), Run (Running) or
+  // Lift (Lifting). The tour cards replace the Lift feature tour; it
+  // stays in Settings.
+  async function finishFirstOpen({ use, appMode }) {
+    const nextMode = MODE_FOR_USE[use] || "plan";
+    await updateSettings({ ...settings, appMode: appMode === "advanced" ? "advanced" : "simple", mode: nextMode });
+    await safeSet("mode-chosen", true);
+    await safeSet("tour-seen", true);
     setShowWelcome(false);
-    handleFirstChoice(choice, {
-      settings,
-      updateSettings,
-      startTour: (appMode) => {
-        setTourSteps(appMode === "simple" ? SIMPLE_TOUR_STEPS : TOUR_STEPS);
-        setTourDemoData(true);
-        setShowTour(true);
-      },
-      openOnboarding: (params) => nav.go("plan:onboarding", params),
-    });
+    setScreen("home");
+    setHomeReload((n) => n + 1);
+    if (typeof window !== "undefined" && window.scrollTo) window.scrollTo(0, 0);
   }
+
+  // Runs from the watch (src/shared/wear.js): a run dated today or
+  // yesterday on a day with no planned run changes the plan.
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const onWatchRuns = async (e) => {
+      const ids = new Set((e && e.detail && e.detail.saved) || []);
+      if (!ids.size) return;
+      try {
+        const list = await listActivities();
+        await reportImportedRuns(list.filter((a) => ids.has(a.id)));
+      } catch (err) {
+        /* the runs are saved; the plan check is extra */
+      }
+    };
+    window.addEventListener("skidmarks:watch-runs", onWatchRuns);
+    return () => window.removeEventListener("skidmarks:watch-runs", onWatchRuns);
+  }, []);
 
   useEffect(() => {
     async function init() {
@@ -209,6 +234,11 @@ export default function App() {
         // pass that reads the setting, before it has drawn anything worth
         // seeing.
         if (merged.showIntro === false) setIntro(false);
+      } else {
+        // A new install has no saved settings. Use the default theme
+        // ("system"), so the first-open screens follow the phone's light
+        // or dark mode.
+        applyTheme(DEFAULT_SETTINGS.theme, DEFAULT_SETTINGS.colourScheme, DEFAULT_SETTINGS.highContrast);
       }
       const mergedForIntro = { ...DEFAULT_SETTINGS, ...(savedSettings || {}) };
       if ((await safeGet(INTRO_SEEN_KEY)) && !mergedForIntro.introEachLaunch) setIntro(false);
@@ -337,6 +367,9 @@ export default function App() {
     const active = await getActiveProgramme();
     if (active) await archiveActiveProgramme(true);
     await saveActiveProgramme(programme);
+    // Lifting is set up (the Lift setup card goes away).
+    await safeSet(LIFT_SETUP_DONE_KEY, true);
+    setGuidedPrefill(null);
     setCurrentProgramme(programme);
     setHomeReload((n) => n + 1);
     setScreen("programme");
@@ -438,7 +471,26 @@ export default function App() {
           onOpenProgramme={() => setScreen("programme")}
           onStartProgrammeDay={(day, programme) => startProgrammeDay(day, programme)}
           onViewProgrammeStats={(prog) => { setStatsProgramme(prog); setStatsIsFinished(true); setScreen("programmeStats"); }}
-          onNewProgramme={() => setScreen("programmeBuilder")}
+          onNewProgramme={() => {
+            setBuilderOrigin("startChoice");
+            setScreen("programmeBuilder");
+          }}
+          setupCard={
+            <LiftSetupCard
+              activeProgramme={currentProgramme}
+              reloadKey={homeReload}
+              onEnterPlan={() => {
+                setBuilderOrigin("home");
+                setGuidedPrefill(null);
+                setScreen("programmeBuilder");
+              }}
+              onMakePlan={(prefill) => {
+                setBuilderOrigin("home");
+                setGuidedPrefill(prefill);
+                setScreen("programmeGuided");
+              }}
+            />
+          }
           onViewPB={() => setScreen("pb")}
           onViewProgress={() => setScreen("progress")}
           onViewSettings={() => setScreen("settings")}
@@ -484,7 +536,10 @@ export default function App() {
           activeName={activeProgrammeMeta ? activeProgrammeMeta.name : ""}
           nextDayName={activeProgrammeMeta ? activeProgrammeMeta.nextDayName : ""}
           onContinue={() => setScreen("programme")}
-          onNew={() => setScreen("programmeBuilder")}
+          onNew={() => {
+            setBuilderOrigin("startChoice");
+            setScreen("programmeBuilder");
+          }}
           onFree={() => setScreen("split")}
           onBack={() => setScreen("home")}
         />
@@ -492,7 +547,7 @@ export default function App() {
 
       {screen === "programmeBuilder" && (
         <ProgrammeBuilderScreen
-          onBack={() => setScreen("startChoice")}
+          onBack={() => setScreen(builderOrigin)}
           onCreate={createProgramme}
           onGuided={() => setScreen("programmeGuided")}
         />
@@ -500,7 +555,8 @@ export default function App() {
 
       {screen === "programmeGuided" && (
         <GuidedProgrammeWizard
-          onBack={() => setScreen("programmeBuilder")}
+          prefill={guidedPrefill}
+          onBack={() => setScreen(guidedPrefill ? "home" : "programmeBuilder")}
           onDecline={() => setScreen("programmeBuilder")}
           onCreate={createProgramme}
         />
@@ -539,6 +595,7 @@ export default function App() {
           onViewVersionHistory={() => setScreen("versionHistory")}
           onViewData={() => nav.go("shared:data")}
           onViewSampleDemo={() => nav.go("plan:demo")}
+          onChangeUse={(use) => nav.go("plan:your-week", { use })}
         />
       )}
 
@@ -719,9 +776,12 @@ export default function App() {
 
       {/* Above the tour in the tree but gated on it not running, so an
           update and a first launch can never stack on top of each other. */}
-      {/* Ahead of everything: the mode choice is the first thing a new
-          install shows, and the tour only begins once it is made. */}
-      {showWelcome && <WhoAreYou overlay onChoose={chooseWho} />}
+      {/* Ahead of everything: the first-open flow is the first thing a
+          new install shows (spec v1.1 section 1). */}
+      {showWelcome && <FirstOpen onDone={finishFirstOpen} initialAppMode={settings.appMode} />}
+
+      {/* "Plan updated" after an unplanned run or lift session. */}
+      {!showWelcome && !showTour && <PlanNotice nav={nav} />}
 
       {whatsNew && !showTour && (
         <WhatsNewScreen notes={whatsNew} onDismiss={() => setWhatsNew(null)} />

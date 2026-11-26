@@ -20,6 +20,7 @@ import { NewExerciseForm } from "../components/NewExerciseForm.jsx";
 import { RestTimer } from "../components/RestTimer.jsx";
 import { TopBar } from "../components/TopBar.jsx";
 import { markGymSession } from "../plan/planState.js";
+import { reportUnplannedLift } from "../plan/unplanned.js";
 
 export function WorkoutScreen({ split, selection, presetExercises, presetSupersets, resumeData, settings, appendMobility, programmeCtx, onBack, onFinish }) {
   const isAdvanced = settings.appMode === "advanced";
@@ -495,6 +496,9 @@ export function WorkoutScreen({ split, selection, presetExercises, presetSuperse
       });
       await safeSet("workout-history", all.slice(-200));
       await markGymSession(session); // marks the planned gym day done in Plan mode
+      // A session on a day with no planned gym session can change the
+      // next runs (spec v1.1 section 4). It never throws.
+      await reportUnplannedLift(session, settings);
 
       // Log this session against the active programme so it knows what's next
       // and can track progress.

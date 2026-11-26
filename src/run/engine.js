@@ -24,6 +24,8 @@ export {
 
 export { adapt, checkMove, suggestDays, returnLadder, afterRace, goalGap, timeTrialDue } from './engine/adapt.js';
 
+export { planWeek, recommendWeek } from './engine/week.js';
+
 export { LOAD_NOTE, FITNESS_DAYS, FATIGUE_DAYS, rpeFromHR, activityMinutes, sessionRpe, sessionLoad, loadSeries, easyHardSplit, weekStreak, readiness } from './engine/load.js';
 
 export { seedFromHistory } from './engine/history.js';

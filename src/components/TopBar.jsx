@@ -11,6 +11,7 @@ export function TopBar({ title, onBack }) {
       {onBack && (
         <button
           onClick={onBack}
+          aria-label="Back"
           style={{
             background: COLORS.surface,
             border: `1px solid ${COLORS.line}`,

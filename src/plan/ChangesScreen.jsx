@@ -26,6 +26,8 @@ const KIND_TEXT = {
   race: "Race result",
   afterRace: "After the race",
   legHeavyDay: "Heavy legs",
+  tired: "Very tired",
+  unplannedSession: "Session not in the plan",
   move: "Session moved",
   drop: "Session dropped",
   repeatWeek: "Week repeated",
