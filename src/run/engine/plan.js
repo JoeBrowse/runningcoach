@@ -903,7 +903,8 @@ export function enforceWeeks(plan, ctxFor, log, warnings, rebuildWeek = null) {
     let cap = wk.targetKm != null ? wk.targetKm + 0.3 : Infinity; let measure = 'km';
     if (wk.check === 'normal' || wk.check === 'event' || wk.check === 'rebuild') cap = Math.min(cap, ref * (1 + SAFETY.maxWeeklyIncrease));
     if (wk.check === 'cutback') cap = Math.min(cap, ref * 0.88);
-    if (wk.check === 'recovery') cap = Math.min(cap, ref);
+    // A changed (disrupted) week 1 has no normal week before it: its limit is the week 1 limit, not the current distance.
+    if (wk.check === 'recovery') cap = Math.min(cap, wi === 0 && lastNormal == null ? cap1 : ref);
     if (wk.check === 'taper') {
       measure = 'training';
       cap = Math.min(wk.targetKm != null ? wk.targetKm : Infinity, (wk.taperFrac || 1) * (peak || ref * (1 + SAFETY.maxWeeklyIncrease)), prevTaperTr != null ? prevTaperTr : Infinity, ref * (1 + SAFETY.maxWeeklyIncrease));
@@ -1150,7 +1151,9 @@ export function safetyChecks(plan) {
     const ref = lastNormal != null ? lastNormal : (L.week1MaxKm ?? Infinity) / 1.1;
     if (!wk.exempt) {
       if ((c === 'normal' || c === 'event' || c === 'rebuild') && i > 0 && k > ref * 1.1 + eps) fg.push(`Week ${wk.n}: ${k} km after ${round(ref, 1)} km.`);
-      if (c === 'recovery' && k > ref + eps) fg.push(`Week ${wk.n} (recovery): ${k} km is more than ${round(ref, 1)} km.`);
+      // A changed week 1 has no normal week before it. Its limit is the week 1 limit (the 'week1' check above).
+      const recRef = i === 0 && lastNormal == null ? lim1.maxKm : ref;
+      if (c === 'recovery' && k > recRef + eps) fg.push(`Week ${wk.n} (${wk.disrupted ? 'changed' : 'recovery'}): ${k} km is more than ${round(recRef, 1)} km.`);
       if (c === 'cutback' && i > 0 && k > ref * SAFETY.cutbackMaxShare + eps) fc.push(`Week ${wk.n} is a cutback week but has ${k} km (limit ${round(ref * SAFETY.cutbackMaxShare, 1)} km).`);
       if (c === 'taper') { const t = tkm(wk); const lim = Math.min((wk.taperFrac || 1) * (peak || ref * 1.1), ref * 1.1); if (t > lim + eps) ft.push(`Week ${wk.n}: ${t} km. Taper limit ${round(lim, 1)} km.`); if (prevT != null && t > prevT + eps) ft.push(`Week ${wk.n}: the taper grows again.`); prevT = t; }
     }

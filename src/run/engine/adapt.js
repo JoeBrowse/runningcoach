@@ -3,7 +3,7 @@
    a move that breaks a safety rule is refused with the reason;
    a return ladder lives only on the plan that needs it and ends on its end date. */
 
-import { toISO, addDays, daysBetween, round, fmtTime, fmtDate } from './util.js';
+import { toISO, addDays, daysBetween, round, sum, fmtTime, fmtDate } from './util.js';
 import { paces, predict, checkResult, isValidScore, SCORE_MIN, SCORE_MAX } from './science.js';
 import { makeWorkout, isRun, isHardRun } from './workouts.js';
 import { allDays, reconcile, enforceWeeks, fixSpacing, overlayRace, ctxForPlan, classifyWeek, weekKm, recoveryDaysFor, buildPlan, GOALS, SAFETY, ChangeLog, isHeavyLegsDay } from './plan.js';
@@ -29,6 +29,8 @@ function setDay(plan, iso, spec, reason, changes, mark = 'disrupted') {
   const nw = makeWorkout(iso, spec, ctxForPlan(plan)(loc.wi));
   nw.gym = before.gym; nw.adjusted = reason;
   if (before.done) nw.done = before.done;
+  if (before.gymDone) nw.gymDone = before.gymDone; // marks of the date stay with the date
+  if (before.unplanned) nw.unplanned = before.unplanned;
   loc.week.days[loc.di] = nw;
   if (mark === 'rebuild') { loc.week.rebuild = true; delete loc.week.disrupted; }
   changes.push({ iso, before: describe(before), after: describe(nw), reason });
@@ -36,6 +38,33 @@ function setDay(plan, iso, spec, reason, changes, mark = 'disrupted') {
 }
 function daysFrom(plan, fromIso, n) { return allDays(plan).filter((w) => w.iso >= fromIso).slice(0, n); }
 const safetyFails = (checks) => checks.filter((c) => !c.ok);
+
+/* ---------- gym days (spec v1.1 section 4) ----------
+   A plan day can carry `gym` ({day, type, intensity, note, heavyLegs, advice, reason}).
+   advice: 'normal' | 'maintenance' | 'skip-heavy' (lift light) | 'rest' (no gym session today).
+   Advice only goes up. A gym day that is done (`gymDone`) does not change. */
+const ADVICE_RANK = { normal: 0, maintenance: 1, 'skip-heavy': 2, rest: 3 };
+const GYM_NAME = { upper: 'Upper body', lower: 'Lower body', full: 'Full body', legs: 'Legs', other: 'Gym' };
+const LEG_GYM = new Set(['legs', 'lower', 'full']);
+function gymText(g) {
+  const label = g.advice === 'rest' ? 'rest' : g.advice === 'skip-heavy' ? 'light' : g.advice === 'maintenance' ? 'maintenance' : g.intensity;
+  return `${GYM_NAME[g.type] || 'Gym'} (${label})`;
+}
+function setGymAdvice(P, iso, advice, reason, changes) {
+  const loc = locate(P, iso);
+  if (!loc || !loc.day.gym || loc.day.gymDone) return false;
+  const g = loc.day.gym;
+  if (ADVICE_RANK[advice] <= (ADVICE_RANK[g.advice] || 0)) return false;
+  if ((advice === 'skip-heavy' || advice === 'maintenance') && g.intensity !== 'heavy') return false; // already light
+  const ng = { ...g, advice, reason };
+  if (advice === 'rest') { ng.plannedIntensity = g.plannedIntensity || g.intensity; ng.intensity = 'light'; ng.heavyLegs = false; }
+  loc.day.gym = ng;
+  changes.push({ iso, before: gymText(g), after: gymText(ng), reason, kind: 'gym' });
+  return true;
+}
+const isHeavyGym = (d) => !!(d && d.gym && !d.gymDone && d.gym.intensity === 'heavy' && d.gym.advice !== 'skip-heavy' && d.gym.advice !== 'rest');
+const isHeavyLegsGym = (d) => isHeavyGym(d) && LEG_GYM.has(d.gym.type);
+const failKeys = (T) => { reconcile(T); return new Set(T.safety.flatMap((c) => c.failures.map((f) => `${c.id}: ${f}`))); };
 
 function finish(P, changes, extra = {}) {
   const log = new ChangeLog();
@@ -116,6 +145,7 @@ function swapDays(P, fromIso, toIso) {
   const movedA = makeWorkout(toIso, A.spec, ctxFor(b.wi)); movedA.gym = B.gym; movedA.moved = { from: fromIso };
   const movedB = isRun(B) || B.type === 'strength' ? makeWorkout(fromIso, B.spec, ctxFor(a.wi)) : makeWorkout(fromIso, { type: 'rest' }, ctxFor(a.wi));
   movedB.gym = A.gym; if (isRun(B)) movedB.moved = { from: toIso };
+  for (const k of ['gymDone', 'unplanned']) { if (B[k]) movedA[k] = B[k]; if (A[k]) movedB[k] = A[k]; } // marks of the date stay with the date
   b.week.days[b.di] = movedA; a.week.days[a.di] = movedB;
 }
 
@@ -211,6 +241,10 @@ export function adapt(plan, event, ctx = {}) {
       else if (isRun(d)) setDay(P, d.iso, { type: 'easy', km: Math.max(SAFETY.minRunKm, Math.min(d.km, 5)) }, 'Symptoms above the neck only. A short easy run is OK if you feel fine. Stop if you feel worse.', changes);
     }
     for (const d of daysFrom(P, addDays(today, n), 4)) if (d.intensity === 'hard' || d.intensity === 'long') setDay(P, d.iso, { type: 'easy', km: Math.max(SAFETY.minRunKm, Math.min(d.km, 6)) }, 'Easing back in after illness. Hard work comes back in a few days.', changes);
+    for (const iso of daysFrom(P, today, n).map((d) => d.iso)) {
+      setGymAdvice(P, iso, severe ? 'rest' : 'skip-heavy', severe ? 'Fever or symptoms below the neck. No gym session until you have had no symptoms for 24 hours.' : 'Symptoms above the neck only. A light session is OK if you feel fine. Stop if you feel worse.', changes);
+    }
+    for (const iso of daysFrom(P, addDays(today, n), 4).map((d) => d.iso)) setGymAdvice(P, iso, 'skip-heavy', 'Easing back in after illness. Lift light for a few days.', changes);
     return finish(P, changes, { message: severe ? 'Rest is training now. We cleared the next days and made the return gentle.' : 'Keep runs short and easy. We removed hard sessions for now.', followUps: Array.from({ length: 3 }, (_, i) => ({ iso: addDays(today, i + 1), question: 'How do you feel today?' })) });
   }
 
@@ -226,12 +260,20 @@ export function adapt(plan, event, ctx = {}) {
         if (isRun(d)) setDay(P, d.iso, { type: 'cross', why: 'Only if it is pain-free.' }, `Pain ${pain}/10 in ${a.area}${a.limping ? ' with a limp' : ''}. No running. Pain-free cross-training only, if you want it.`, changes);
         else if (d.type === 'strength') setDay(P, d.iso, { type: 'rest' }, 'Injury: rest instead of strength until a physio or doctor says it is OK.', changes);
       }
+      for (const iso of allDays(P).filter((x) => x.iso >= today && x.iso <= end && x.gym).map((x) => x.iso)) {
+        const g = locate(P, iso).day.gym;
+        if (LEG_GYM.has(g.type)) setGymAdvice(P, iso, 'rest', 'Injury: no leg or full-body gym session until a physio or doctor says it is OK.', changes);
+        else setGymAdvice(P, iso, 'skip-heavy', 'Injury: light upper-body work only, if it is pain-free and does not load the painful area. Ask a physio or doctor first.', changes);
+      }
       applyLadder(P, addDays(end, 1), today, changes, 'injury');
       return finish(P, changes, { message: 'Please see a physio or doctor. We stopped running for 2 weeks and added a return-to-run ladder. The app cannot diagnose injuries.', followUps });
     }
     for (const d of daysFrom(P, today, 5)) {
       if (!isRun(d) || d.type === 'race') continue;
       setDay(P, d.iso, { type: 'easy', km: Math.max(SAFETY.minRunKm, Math.min(d.km, 4)) }, `Mild pain (${pain}/10) in ${a.area}. Short easy runs only, if pain stays at 3/10 or less during the run and the next morning.`, changes);
+    }
+    for (const iso of daysFrom(P, today, 5).filter((d) => d.gym && LEG_GYM.has(d.gym.type)).map((d) => d.iso)) {
+      setGymAdvice(P, iso, 'skip-heavy', `Mild pain (${pain}/10) in ${a.area}. Light leg work only, if it is pain-free. See a physio or doctor if the pain stays.`, changes);
     }
     return finish(P, changes, { message: 'We made the next 5 days short and easy. Use the pain rule: 3/10 or less, and not worse the next morning.', followUps });
   }
@@ -291,6 +333,8 @@ export function adapt(plan, event, ctx = {}) {
       setDay(P, w.iso, { ...w.spec, reps: Math.max(1, w.spec.reps - step) }, `Readiness ${score}/100. A shorter session today.`, changes);
       message = 'We made today a little shorter to match how you feel.';
     }
+    if (loc && score < 40 && setGymAdvice(P, today, 'skip-heavy', `Readiness is low (${score}/100). Lift light today, or rest.`, changes)) message = 'We changed today to match how you feel.';
+    else if (loc && score < 60 && setGymAdvice(P, today, 'maintenance', `Readiness ${score}/100. Keep the weight, do fewer sets, and stop 3 or more reps before failure.`, changes) && !changes.some((c) => c.kind !== 'gym')) message = 'We made the gym session a little easier to match how you feel.';
     return finish(P, changes, { message });
   }
 
@@ -340,6 +384,9 @@ export function adapt(plan, event, ctx = {}) {
     return finish(P, changes, { offers, message: 'Done. Your key runs are now far enough from the leg-heavy day.' });
   }
 
+  if (type === 'tired') return tired(P, today, changes);
+  if (type === 'unplannedSession') return unplannedSession(plan, P, event, today, changes);
+
   if (type === 'move') {
     const r = checkMove(P, toISO(event.fromIso), toISO(event.toIso), today);
     if (!r.ok) return { plan, changes, questions: [], needsAnswers: false, refused: true, reason: r.reason, message: r.reason };
@@ -384,6 +431,186 @@ export function adapt(plan, event, ctx = {}) {
   }
 
   return { plan, changes, questions: [], needsAnswers: false, refused: true, reason: `Unknown event: ${type}`, message: `Unknown event: ${type}` };
+}
+
+/* "I feel really tired": today's hard run or heavy lift becomes easy or light; the next day stays easy. */
+function tired(P, today, changes) {
+  const next = addDays(today, 1);
+  for (const [iso, first] of [[today, true], [next, false]]) {
+    const loc = locate(P, iso); if (!loc) continue;
+    const d = loc.day;
+    if (!d.done && (d.intensity === 'hard' || d.intensity === 'long')) {
+      setDay(P, iso, { type: 'easy', km: Math.max(SAFETY.minRunKm, Math.min(d.km, 6)) }, first ? 'You feel really tired. Today is a short easy run instead. The hard session can wait.' : 'You felt really tired yesterday. Today stays easy.', changes);
+    }
+    if (isHeavyGym(locate(P, iso).day)) setGymAdvice(P, iso, 'skip-heavy', first ? 'You feel really tired. Lift light today, or rest.' : 'You felt really tired yesterday. Lift light today.', changes);
+  }
+  const race = [today, next].map((iso) => locate(P, iso)).find((l) => l && l.day.type === 'race');
+  const message = changes.length ? 'We made today and tomorrow easy. Sleep well, eat well and drink water.' : race ? 'Your race stays in the plan. Rest as much as you can before it.' : 'Today and tomorrow are already easy. No change is necessary. Rest if you need it.';
+  return finish(P, changes, { message });
+}
+
+/* Swaps a key run on `c` to the first safe day in the next 4 days that is at least `minGap` days after `fromIso`.
+   A long run stays in its week. Returns the new day or null. */
+function moveKeyRun(P, c, fromIso, minGap, today) {
+  const src = locate(P, c);
+  for (let j = 1; j <= 4; j++) {
+    const t = addDays(c, j); const tl = locate(P, t);
+    if (!tl || t < today || daysBetween(fromIso, t) < minGap) continue;
+    if (src.day.intensity === 'long' && tl.week !== src.week) break;
+    if (tl.day.done || tl.day.type === 'race' || isHardRun(tl.day)) continue;
+    const res = trySafe(P, (X) => swapDays(X, c, t));
+    if (res.ok) return t;
+  }
+  return null;
+}
+
+/* Unplanned session (spec v1.1 section 4). The plan day records it in `unplanned`.
+   A lift also marks the day's gym session as done, when this keeps every safety rule. */
+function unplannedSession(plan, P, event, today, changes) {
+  const refuse = (reason) => ({ plan, changes: [], questions: [], needsAnswers: false, refused: true, reason, message: reason });
+  const kind = event.kind === 'lift' || event.kind === 'run' ? event.kind : null;
+  if (!kind) return refuse('Use kind "run" or "lift".');
+  let iso; try { iso = toISO(event.date || event.iso || today); } catch { return refuse('The date is not valid.'); }
+  const intensity = ['easy', 'hard', 'long'].includes(event.intensity) ? event.intensity : kind === 'lift' ? 'hard' : 'easy';
+  let areas = (Array.isArray(event.areas) ? event.areas : []).filter((a) => ['legs', 'upper', 'full'].includes(a));
+  if (!areas.length) areas = [kind === 'run' ? 'legs' : 'full']; // unknown lift areas: the safe side
+  const minutes = Number(event.minutes) > 0 ? Number(event.minutes) : 0;
+  const home = locate(P, iso);
+  if (!home) return { plan, changes: [], questions: [], needsAnswers: false, message: 'This day is not in the plan. The plan does not change.' };
+  const p = P.paces;
+  const km = Number(event.km) > 0 ? round(Number(event.km), 1) : kind === 'run' && minutes && p ? round((minutes * 60) / p.easy, 1) : 0;
+  const session = { kind, intensity, areas, minutes, ...(kind === 'run' ? { km } : {}) };
+  // The plan day records the session. Other rules can replace the day object, so it is written again at the end.
+  const record = (X) => { const l = locate(X, iso); if (l) l.day.unplanned = [...(home.day.unplanned || []), session]; };
+  const done = (extra) => {
+    let markedGym = null;
+    { const l = locate(P, iso); if (l && l.day.gym && l.day.gym.unplanned) markedGym = { gym: l.day.gym, gymDone: l.day.gymDone }; }
+    const out = finish(P, changes, extra);
+    record(out.plan);
+    const l = locate(out.plan, iso);
+    if (markedGym && l) { l.day.gym = markedGym.gym; l.day.gymDone = markedGym.gymDone; }
+    return out;
+  };
+  const when = fmtDate(iso);
+  const dayAt = (k) => { const c = addDays(iso, k); const l = c >= today ? locate(P, c) : null; return l && !l.day.done ? l : null; };
+  const gymAt = (k) => { const c = addDays(iso, k); const l = c >= today ? locate(P, c) : null; return l && l.day.gym && !l.day.gymDone ? l : null; };
+  const notes = [];
+
+  if (kind === 'lift') {
+    const legs = areas.includes('legs') || areas.includes('full');
+    const upper = areas.includes('upper') || areas.includes('full');
+    const heavy = intensity !== 'easy';
+    const what = areas.includes('full') ? 'full-body' : legs ? 'leg' : 'upper-body';
+    if (legs && heavy) {
+      // key runs: no hard run within 48 hours and no long run within 72 hours after heavy legs
+      for (let k = 0; k <= 2; k++) {
+        const l = dayAt(k); if (!l) continue;
+        const d = l.day;
+        if (d.type === 'race') { notes.push(`${d.title} is on ${fmtDate(d.iso)}. The race stays in the plan. Keep the legs fresh until then.`); continue; }
+        const clash = (k <= 1 && d.intensity === 'hard') || (k <= 2 && d.intensity === 'long');
+        if (!clash) continue;
+        const why = `You did a heavy ${what} session on ${when}. Heavy legs need 48 hours before a hard run and 72 hours before the long run.`;
+        const t = moveKeyRun(P, d.iso, iso, d.intensity === 'long' ? 3 : 2, today);
+        if (t) {
+          const after = locate(P, t).day;
+          swapDays(P, d.iso, t);
+          changes.push({ iso: d.iso, before: describe(d), after: `Moved to ${fmtDate(t)}`, reason: `${why} ${d.title} moves to ${fmtDate(t)}.` });
+          changes.push({ iso: t, before: describe(after), after: describe(d), reason: `${d.title} moved here from ${fmtDate(d.iso)}. No hard day touches it.` });
+        } else {
+          const easyKm = Math.max(SAFETY.minRunKm, d.intensity === 'long' ? Math.floor(d.km * 6) / 10 : Math.min(d.km, 8));
+          setDay(P, d.iso, { type: 'easy', km: easyKm }, `${why} No safe day is free, so this run is easy.`, changes);
+        }
+      }
+    }
+    // the next gym sessions on the same muscles
+    for (let k = 0; k <= 1; k++) {
+      const l = gymAt(k); if (!l) continue;
+      const g = l.day.gym;
+      if (legs && LEG_GYM.has(g.type) && isHeavyGym(l.day)) setGymAdvice(P, l.day.iso, 'skip-heavy', `You did a ${what} session on ${when}. Your legs need time to recover. This session is light.`, changes);
+      else if (upper && g.type === 'upper' && isHeavyGym(l.day)) setGymAdvice(P, l.day.iso, 'skip-heavy', `You did a ${what} session on ${when}. Your upper body needs 48 hours to recover. This session is light.`, changes);
+    }
+    // mark the day's gym session as done, when this keeps every safety rule
+    if (!home.day.gym || !home.day.gymDone) {
+      const type = areas.includes('full') || (legs && upper) ? 'full' : legs ? 'legs' : 'upper';
+      const gym = { day: home.day.dow, type, intensity: heavy ? 'heavy' : 'light', note: 'Unplanned session', heavyLegs: heavy && LEG_GYM.has(type), advice: 'normal', reason: 'You logged this session.', unplanned: true };
+      const mark = (X) => { const l = locate(X, iso); if (l.day.gym) gym.planned = l.day.gym; l.day.gym = { ...gym }; l.day.gymDone = { activityId: null, at: null, unplanned: true }; };
+      const before = failKeys(clone(P));
+      const T = clone(P); mark(T);
+      const fresh = [...failKeys(T)].filter((f) => !before.has(f));
+      if (!fresh.length) mark(P);
+    }
+    const message = changes.length ? 'Plan updated. Your next sessions now respect the extra lift session.' : 'The lift session is saved. Your next sessions are far enough away. No change is necessary.';
+    return done({ message: notes.length ? `${message} ${notes.join(' ')}` : message });
+  }
+
+  // run
+  if (intensity === 'hard' || intensity === 'long') {
+    const what = intensity === 'long' ? 'long run' : 'hard run';
+    for (let k = 0; k <= 1; k++) {
+      const l = dayAt(k); if (!l) continue;
+      const d = l.day;
+      if (d.type === 'race') { notes.push(`${d.title} is on ${fmtDate(d.iso)}. The race stays in the plan. Run it by feel.`); continue; }
+      const why = `You did a ${what} on ${when} that was not in the plan. Hard days must not touch.`;
+      if (d.intensity === 'hard') setDay(P, d.iso, { type: 'easy', km: Math.max(SAFETY.minRunKm, Math.min(d.km, 8)) }, `${why} This run is easy now.`, changes);
+      else if (d.intensity === 'long') {
+        const t = moveKeyRun(P, d.iso, iso, 2, today);
+        if (t) {
+          const after = locate(P, t).day;
+          swapDays(P, d.iso, t);
+          changes.push({ iso: d.iso, before: describe(d), after: `Moved to ${fmtDate(t)}`, reason: `${why} ${d.title} moves to ${fmtDate(t)}.` });
+          changes.push({ iso: t, before: describe(after), after: describe(d), reason: `${d.title} moved here from ${fmtDate(d.iso)}. No hard day touches it.` });
+        } else setDay(P, d.iso, { type: 'easy', km: Math.max(SAFETY.minRunKm, Math.floor(d.km * 6) / 10) }, `${why} No safe day is free, so this run is easy.`, changes);
+      }
+    }
+    for (let k = 0; k <= 1; k++) {
+      const l = gymAt(k);
+      if (l && isHeavyLegsGym(l.day)) setGymAdvice(P, l.day.iso, 'skip-heavy', `You did a ${what} on ${when}. Hard days must not touch. Heavy legs are light this time.`, changes);
+    }
+    const message = changes.length ? `Plan updated. The next days are easier after your extra ${what}.` : `The ${what} is saved. Your next key sessions are far enough away. No change is necessary.`;
+    return done({ message: notes.length ? `${message} ${notes.join(' ')}` : message });
+  }
+
+  // easy run: the week counts it; the next easy run in the next 2 days can get shorter
+  const week = home.week;
+  const extraKm = round(sum(week.days.flatMap((d) => (d.unplanned || []).filter((u) => u.kind === 'run')), (u) => u.km || 0) + km, 1);
+  const target = Number.isFinite(week.targetKm) ? week.targetKm : weekKm(week);
+  const total = round(weekKm(week) + extraKm, 1);
+  if (!km) return done({ message: 'The run is saved. The plan does not change.' });
+  if (total <= target + SAFETY.checkEps) return done({ message: `The week counts this run (${km} km). The week is still at or under its target of ${round(target, 1)} km, so the plan does not change.` });
+  const over = round(total - target, 1);
+  const floorKm = Math.ceil(Math.max(3, p ? (20 * 60) / p.easy : 3) * 10) / 10; // not below 3 km or 20 minutes
+  for (let k = 1; k <= 2; k++) {
+    const l = dayAt(k); if (!l) continue;
+    const d = l.day;
+    if (!['easy', 'recovery', 'strides'].includes(d.type)) continue;
+    const goal = Math.max(floorKm, round(d.km - over, 1));
+    if (goal >= d.km - 0.05) return done({ message: `The week counts this run (${km} km). Your next easy run is already short, so the plan does not change.` });
+    // A changed week counts at its planned distance (markDisrupted).
+    // safe, and no other day must change (a smaller week can make later weeks shrink)
+    const fits = (newKm) => {
+      const T = clone(P); const x = locate(T, d.iso);
+      const nw = makeWorkout(d.iso, { ...d.spec, km: newKm }, ctxForPlan(T)(x.wi)); nw.gym = x.day.gym;
+      markDisrupted(x.week);
+      x.week.days[x.di] = nw;
+      const side = [];
+      finish(T, side);
+      return !side.length && !safetyFails(T.safety).length;
+    };
+    // the shortest distance that fits (0.1 km steps; a longer run is never less safe here)
+    let lo = Math.round(goal * 10), hi = Math.round(d.km * 10) - 1;
+    let best = null;
+    if (lo <= hi && fits(hi / 10)) {
+      best = hi;
+      while (lo < best) { const mid = Math.floor((lo + best) / 2); if (fits(mid / 10)) best = mid; else lo = mid + 1; }
+    }
+    if (best != null) {
+      const newKm = best / 10;
+      setDay(P, d.iso, { ...d.spec, km: newKm }, `You ran ${km} km on ${when} that was not in the plan. This easy run is ${newKm} km, not ${round(d.km, 1)} km. The week stays near its target.`, changes);
+      return done({ message: 'Plan updated. The week counts your extra run, so the next easy run is shorter.' });
+    }
+    return done({ message: `The week counts this run (${km} km). A shorter easy run would break a safety rule, so the plan does not change.` });
+  }
+  return done({ message: `The week counts this run (${km} km). There is no easy run in the next 2 days, so the plan does not change.` });
 }
 
 /** Recovery block and "what next" options after a race result. */

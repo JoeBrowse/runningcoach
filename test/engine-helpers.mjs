@@ -111,7 +111,11 @@ export function verdicts(plan) {
         if (t > lim + EPS) out.taper.push(`week ${wk.n}: taper ${t} > ${r1(lim)}`);
         if (prevTaper != null && t > prevTaper + EPS) out.taper.push(`week ${wk.n}: taper grows`);
         prevTaper = t;
-      } else if (down) { if (k > r + EPS) out.growth.push(`week ${wk.n}: down week ${k} > ${r1(r)}`); } else if (wk.cutback) {
+      } else if (down) {
+        // a changed first week has no normal week before it: the week 1 limit applies
+        const lim = wk === plan.weeks[0] && ref == null ? cap1 : r;
+        if (k > lim + EPS) out.growth.push(`week ${wk.n}: down week ${k} > ${r1(lim)}`);
+      } else if (wk.cutback) {
         if (wk.n > 1 && k > r * 0.9 + EPS) out.cutback.push(`week ${wk.n}: cutback ${k} vs ref ${r1(r)}`);
       } else if (wk.n > 1 && k > r * 1.1 + EPS) out.growth.push(`week ${wk.n}: ${k} after ref ${r1(r)}`);
     }
