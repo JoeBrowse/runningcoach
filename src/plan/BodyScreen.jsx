@@ -12,7 +12,7 @@ import { Screen, Card, Btn, Loading, st } from "./ui.jsx";
 /* ---------------------------------------------------------------
    BODY
 
-   Iron Log's muscle readiness map, the shared body screen. Lift
+   Lift's muscle readiness map, the shared body screen. Lift
    sessions, runs and other sports all feed it (lib/recovery.js reads
    workout-history and activity-history). The Form gauge uses the one
    load model (shared/load.js). The activity panel logs other sports.

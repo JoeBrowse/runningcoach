@@ -95,7 +95,7 @@ export default function App() {
     ? { name: currentProgramme.name, nextDayName: currentProgramme.days[programmeNextIndex(currentProgramme)] ? currentProgramme.days[programmeNextIndex(currentProgramme)].name : "" }
     : null;
 
-  // The tour always runs over Lift, because it describes Iron Log screens.
+  // The tour always runs over Lift, because it describes Lift screens.
   const mode = showTour ? "lift" : normaliseMode(settings.mode);
 
   function setScreen(target) {
@@ -143,7 +143,7 @@ export default function App() {
     },
     home: () => setScreen("home"),
     openSettings: () => setScreen("settings"),
-    // Opens an Iron Log screen by its id ("history", "streak", ...). Its
+    // Opens a Lift screen by its id ("history", "streak", ...). Its
     // back button returns to the current mode's home.
     openLiftScreen: (id) => setScreen(id),
   };
@@ -227,7 +227,7 @@ export default function App() {
           setTourDemoData(true);
           setShowTour(true);
         } else if (((await safeGet("workout-history")) || []).length) {
-          // An upgraded Iron Log user: no onboarding. Lift opens as before
+          // An upgrade with old gym data: no onboarding. Lift opens as before
           // and Plan home shows a "Set up running" card.
           await safeSet("mode-chosen", true);
           setTourSteps(mergedSettings.appMode === "advanced" ? TOUR_STEPS : SIMPLE_TOUR_STEPS);

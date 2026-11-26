@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Settings as SettingsIcon, X, Check, ChevronDown } from "lucide-react";
 import { hexToRgba, COLORS } from "../theme.js";
 import { MODE_LIST } from "./modeList.js";
+import { InstallHint } from "../shared/ui/WebInstall.jsx";
 
 /* The top of every mode's home screen.
 
@@ -134,6 +135,7 @@ export function ModeHeader({ mode, onModeChange, onViewSettings }) {
         )}
       </div>
       <ModeSwitch mode={mode} onModeChange={onModeChange} />
+      <InstallHint onOpenSettings={onViewSettings} />
       {sheet && (
         <ModeSheet
           mode={mode}

@@ -2,9 +2,9 @@
 
 ## What this is
 
-**Skid Marks** is a free running coach and gym tracker in one Android app (React 18 + Vite, wrapped with Capacitor 8). It has three modes: **Plan** (the master week), **Run** (the running coach) and **Lift** (the gym tracker, based on Iron Log). All features are free. No ads, no accounts, no data sales. Data stays on the phone. Licence: GPL-3.0-or-later.
+**Skid Marks** is a free running coach and gym tracker in one Android app (React 18 + Vite, wrapped with Capacitor 8). It has three modes: **Plan** (the master week), **Run** (the running coach) and **Lift** (the gym tracker). All features are free. No ads, no accounts, no data sales. Data stays on the phone. Licence: GPL-3.0-or-later.
 
-- Package ID: `com.skidmarks.app`. App version: see `package.json` (2.x continues Iron Log 1.29).
+- Package ID: `com.skidmarks.app`. App version: see `package.json`.
 - The decisions for V1 are in `docs/v1-spec.md`, and for 2.1 in `docs/v1.1-spec.md` (first open, hybrid week, setups). Read them before you change behaviour. The rules for running and lifting together come from `docs/research/concurrent-training.md`.
 
 ## Writing style
@@ -23,7 +23,9 @@ npm run lint    # parses every file under src/
 npm run build   # production build into dist/
 ```
 
-Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on every push and publishes it on a release for each push to `main`. The latest APK: `https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk`. The workflow runs `npx cap add android`, then `scripts/android-permissions.mjs` (location and notification permissions) and `scripts/android-signing.mjs` (signs with the fixed test key in `signing/`), then `cap sync` and Gradle. The `android/` folder is generated and not committed.
+Web: `.github/workflows/pages.yml` publishes GitHub Pages on each push to `main`: `docs/index.html` at `https://joebrowse.github.io/skidmarks/` and the web app (the same Vite build) at `/app/`. The limits of the web version are in `WEB_LIMITS` (`src/lib/webApp.js`) and in the limits table of `docs/index.html`. Change both together (`test/web-app.test.mjs` checks the titles).
+
+Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on every push and publishes it on a release for each push to `main`. The latest APK: `https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk`. The workflow runs `npx cap add android`, then `scripts/android-permissions.mjs` (location and notification permissions) and `scripts/android-signing.mjs` (signs with the fixed test key in `signing/`), then `cap sync` and Gradle. The `android/` folder is generated and not committed.
 
 ## Code map
 
@@ -32,9 +34,10 @@ Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on 
 | `src/run/` | Plan engine (pure functions, no DOM). API: `src/run/ENGINE.md`. Warm-ups: `src/run/engine/warmup.js`. |
 | `src/plan/` | First open (`FirstOpen.jsx`: running, lifting or both; tour), "Your week" (`YourWeek.jsx`, `weekSetup.js`), Lift setup card, unplanned-session handling (`unplanned.js`), plan wizard, master week, life events, weekly review, races, reminders. `planState.js` loads, saves, adapts and undoes the plan. |
 | `src/runui/` | Run mode: run home, GPS recorder, summary, season chart, progress, zones, fuel, weather, routes, coach, shoes, cycle log, workout builder. |
-| `src/shared/` | `store.js` (one activity store and storage keys), `load.js` (one load model), `import/` (GPX, TCX, FIT, ZIP, Strava CSV), `intervals.js`, `weather.js` (Open-Meteo), `export.js`, `ui/DataScreen.jsx`. |
+| `src/shared/` | `store.js` (one activity store and storage keys), `load.js` (one load model), `import/` (GPX, TCX, FIT, ZIP), `intervals.js`, `weather.js` (Open-Meteo), `export.js`, `ui/DataScreen.jsx`, `ui/WebInstall.jsx` (install hint and the web version panel). |
 | `src/modes/` | Mode switch and screen registry. How to add a screen: `src/modes/README.md`. |
-| `src/screens/`, `src/components/`, `src/lib/`, `src/data/`, `src/theme.js` | Lift mode (Iron Log). Storage prefix stays `iron-log:` so Iron Log data still loads. |
+| `src/lib/webApp.js` | Web version: browser or app, installed or not, the install prompt, install steps and `WEB_LIMITS`. |
+| `src/screens/`, `src/components/`, `src/lib/`, `src/data/`, `src/theme.js` | Lift mode. The storage key prefix stays `iron-log:` (`STORAGE_PREFIX` in `src/lib/storage.js`) so that old data still loads. Do not change it. |
 | `wear/` | Wear OS watch app (Kotlin, Compose for Wear OS, Health Services). Own Gradle project: `cd wear && ./gradlew assembleDebug testDebugUnitTest`. `app/src/main/java/com/skidmarks/app/coach/` is a pure Kotlin port of the recorder logic; `ParityTest` checks it against `parity.json`, which `test/wear.test.mjs` writes (`UPDATE_WEAR_FIXTURE=1 npm test`). Guide: `docs/wear-os.md`. |
 | `native/wear-bridge/` | Local Capacitor plugin `WearBridge` (Wear OS Data Layer): plan to the watch, runs from the watch. JS side: `src/shared/wear.js`. |
 | `test/` | `node:test` suites. `test/index.js` loads every `*.test.mjs`. |
@@ -42,7 +45,7 @@ Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on 
 
 ## Design rules
 
-- **Look:** Iron Log style. Use `COLORS`/`THEME` from `src/theme.js` (never hard-coded colours; every colour scheme and light/dark must work), Oswald uppercase labels, JetBrains Mono numbers, orange accent `#FF6A1A`.
+- **Look:** Use `COLORS`/`THEME` from `src/theme.js` (never hard-coded colours; every colour scheme and light/dark must work), Oswald uppercase labels, JetBrains Mono numbers, orange accent `#FF6A1A`.
 - **Simple and Advanced:** Simple mode hides fitness score, form, zones, phase names and predictions, and uses effort words.
 - **One store, one load:** every activity is saved once through `src/shared/store.js`. Load is RPE × minutes for every activity, with fitness / fatigue / form from `src/shared/load.js`. Do not add a second load model.
 - **Safety:** every plan change has a reason. Safety checks test the real planned days and must be honest. Keep the tests that check thousands of generated plans green.
@@ -54,7 +57,8 @@ Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on 
 - **Strava:** show Strava data only to its owner. **Never send Strava data to an AI model.** The Intervals.icu sync skips activities that came from Strava.
 - **Garmin:** do not depend on the Garmin Connect Developer Program (closed to new applications in 2026). Do not use unofficial Garmin libraries. Use FIT files and the Intervals.icu link.
 - **Plans:** generate plans from rules. Do not copy published plan tables (Hal Higdon, NHS, Pfitzinger).
-- **Network:** the app calls the network only for links that the user turns on (Open-Meteo weather, Intervals.icu). Location only while recording a run.
+- **Network:** the app calls the network only for links that the user turns on (Open-Meteo weather, Intervals.icu). Location only while recording a run. The web version loads its files from GitHub Pages; it sends no user data.
+- **Web version:** be honest about its limits. Native-only features (reminders, the watch link) are hidden or say that they need the Android app.
 - **Not yet researched:** GDPR and medical-device rules. Keep the medical disclaimer. Get legal advice before any injury or medical claim.
 - Verify the FIT SDK licence before a store release (the app uses the MIT-licensed `fit-file-parser`).
 

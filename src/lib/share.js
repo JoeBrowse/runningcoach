@@ -8,7 +8,7 @@ import { formatSet } from "./exercises.js";
 
    Strava's API can create an activity, but authorising against it needs a
    client secret at token exchange and they do not support PKCE for public
-   clients. Iron Log has no server: the secret would have to ship inside the
+   clients. Skid Marks has no server: the secret would have to ship inside the
    APK, where anyone can pull it out and use this app's Strava identity as
    their own. So there is no honest way to post directly from here without
    standing up a small service to hold that secret, which is not something to

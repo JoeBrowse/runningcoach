@@ -4,6 +4,7 @@ import * as engine from "../run/engine.js";
 import { COLORS, hexToRgba } from "../theme.js";
 import { TopBar } from "../components/TopBar.jsx";
 import { isNativeRuntime } from "../lib/platform.js";
+import { isTouchDevice } from "../lib/webApp.js";
 import { listActivities } from "../shared/store.js";
 import { todayInfo } from "../plan/planState.js";
 import { RunSession, buildSegments, getActiveSession, ribbonFraction, stepProgress } from "./recorder.js";
@@ -258,7 +259,7 @@ export function RecordScreen({ nav }) {
     return a && a.status !== "ended" ? a : null;
   });
   const [mode, setMode] = useState(params.mode === "treadmill" ? (params.workout ? "plan" : "free") : params.mode || "plan");
-  const [source, setSource] = useState(params.mode === "treadmill" ? "treadmill" : isNativeRuntime() ? "gps" : "sim");
+  const [source, setSource] = useState(params.mode === "treadmill" ? "treadmill" : isNativeRuntime() || isTouchDevice() ? "gps" : "sim");
   const [simSpeed, setSimSpeed] = useState(10);
   const [level, setLevel] = useState(1);
   const [reps, setReps] = useState(null);
@@ -470,7 +471,7 @@ export function RecordScreen({ nav }) {
         )}
         {source === "gps" && !isNativeRuntime() && (
           <div style={{ marginTop: 10 }}>
-            <Note>The browser asks for your location. A computer often has no GPS. Use the Android app for real runs.</Note>
+            <Note>The browser asks for your location. Keep this page open and the screen on during the run. If the screen locks or you open another app, the browser stops the GPS and the voice cues. A computer often has no GPS.</Note>
           </div>
         )}
         {source === "treadmill" && (

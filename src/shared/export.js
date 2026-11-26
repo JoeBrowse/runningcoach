@@ -12,7 +12,7 @@ import { KEYS, listActivities } from "./store.js";
    - setsCsv(): one row for each lift set (and each drop of a drop set).
    - runToGpx(run): a GPX file of a run with a track. The recorder keeps
      the track as `track: [{ t, lat, lon, ele }]` on the run.
-   - Full backup: Iron Log's backup (lib/backup.js). It has every key
+   - Full backup: the Lift backup (lib/backup.js). It has every key
      under the storage prefix, so it has the run data too.
    - workoutToFit(workout): a FIT workout file (file_id, workout,
      workout_step) that a Garmin or COROS user can copy to the watch.

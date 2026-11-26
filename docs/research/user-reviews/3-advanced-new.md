@@ -11,7 +11,7 @@ I am 38. I run 6 days a week, 55 to 80 km. I have run 7 marathons (best 3:12). I
 | A "Coach" | 6/10 | Clear Today screen and reasons. The seed step cannot be edited. Data hides under More. |
 | B "Logbook" | 7/10 | Season chart, load column and dense history suit me. Seed weekly distance is editable. |
 | C "Track" | 4/10 | GO-first design is for beginners. Analysis is two taps deep. |
-| Iron Log (Lift) | 5/10 | Good lift log and honest load gauge. Runs need manual entry. No runner strength plan. |
+| Lift (gym tracker) | 5/10 | Good lift log and honest load gauge. Runs need manual entry. No runner strength plan. |
 
 ## 3. What works
 
@@ -23,7 +23,7 @@ I am 38. I run 6 days a week, 55 to 80 km. I have run 7 marathons (best 3:12). I
 
 **C:** The step bar on the GO screen reads well from a distance.
 
-**Iron Log:** Cardio & Activity already feeds runs into the muscle readiness map. The load gauge says "information only. It cannot predict injury." The JSON backup is plain.
+**Lift:** Cardio & Activity already feeds runs into the muscle readiness map. The load gauge says "information only. It cannot predict injury." The JSON backup is plain.
 
 ## 4. What fails or is missing
 
@@ -50,7 +50,7 @@ I am 38. I run 6 days a week, 55 to 80 km. I have run 7 marathons (best 3:12). I
 
 **Trust:** A shows 77% easy and form -14. B shows 92% easy and form -9 for the same data.
 
-**Run + gym:** Iron Log load is RPE x minutes. The run engine uses RPE x minutes / 10, or TRIMP. The scales differ by about 10x, so "one shared load" is not real yet. Iron Log makes me type each run by hand. It has Push/Pull/Legs and Bro Split, but no runner programme.
+**Run + gym:** Lift load is RPE x minutes. The run engine uses RPE x minutes / 10, or TRIMP. The scales differ by about 10x, so "one shared load" is not real yet. Lift makes me type each run by hand. It has Push/Pull/Legs and Bro Split, but no runner programme.
 
 ## 5. What I predict will annoy me in month 2
 
@@ -85,4 +85,4 @@ I am 38. I run 6 days a week, 55 to 80 km. I have run 7 marathons (best 3:12). I
 - **B for the data side:** season chart, Analysis, history with load, week view with reasons and undo. Add a wide layout for tablet and desktop.
 - **A for the daily screen:** the Today card, the "why", and the wizard with visible safety checks. Make "Bring your history" step 1 of the wizard. Move Data out of More.
 - **C for the in-run screen only:** GO and the big step bar.
-- **From Iron Log:** keep the readiness map (it already counts runs), the honest gauge text, Advanced mode and JSON backup. Replace the manual cardio form with imported runs. Merge the load model first.
+- **From Lift:** keep the readiness map (it already counts runs), the honest gauge text, Advanced mode and JSON backup. Replace the manual cardio form with imported runs. Merge the load model first.

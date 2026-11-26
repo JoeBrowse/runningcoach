@@ -8,10 +8,10 @@ import { safeGet, safeSet } from "../lib/storage.js";
 
    One data layer for Plan, Run and Lift. It sits on top of
    lib/storage.js, so every key keeps the "iron-log:" prefix and old
-   Iron Log data still loads.
+   data still loads.
 
    Activities are saved once. Lift sessions stay in "workout-history".
-   Runs and other sports go into "activity-history" in the Iron Log
+   Runs and other sports go into "activity-history" in the Lift
    activity format, so the muscle readiness map, the history and the
    consistency calendar read them with no change.
 
@@ -34,7 +34,7 @@ import { safeGet, safeSet } from "../lib/storage.js";
 --------------------------------------------------------------- */
 
 export const KEYS = {
-  // Iron Log keys (do not rename: old data uses them).
+  // Lift keys (do not rename: old data uses them).
   activityHistory: "activity-history",
   workoutHistory: "workout-history",
   settings: "settings",
@@ -63,7 +63,7 @@ const num = (v) => {
 
 /* ---------- normalising ---------- */
 
-// Distance of a stored Iron Log activity, in km. Swims and rows store
+// Distance of a stored Lift activity, in km. Swims and rows store
 // metres; the type says which unit it uses.
 export function activityKm(a) {
   const d = num(a && a.distance);
@@ -183,7 +183,7 @@ export function isDuplicate(a, list) {
 // the stored record as it is.
 const MAPPED = new Set(["id", "type", "date", "startedAt", "at", "durationSec", "minutes", "seconds", "km", "distance", "rpe", "name"]);
 
-/* Builds an Iron Log activity record from a run.
+/* Builds a Lift activity record from a run.
 
    Input (all optional except a duration):
      id, type ("run" default; any ACTIVITY_TYPES id), startedAt (ISO),

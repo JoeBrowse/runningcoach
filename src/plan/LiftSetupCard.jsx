@@ -13,7 +13,7 @@ import { guidedPrefill, LIFT_LEVELS } from "./weekSetup.js";
    builder) or "Make a plan for me" (the guided wizard, pre-filled from
    the level, the lift days of the master week and the split).
 
-   Lifting is set up when a programme is active (Iron Log stores it in
+   Lifting is set up when a programme is active (Lift stores it in
    "active-programme", lib/programmes.js) or when the user made one
    with this card ("lift-setup-done"). The X hides the card.
 --------------------------------------------------------------- */

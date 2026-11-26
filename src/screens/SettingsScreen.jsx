@@ -4,6 +4,7 @@ import { APP_VERSION, releaseNotesFor } from "../data/releaseNotes.js";
 import { APP_MODES } from "../lib/settings.js";
 import { hexToRgba, COLORS } from "../theme.js";
 import { BackupPanel } from "../components/BackupPanel.jsx";
+import { WebVersionPanel } from "../shared/ui/WebInstall.jsx";
 import { SettingsToggleRow } from "../components/SettingsToggleRow.jsx";
 import { TopBar } from "../components/TopBar.jsx";
 import { KEYS, getKey, getRunProfile, setRunProfile } from "../shared/store.js";
@@ -254,6 +255,8 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
 
       <BackupPanel />
 
+      <WebVersionPanel />
+
       <div data-tour="opt-in-features" style={{ padding: "0 20px 10px" }}>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
           Off by default
@@ -288,7 +291,7 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
       <div style={{ padding: "0 20px 40px", textAlign: "center" }}>
         <div style={{ color: COLORS.textDim, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>Skid Marks v{APP_VERSION}</div>
         <div data-testid="about-text" style={{ color: COLORS.textDim, fontSize: 11.5, marginTop: 6, lineHeight: 1.5 }}>
-          Skid Marks is free and open source (GPL-3.0). Lift mode is based on Iron Log.
+          Skid Marks is free and open source (GPL-3.0).
         </div>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, marginTop: 6, opacity: 0.8, lineHeight: 1.5 }}>
           The muscle map artwork is from Body Muscles, © 2024 Ivan Vulović.

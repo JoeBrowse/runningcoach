@@ -12,7 +12,7 @@ Tests: `node --test test/` (Node 22). The tests build more than 500 plans and ch
 - Dates are ISO strings, for example `"2026-12-01"`. Weeks start on Monday.
 - Distances are in km. Paces are seconds per km. The UI converts units.
 - "Running fitness score" comes from the Daniels and Gilbert equations. Do not call it VDOT.
-- "Training load" is RPE (1 to 10) x minutes, the Iron Log scale. Do not call it TSS.
+- "Training load" is RPE (1 to 10) x minutes, the same scale as Lift. Do not call it TSS.
 - Load numbers are information only. They cannot predict injury.
 
 ## Formatting and dates

@@ -37,7 +37,7 @@ The 2021 OnePlus Watch does not use Wear OS. The app does not work on it.
 
 ## Install the test build
 
-1. Download `skid-marks.apk` and `skid-marks-wear.apk` from the same release: https://github.com/JoeBrowse/runningcoach/releases/latest
+1. Download `skid-marks.apk` and `skid-marks-wear.apk` from the same release: https://github.com/JoeBrowse/skidmarks/releases/latest
 2. Install `skid-marks.apk` on the phone (see the README). If the phone has an older build, install the new build over it.
 3. On the watch, turn on Developer options: open **Settings > System > About** and tap the **build number** 7 times. (On some watches: **Settings > System > About > Versions**.)
 4. Open **Settings > Developer options**. Turn on **ADB debugging** and **Wireless debugging**. Connect the watch to the same Wi-Fi network as the computer.

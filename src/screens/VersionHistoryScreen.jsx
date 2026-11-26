@@ -80,7 +80,7 @@ export function VersionHistoryScreen({ onBack }) {
         })}
 
         <div style={{ color: COLORS.textDim, fontSize: 11.5, lineHeight: 1.5, textAlign: "center", marginTop: 16 }}>
-          {`The first release of Iron Log was on ${formatReleaseDate(first.released)}. Iron Log is now Lift mode in Skid Marks.`}
+          {`The first release of Skid Marks was on ${formatReleaseDate(first.released)}.`}
         </div>
       </div>
     </div>

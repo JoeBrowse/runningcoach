@@ -53,7 +53,7 @@ export function activityLabel(a) {
   return (type.id === "other" || type.id === "team-sport") && name ? name : type.label;
 }
 
-// Iron Log kept 200 activities. Runners import years of runs, so the cap
+// The old limit was 200 activities. Runners import years of runs, so the cap
 // is much higher now. Old data is not changed.
 export const ACTIVITY_CAP = 5000;
 

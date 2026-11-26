@@ -11,14 +11,14 @@ I am Sam, 38. I have used Skid Marks daily for a year. I race 10 to 14 times a y
 | A "Coach" | 5/10 | Clear "why" text. But it plans for one race only and its charts cover 84 days. |
 | B "Logbook" | 6/10 | The season chart with B-race flags matches how I think. The flags do not change the plan. |
 | C "Track" | 3/10 | My Garmin records my runs, so the big GO button is no use to me. Analytics are hidden under "Me". |
-| Iron Log (Lift) | 5/10 | Fast logging, 1RM charts, and a muscle map that counts runs. Bodybuilding presets only. |
+| Lift (gym tracker) | 5/10 | Fast logging, 1RM charts, and a muscle map that counts runs. Bodybuilding presets only. |
 
 ## 3. What works
 
 - **Engine.** Every change has a reason ("New result 38:30 for 10 km"). B's Week view shows "Safety rules 4 of 4 pass". The marathon taper (80/65/45%) is sound. Strength never sits the day before a hard day.
 - **A.** The Today card shows the next run on rest days, with a step bar and paces.
 - **B.** The Season chart puts "Before the plan" history next to planned weeks, with cutback and B-race markers. Analysis has fitness/fatigue/form, weekly distance, an 80/20 split for the last 8 and next 4 weeks, and a filterable history.
-- **Iron Log.** Logging is quick. RIR and 1RM tracking suit a runner who lifts heavy. A run logged in "Cardio & Activity" turns the quads, calves and hamstrings red on the map. That is the right seed for a shared load model.
+- **Lift.** Logging is quick. RIR and 1RM tracking suit a runner who lifts heavy. A run logged in "Cardio & Activity" turns the quads, calves and hamstrings red on the map. That is the right seed for a shared load model.
 
 ## 4. What fails or is missing
 
@@ -30,7 +30,7 @@ I am Sam, 38. I have used Skid Marks daily for a year. I race 10 to 14 times a y
 
 **The weeks repeat.** In my 22-week experienced marathon plan, weeks 5-7, 9-11, 13-15 and 17-19 are copies. The engine says the peak is 85 km, but no week goes above 77.6 km. Monday has a 14.6 km "Easy + strides" right after a 27 km long run. In the sample plan, a Friday easy run (15.3 km) is longer than the Sunday long run (14.4 km).
 
-**The analytics disagree.** On the same sample data, A says "fitness 39, 75% easy, based on heart rate". B says "fitness 40, 92 / 8, an estimate from session types". The windows also differ: C uses 70 days, A 84 and B 90. Iron Log adds a fourth number, the acute:chronic ratio. After a year I would stop trusting all of them.
+**The analytics disagree.** On the same sample data, A says "fitness 39, 75% easy, based on heart rate". B says "fitness 40, 92 / 8, an estimate from session types". The windows also differ: C uses 70 days, A 84 and B 90. Lift adds a fourth number, the acute:chronic ratio. After a year I would stop trusting all of them.
 
 **Data volume.** Import takes one .fit/.gpx/.tcx file at a time. There is no bulk or Garmin-archive import. Export gives runs as CSV, the last route as GPX, an .ics file and a JSON backup. There is no FIT/TCX export per run. B's history list ends at "Show all 39". I will have 400.
 
@@ -38,7 +38,7 @@ I am Sam, 38. I have used Skid Marks daily for a year. I race 10 to 14 times a y
 
 **Race list.** No A/B/C priority, goal time, result or elevation. No 15K, 10 mile or 30K trail.
 
-**Iron Log as Lift.** Its presets are PPL, Upper/Lower, Bro split, Arnold and Project Arms. There is no runner strength preset. Programmes rotate in order and are not tied to calendar days, so they cannot line up with the run week. The tour has 20 steps.
+**Lift.** Its presets are PPL, Upper/Lower, Bro split, Arnold and Project Arms. There is no runner strength preset. Programmes rotate in order and are not tied to calendar days, so they cannot line up with the run week. The tour has 20 steps.
 
 ## 5. Long-term grievances and wishes
 
@@ -67,4 +67,4 @@ I am Sam, 38. I have used Skid Marks daily for a year. I race 10 to 14 times a y
 
 ## 7. Design verdict
 
-Use **B "Logbook"** as the base for Plan and Analysis. Its Season chart is the right home for a multi-race athlete, and it scales to desktop. Make its B-race flags change the bars. Take **A's** Today card, its "why" text and its "What changed and why" list for daily use. Use **C** only as the in-run screen for treadmill or phone-recorded runs. From **Iron Log**, keep quick set logging, 1RM charts and the muscle-readiness map, and let runs and races drive the map. Replace its bodybuilding-first programme picker with a runner preset on the shared calendar. Cut the tour to three cards.
+Use **B "Logbook"** as the base for Plan and Analysis. Its Season chart is the right home for a multi-race athlete, and it scales to desktop. Make its B-race flags change the bars. Take **A's** Today card, its "why" text and its "What changed and why" list for daily use. Use **C** only as the in-run screen for treadmill or phone-recorded runs. From **Lift**, keep quick set logging, 1RM charts and the muscle-readiness map, and let runs and races drive the map. Replace its bodybuilding-first programme picker with a runner preset on the shared calendar. Cut the tour to three cards.

@@ -2,7 +2,7 @@
 
 **A free running coach and gym tracker in one app. Your data stays on your phone.**
 
-[**Download the Android app (APK)**](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk) · [All releases](https://github.com/JoeBrowse/runningcoach/releases) · [Privacy](docs/privacy-policy.md) · [Licence: GPL-3.0](LICENSE)
+[**Open the web app**](https://joebrowse.github.io/skidmarks/app/) (iPhone, Android, computers) · [**Download the Android app (APK)**](https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk) · [Limits](https://joebrowse.github.io/skidmarks/#limits) · [All releases](https://github.com/JoeBrowse/skidmarks/releases) · [Privacy](docs/privacy-policy.md) · [Licence: GPL-3.0](LICENSE)
 
 Skid Marks plans your runs around your gym days. It adapts the plan when life changes, and it tells you why each change happens. All features are free. There are no ads, no accounts and no paywall.
 
@@ -28,7 +28,7 @@ Use the switch at the top of the screen: **Plan · Run · Lift**.
 |---|---|
 | **Plan** | Your master week. Run days and gym days are in one plan. Today's session, the week, a weekly review, races and goals, and the muscle readiness map. |
 | **Run** | The running coach. Today's run, GPS recording with voice cues, the season chart, progress, zones and race prediction, fuel, weather, routes and the coach. |
-| **Lift** | The gym tracker (based on Iron Log). Log sets, follow programmes, see 1RM progress and which muscles have recovered. Runner presets are included. |
+| **Lift** | The gym tracker. Log sets, follow programmes, see 1RM progress and which muscles have recovered. Runner presets are included. |
 
 Each session goes into one shared log. A run that you record appears in all three modes and on the muscle map. You never log a session twice.
 
@@ -58,12 +58,30 @@ Skid Marks gives general training information. It is not medical advice. It cann
 
 ## Install
 
-1. On your Android phone, open the [APK download link](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk).
+### Web app (iPhone, Android and computers)
+
+1. Open [joebrowse.github.io/skidmarks/app/](https://joebrowse.github.io/skidmarks/app/).
+2. **iPhone:** in Safari, tap the Share button, then **Add to Home Screen**.
+3. **Android:** in Chrome, tap **Install app**, or open the menu and tap **Add to Home screen**.
+
+**Limits of the web version.** Read these before you use it:
+
+- GPS and voice cues stop when the screen locks or when you open another app. Keep the app open with the screen on during a run.
+- No night-before reminders and no Wear OS watch link. These need the Android app.
+- Your data stays in the browser on this device. If you clear the browser data, it is gone. Safari can delete the data of a website that is not on the home screen after 7 days without use. Save a backup each week.
+- iPhone browsers cannot vibrate.
+- There is no account and no sync. To move to another device, use a backup file.
+
+The same list is in the app (Settings > Web version) and on the [product page](https://joebrowse.github.io/skidmarks/#limits).
+
+### Android app (APK)
+
+1. On your Android phone, open the [APK download link](https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk).
 2. Open the file. Allow your browser or file manager to install apps when Android asks.
 3. Open Skid Marks.
 4. Optional: install the Wear OS watch app to run with only the watch and headphones. See [docs/wear-os.md](docs/wear-os.md).
 
-This is a test build signed with a public test key (see [signing/README.md](signing/README.md)), so Android shows a warning. All builds use the same key, so a new build installs over an old one and keeps your data. The app installs next to Iron Log and does not change Iron Log's data. To move your Iron Log data, save a backup in Iron Log and restore it in Skid Marks.
+This is a test build signed with a public test key (see [signing/README.md](signing/README.md)), so Android shows a warning. All builds use the same key, so a new build installs over an old one and keeps your data.
 
 ## Build from source
 
@@ -89,6 +107,8 @@ cd android && ./gradlew assembleDebug
 
 GitHub Actions builds the APK on every push (`.github/workflows/android.yml`). Each push to `main` publishes the APK on a release.
 
+The website (`.github/workflows/pages.yml`) puts `docs/index.html` at the site root and the web app at `/app/` on GitHub Pages. Each push to `main` publishes it. One-time setup: Settings > Pages > Source: **GitHub Actions**.
+
 ## Project structure
 
 | Path | Contents |
@@ -98,14 +118,13 @@ GitHub Actions builds the APK on every push (`.github/workflows/android.yml`). E
 | `src/runui/` | Run mode: today's run, recording, progress, zones, fuel, weather, routes, coach, shoes. |
 | `src/shared/` | Shared activity store, load model, file import, Intervals.icu, weather and export. |
 | `src/modes/` | The mode switch and the screen registry. See [src/modes/README.md](src/modes/README.md). |
-| `src/screens/`, `src/components/`, `src/lib/`, `src/data/` | Lift mode (Iron Log). |
+| `src/screens/`, `src/components/`, `src/lib/`, `src/data/` | Lift mode. |
 | `test/` | Tests (`npm test`). |
 | `docs/v1-spec.md` | The V1 specification. |
 | `docs/research/` | Market research of 37 apps and six user reviews. |
 
 ## Credits
 
-- Lift mode is based on [Iron Log](https://github.com/JoeBrowse/IronLogV3).
 - The muscle readiness map uses region data from [body-muscles](https://github.com/vulovix/body-muscles) by Ivan Vulović, under the Apache License 2.0. See [NOTICE](NOTICE).
 - Race prediction uses the published Daniels and Gilbert equations and the Riegel formula. The app is not linked to or endorsed by their authors.
 
