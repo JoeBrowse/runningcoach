@@ -1,0 +1,78 @@
+# Publishes the Skid Marks website on GitHub Pages.
+#
+#   https://joebrowse.github.io/runningcoach/       the product page (docs/index.html)
+#   https://joebrowse.github.io/runningcoach/app/   the web app (the Vite build)
+#
+# Every push builds the site, so a broken site shows on the branch first.
+# Only a push to main publishes it.
+#
+# One-time setup in the repository: Settings > Pages > Build and deployment >
+# Source: "GitHub Actions". Until then the deploy job fails.
+name: Website
+
+on:
+  push:
+    branches: ["main", "claude/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build the web app
+        run: npm run build
+
+      - name: Put the site together
+        run: |
+          mkdir -p _site/app
+          cp -r dist/. _site/app/
+          cp docs/index.html docs/privacy.html docs/fonts.css docs/icon-192.png _site/
+          cp -r docs/screens _site/screens
+          # GitHub Pages must not run Jekyll on the files.
+          touch _site/.nojekyll
+          test -f _site/app/index.html
+          test -f _site/app/manifest.webmanifest
+          test -f _site/app/sw.js
+          ls -R _site | head -40
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish on GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

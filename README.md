@@ -2,7 +2,7 @@
 
 **A free running coach and gym tracker in one app. Your data stays on your phone.**
 
-[**Download the Android app (APK)**](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk) · [All releases](https://github.com/JoeBrowse/runningcoach/releases) · [Privacy](docs/privacy-policy.md) · [Licence: GPL-3.0](LICENSE)
+[**Open the web app**](https://joebrowse.github.io/runningcoach/app/) (iPhone, Android, computers) · [**Download the Android app (APK)**](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk) · [Limits](https://joebrowse.github.io/runningcoach/#limits) · [All releases](https://github.com/JoeBrowse/runningcoach/releases) · [Privacy](docs/privacy-policy.md) · [Licence: GPL-3.0](LICENSE)
 
 Skid Marks plans your runs around your gym days. It adapts the plan when life changes, and it tells you why each change happens. All features are free. There are no ads, no accounts and no paywall.
 
@@ -58,6 +58,24 @@ Skid Marks gives general training information. It is not medical advice. It cann
 
 ## Install
 
+### Web app (iPhone, Android and computers)
+
+1. Open [joebrowse.github.io/runningcoach/app/](https://joebrowse.github.io/runningcoach/app/).
+2. **iPhone:** in Safari, tap the Share button, then **Add to Home Screen**.
+3. **Android:** in Chrome, tap **Install app**, or open the menu and tap **Add to Home screen**.
+
+**Limits of the web version.** Read these before you use it:
+
+- GPS and voice cues stop when the screen locks or when you open another app. Keep the app open with the screen on during a run.
+- No night-before reminders and no Wear OS watch link. These need the Android app.
+- Your data stays in the browser on this device. If you clear the browser data, it is gone. Safari can delete the data of a website that is not on the home screen after 7 days without use. Save a backup each week.
+- iPhone browsers cannot vibrate.
+- There is no account and no sync. To move to another device, use a backup file.
+
+The same list is in the app (Settings > Web version) and on the [product page](https://joebrowse.github.io/runningcoach/#limits).
+
+### Android app (APK)
+
 1. On your Android phone, open the [APK download link](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk).
 2. Open the file. Allow your browser or file manager to install apps when Android asks.
 3. Open Skid Marks.
@@ -88,6 +106,8 @@ cd android && ./gradlew assembleDebug
 ```
 
 GitHub Actions builds the APK on every push (`.github/workflows/android.yml`). Each push to `main` publishes the APK on a release.
+
+The website (`.github/workflows/pages.yml`) puts `docs/index.html` at the site root and the web app at `/app/` on GitHub Pages. Each push to `main` publishes it. One-time setup: Settings > Pages > Source: **GitHub Actions**.
 
 ## Project structure
 

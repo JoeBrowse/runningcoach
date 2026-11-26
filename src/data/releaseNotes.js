@@ -23,6 +23,25 @@ export const LAST_SEEN_VERSION_KEY = "last-seen-version";
 
 export const RELEASE_NOTES = [
   {
+    version: "2.2.0",
+    released: "2026-11-26",
+    headline: "Skid Marks is now also a website. Use it on an iPhone, an Android phone or a computer.",
+    items: [
+      {
+        title: "Web app",
+        body: "Open joebrowse.github.io/runningcoach/app/ in a browser. On an iPhone, tap Share, then Add to Home Screen. On Android, tap Install app. The web app has the same features, with some limits.",
+      },
+      {
+        title: "Honest limits",
+        body: "In a browser, GPS and voice cues stop when the screen locks. Reminders and the watch link need the Android app. Settings > Web version shows all the limits.",
+      },
+      {
+        title: "Source code link",
+        body: "Settings has a link to the source code on GitHub. Skid Marks is free and open source (GPL-3.0).",
+      },
+    ],
+  },
+  {
     version: "2.1.1",
     released: "2026-11-26",
     headline: "The app opens faster.",

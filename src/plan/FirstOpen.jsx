@@ -4,6 +4,7 @@ import { hexToRgba, COLORS } from "../theme.js";
 import { KEYS, getKey } from "../shared/store.js";
 import { Btn, Segmented, st, oswald } from "./ui.jsx";
 import { YourWeek, saveYourWeek } from "./YourWeek.jsx";
+import { WEB_LIMITS_SHORT, isWebApp } from "../lib/webApp.js";
 
 /* ---------------------------------------------------------------
    FIRST OPEN (spec v1.1 section 1)
@@ -43,10 +44,12 @@ const LIFT_CARDS = [
 
 const BOTH_CARD = { icon: "week", title: "One shared week", body: "Runs and gym days are in one week. Each side respects the other. Heavy leg days stay away from hard runs and from the long run." };
 
-export function tourCardsFor(use) {
-  if (use === "run") return RUN_CARDS;
-  if (use === "lift") return LIFT_CARDS;
-  return [...RUN_CARDS, ...LIFT_CARDS, BOTH_CARD];
+// Browser only: one honest card about the limits of the web version.
+export const WEB_CARD = { icon: "web", title: "The web version", body: WEB_LIMITS_SHORT };
+
+export function tourCardsFor(use, web = isWebApp()) {
+  const cards = use === "run" ? RUN_CARDS : use === "lift" ? LIFT_CARDS : [...RUN_CARDS, ...LIFT_CARDS, BOTH_CARD];
+  return web ? [...cards, WEB_CARD] : cards;
 }
 
 /* Simple drawn icons, one for each tour card. Lines only, in the accent colour. */
@@ -105,6 +108,16 @@ export function TourIcon({ name, size = 84 }) {
         <path d="M22 21h20l-3 19H25z" {...p} />
         <path d="M22 23l-8 14M42 23l8 14" {...p} />
         <path d="M27 40l-2 18M37 40l2 18" {...p} stroke={c} strokeWidth="5" />
+      </>
+    );
+  } else if (name === "web") {
+    // a phone with a browser address bar
+    body = (
+      <>
+        <rect x="16" y="4" width="32" height="56" rx="6" {...p} />
+        <path d="M16 16h32M28 54h8" {...p} />
+        <circle cx="32" cy="34" r="9" {...p} fill={soft} />
+        <path d="M23 34h18M32 25c-4 5-4 13 0 18M32 25c4 5 4 13 0 18" {...p} strokeWidth="2" />
       </>
     );
   } else {

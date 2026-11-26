@@ -9,6 +9,7 @@ import { getCachedWeather, getWeather, getWeatherSettings, saveWeatherSettings, 
 import { exportActivitiesCsv, exportFullBackup, exportLastRunGpx, exportSetsCsv } from "../export.js";
 import { HistoryImport } from "./HistoryImport.jsx";
 import { reportImportedRuns } from "../../plan/unplanned.js";
+import { isNativeRuntime } from "../../lib/platform.js";
 import { WEAR_GUIDE_URL, pullWatchRuns, pushPlanToWatch, watchStatus } from "../wear.js";
 import { body, card, cardTitle, field, fmtInt, legend, mono, primaryBtn, resultBox, resultDetail, resultTitle, secondaryBtn, sectionLabel } from "./dataStyles.js";
 
@@ -442,7 +443,8 @@ export function DataScreen({ nav }) {
 
       <div style={sectionLabel()}>Links</div>
       <IntervalsCard onSynced={changed} reloadKey={nav.reloadKey} />
-      <WatchCard onSynced={changed} reloadKey={nav.reloadKey} />
+      {/* The watch link needs the Android app (WearBridge plugin). */}
+      {isNativeRuntime() && <WatchCard onSynced={changed} reloadKey={nav.reloadKey} />}
       <div style={card()}>
         <div style={cardTitle()}>Health Connect and HealthKit</div>
         <div style={body()}>Not in this version. Export files from your health app or your watch app, and import them above.</div>

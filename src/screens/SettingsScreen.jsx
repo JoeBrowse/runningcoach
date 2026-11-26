@@ -4,6 +4,7 @@ import { APP_VERSION, releaseNotesFor } from "../data/releaseNotes.js";
 import { APP_MODES } from "../lib/settings.js";
 import { hexToRgba, COLORS } from "../theme.js";
 import { BackupPanel } from "../components/BackupPanel.jsx";
+import { WebVersionPanel } from "../shared/ui/WebInstall.jsx";
 import { SettingsToggleRow } from "../components/SettingsToggleRow.jsx";
 import { TopBar } from "../components/TopBar.jsx";
 import { KEYS, getKey, getRunProfile, setRunProfile } from "../shared/store.js";
@@ -253,6 +254,8 @@ export function SettingsScreen({ settings, onChange, onBack, onViewColour, onVie
       </div>
 
       <BackupPanel />
+
+      <WebVersionPanel />
 
       <div data-tour="opt-in-features" style={{ padding: "0 20px 10px" }}>
         <div style={{ color: COLORS.textDim, fontSize: 10.5, fontFamily: "'Oswald', sans-serif", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
