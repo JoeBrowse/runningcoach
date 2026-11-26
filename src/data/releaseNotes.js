@@ -29,7 +29,7 @@ export const RELEASE_NOTES = [
     items: [
       {
         title: "Web app",
-        body: "Open joebrowse.github.io/runningcoach/app/ in a browser. On an iPhone, tap Share, then Add to Home Screen. On Android, tap Install app. The web app has the same features, with some limits.",
+        body: "Open joebrowse.github.io/skidmarks/app/ in a browser. On an iPhone, tap Share, then Add to Home Screen. On Android, tap Install app. The web app has the same features, with some limits.",
       },
       {
         title: "Honest limits",

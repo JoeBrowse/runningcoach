@@ -31,7 +31,7 @@ import { RUN_PREF_DEFAULTS, getRunPrefs, jargonOn, unitsOf } from "../runui/runD
 
 export const WATCH_DAYS = 7;
 export const WATCH_PLAN_VERSION = 1;
-export const WEAR_GUIDE_URL = "https://github.com/JoeBrowse/runningcoach/blob/main/docs/wear-os.md";
+export const WEAR_GUIDE_URL = "https://github.com/JoeBrowse/skidmarks/blob/main/docs/wear-os.md";
 
 const numOrNull = (v) => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
 const plain = (v) => JSON.parse(JSON.stringify(v === undefined ? null : v));

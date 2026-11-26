@@ -23,9 +23,9 @@ npm run lint    # parses every file under src/
 npm run build   # production build into dist/
 ```
 
-Web: `.github/workflows/pages.yml` publishes GitHub Pages on each push to `main`: `docs/index.html` at `https://joebrowse.github.io/runningcoach/` and the web app (the same Vite build) at `/app/`. The limits of the web version are in `WEB_LIMITS` (`src/lib/webApp.js`) and in the limits table of `docs/index.html`. Change both together (`test/web-app.test.mjs` checks the titles).
+Web: `.github/workflows/pages.yml` publishes GitHub Pages on each push to `main`: `docs/index.html` at `https://joebrowse.github.io/skidmarks/` and the web app (the same Vite build) at `/app/`. The limits of the web version are in `WEB_LIMITS` (`src/lib/webApp.js`) and in the limits table of `docs/index.html`. Change both together (`test/web-app.test.mjs` checks the titles).
 
-Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on every push and publishes it on a release for each push to `main`. The latest APK: `https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk`. The workflow runs `npx cap add android`, then `scripts/android-permissions.mjs` (location and notification permissions) and `scripts/android-signing.mjs` (signs with the fixed test key in `signing/`), then `cap sync` and Gradle. The `android/` folder is generated and not committed.
+Android: GitHub Actions (`.github/workflows/android.yml`) builds a debug APK on every push and publishes it on a release for each push to `main`. The latest APK: `https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk`. The workflow runs `npx cap add android`, then `scripts/android-permissions.mjs` (location and notification permissions) and `scripts/android-signing.mjs` (signs with the fixed test key in `signing/`), then `cap sync` and Gradle. The `android/` folder is generated and not committed.
 
 ## Code map
 

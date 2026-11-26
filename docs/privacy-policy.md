@@ -35,7 +35,7 @@ When all links are off, the app makes no network calls.
 
 ## The web version
 
-The web version (joebrowse.github.io/runningcoach/app/) works in the same way.
+The web version (joebrowse.github.io/skidmarks/app/) works in the same way.
 Your data stays in the storage of your browser on your device. GitHub Pages
 sends the app files to your browser. GitHub can record technical data about
 each visit, for example your IP address, as any web host does. See the GitHub

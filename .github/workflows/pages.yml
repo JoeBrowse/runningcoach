@@ -1,7 +1,7 @@
 # Publishes the Skid Marks website on GitHub Pages.
 #
-#   https://joebrowse.github.io/runningcoach/       the product page (docs/index.html)
-#   https://joebrowse.github.io/runningcoach/app/   the web app (the Vite build)
+#   https://joebrowse.github.io/skidmarks/       the product page (docs/index.html)
+#   https://joebrowse.github.io/skidmarks/app/   the web app (the Vite build)
 #
 # Every push builds the site, so a broken site shows on the branch first.
 # Only a push to main publishes it.

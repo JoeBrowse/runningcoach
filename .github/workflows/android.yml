@@ -4,7 +4,7 @@
 # as workflow artifacts.
 # A push to main also publishes the APK on a GitHub Release, so the
 # latest build is always at:
-#   https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk
+#   https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk
 #
 # The APK is signed with the fixed test key in signing/ (see its README).
 # It is a test build: Android asks the user to allow apps from unknown sources.

@@ -16,8 +16,8 @@ import { isNativeRuntime } from "./platform.js";
      Change both places together.
 --------------------------------------------------------------- */
 
-export const SOURCE_URL = "https://github.com/JoeBrowse/runningcoach";
-export const APK_URL = "https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk";
+export const SOURCE_URL = "https://github.com/JoeBrowse/skidmarks";
+export const APK_URL = "https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk";
 export const INSTALL_HINT_DISMISSED_KEY = "install-hint-dismissed";
 
 /** True in a browser, false in the Android app. */

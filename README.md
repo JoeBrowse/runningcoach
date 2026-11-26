@@ -2,7 +2,7 @@
 
 **A free running coach and gym tracker in one app. Your data stays on your phone.**
 
-[**Open the web app**](https://joebrowse.github.io/runningcoach/app/) (iPhone, Android, computers) · [**Download the Android app (APK)**](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk) · [Limits](https://joebrowse.github.io/runningcoach/#limits) · [All releases](https://github.com/JoeBrowse/runningcoach/releases) · [Privacy](docs/privacy-policy.md) · [Licence: GPL-3.0](LICENSE)
+[**Open the web app**](https://joebrowse.github.io/skidmarks/app/) (iPhone, Android, computers) · [**Download the Android app (APK)**](https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk) · [Limits](https://joebrowse.github.io/skidmarks/#limits) · [All releases](https://github.com/JoeBrowse/skidmarks/releases) · [Privacy](docs/privacy-policy.md) · [Licence: GPL-3.0](LICENSE)
 
 Skid Marks plans your runs around your gym days. It adapts the plan when life changes, and it tells you why each change happens. All features are free. There are no ads, no accounts and no paywall.
 
@@ -60,7 +60,7 @@ Skid Marks gives general training information. It is not medical advice. It cann
 
 ### Web app (iPhone, Android and computers)
 
-1. Open [joebrowse.github.io/runningcoach/app/](https://joebrowse.github.io/runningcoach/app/).
+1. Open [joebrowse.github.io/skidmarks/app/](https://joebrowse.github.io/skidmarks/app/).
 2. **iPhone:** in Safari, tap the Share button, then **Add to Home Screen**.
 3. **Android:** in Chrome, tap **Install app**, or open the menu and tap **Add to Home screen**.
 
@@ -72,11 +72,11 @@ Skid Marks gives general training information. It is not medical advice. It cann
 - iPhone browsers cannot vibrate.
 - There is no account and no sync. To move to another device, use a backup file.
 
-The same list is in the app (Settings > Web version) and on the [product page](https://joebrowse.github.io/runningcoach/#limits).
+The same list is in the app (Settings > Web version) and on the [product page](https://joebrowse.github.io/skidmarks/#limits).
 
 ### Android app (APK)
 
-1. On your Android phone, open the [APK download link](https://github.com/JoeBrowse/runningcoach/releases/latest/download/skid-marks.apk).
+1. On your Android phone, open the [APK download link](https://github.com/JoeBrowse/skidmarks/releases/latest/download/skid-marks.apk).
 2. Open the file. Allow your browser or file manager to install apps when Android asks.
 3. Open Skid Marks.
 4. Optional: install the Wear OS watch app to run with only the watch and headphones. See [docs/wear-os.md](docs/wear-os.md).

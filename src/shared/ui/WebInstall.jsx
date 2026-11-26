@@ -163,7 +163,7 @@ export function WebVersionPanel() {
         <div style={{ ...st.body(), marginTop: web ? 12 : 0 }}>
           Skid Marks is free and open source (GPL-3.0). Read the code, report a problem or make a copy:{" "}
           <a data-testid="source-link" href={SOURCE_URL} target="_blank" rel="noreferrer" style={linkStyle}>
-            github.com/JoeBrowse/runningcoach <ExternalLink size={12} />
+            github.com/JoeBrowse/skidmarks <ExternalLink size={12} />
           </a>
         </div>
       </div>
