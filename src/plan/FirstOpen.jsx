@@ -23,9 +23,9 @@ import { WEB_LIMITS_SHORT, isWebApp } from "../lib/webApp.js";
 --------------------------------------------------------------- */
 
 export const USE_CHOICES = [
-  { id: "run", label: "Running", detail: "A running plan that fits your week. Record runs with voice cues." },
+  { id: "run", label: "Running", detail: "A running plan that fits your week. Record runs with voice cues. In beta." },
   { id: "lift", label: "Lifting", detail: "Log your sets, follow a programme and see your progress." },
-  { id: "both", label: "Both", detail: "Runs and gym days in one week. Each side respects the other." },
+  { id: "both", label: "Both", detail: "Runs and gym days in one week. Each side respects the other. Running is in beta." },
 ];
 
 export const MODE_FOR_USE = { run: "run", lift: "lift", both: "plan" };

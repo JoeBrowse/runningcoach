@@ -3,7 +3,7 @@ import { isNativeRuntime } from "../lib/platform.js";
 import { todayStr } from "../lib/dates.js";
 import { KEYS, getKey, getRunProfile, isDuplicate, listActivities, saveRun } from "./store.js";
 import { currentPlan, markDone, onPlanSaved } from "../plan/planState.js";
-import { RUN_PREF_DEFAULTS, getRunPrefs, jargonOn, unitsOf } from "../runui/runData.js";
+import { RUN_PREF_DEFAULTS, getRunPrefs, jargonOn, paceOn, unitsOf } from "../runui/runData.js";
 
 /* ---------------------------------------------------------------
    WEAR OS LINK
@@ -218,7 +218,7 @@ export async function currentWatchPlan(today) {
     plan,
     today: t,
     units: unitsOf(p),
-    simple: !jargonOn(settings || {}, plan, acts, t),
+    simple: !paceOn(settings || {}, plan, acts, t, p),
     voice: prefs.voice,
     autoPause: prefs.autoPause !== false,
     profile: p,

@@ -28,11 +28,11 @@ export const GOAL_OPTIONS = [
   { id: "10k", label: "10K race" },
   { id: "half", label: "Half marathon" },
   { id: "marathon", label: "Marathon" },
-  { id: "ultra50", label: "50K trail" },
   { id: "keepfit", label: "Keep fit", detail: "No race date. Rolling 4-week blocks." },
-  { id: "faster5k", label: "Get faster at 5K", detail: "No race date. A 5K time trial every 4 weeks." },
-  { id: "build10k", label: "Build to 10K", detail: "No race date. Distance grows slowly." },
 ];
+// Version 2.4 (Run in beta) shows the common goals only. The engine still
+// has 50K trail, Get faster at 5K and Build to 10K (engine.GOALS); an old
+// plan with one of them still works.
 
 const ALL_STEPS = ["Goal", "Days", "Gym", "Fitness", "About you", "Check"];
 const WEEK_STEPS = ["Goal", "Fitness", "About you", "Check"];
@@ -80,6 +80,7 @@ function defaultsFrom(profile, master, level) {
     maxHR: p.maxHR || "",
     restHR: p.restHR || "",
     lthr: p.lthr || "",
+    coachBy: p.coachBy === "feel" ? "feel" : p.coachBy === "pace" ? "pace" : lvl === "new" ? "feel" : "pace",
     consent: !!p.consentAt,
   };
 }
@@ -127,6 +128,7 @@ export function formToProfile(f, prev, seed) {
     maxHR: numOrNull(f.maxHR),
     restHR: numOrNull(f.restHR),
     lthr: numOrNull(f.lthr),
+    coachBy: f.coachBy === "feel" ? "feel" : "pace",
     score: score,
     currentWeeklyKm,
     weeklyKmTyped,
@@ -139,7 +141,7 @@ export function formToProfile(f, prev, seed) {
     usesLift: !!f.usesLift,
     consentAt: f.consent ? (prev && prev.consentAt) || new Date().toISOString() : null,
   };
-  const master = { runDays: f.runDays, longRunDay: f.longRunDay, gymDays: f.gymDays.map((g) => ({ day: g.day, type: g.type, intensity: g.intensity, note: g.note || "", split: g.split || null })) };
+  const master = { runDays: f.runDays, longRunDay: f.longRunDay, gymDays: f.gymDays.map((g) => ({ day: g.day, type: g.type, intensity: g.intensity, note: g.note || "", split: g.split || null, ...(g.name ? { name: g.name } : {}) })) };
   return { profile, master };
 }
 
@@ -160,7 +162,7 @@ function GymRow({ g, onChange, onRemove, idx }) {
       </Row>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
         {Object.keys(GYM_TYPE_LABEL).map((t) => (
-          <Chip key={t} testId={`gym-${idx}-type-${t}`} active={g.type === t} onClick={() => onChange({ ...g, type: t })}>
+          <Chip key={t} testId={`gym-${idx}-type-${t}`} active={g.type === t} onClick={() => onChange({ ...g, type: t, name: undefined })}>
             {GYM_TYPE_LABEL[t]}
           </Chip>
         ))}
@@ -529,7 +531,7 @@ export function PlanSetup({ nav }) {
               {resultCheck && !resultCheck.ok && <div style={{ ...st.body(), color: COLORS.bad, marginBottom: 8 }}>{resultCheck.error}</div>}
             </>
           )}
-          <Field label={`Distance a week now (${units}, optional)`} hint={f.fitness === "history" && seed ? `Empty: the plan uses ${engine.fmtKm(seed.currentWeeklyKm, units)} from your runs.` : "Empty: the plan uses a safe default for your experience."}>
+          <Field label={`Distance a week now (${units}, optional)`} hint={f.fitness === "history" && seed ? `Empty: the plan uses ${engine.fmtKm(seed.currentWeeklyKm, units)} from your runs.` : f.fitness === "new" ? "Empty: the plan uses a safe default for a new runner." : "Empty: the plan uses your past runs in the app. With no past runs, it starts very low. Type your usual distance a week for a better start."}>
             <TextInput testId="weekly-km" type="number" inputMode="decimal" value={f.weeklyKm} onChange={(v) => set({ weeklyKm: v })} />
           </Field>
         </>
@@ -543,25 +545,12 @@ export function PlanSetup({ nav }) {
           <Field label="Units">
             <Segmented testId="setup-units" value={f.units} onChange={(v) => set({ units: v })} options={[{ value: "km", label: "Kilometres" }, { value: "mi", label: "Miles" }]} />
           </Field>
-          <Label>Heart rate (optional)</Label>
-          <div style={{ ...st.body(), fontSize: 12, marginBottom: 8 }}>Leave these empty if you do not know them. The plan uses effort words.</div>
-          <Row gap={8}>
-            <div style={{ flex: 1 }}>
-              <Field label="Max">
-                <TextInput testId="hr-max" type="number" inputMode="numeric" value={f.maxHR} onChange={(v) => set({ maxHR: v })} />
-              </Field>
-            </div>
-            <div style={{ flex: 1 }}>
-              <Field label="Resting">
-                <TextInput testId="hr-rest" type="number" inputMode="numeric" value={f.restHR} onChange={(v) => set({ restHR: v })} />
-              </Field>
-            </div>
-            <div style={{ flex: 1 }}>
-              <Field label="Threshold">
-                <TextInput testId="hr-lthr" type="number" inputMode="numeric" value={f.lthr} onChange={(v) => set({ lthr: v })} />
-              </Field>
-            </div>
-          </Row>
+          <Field label="Coach me by">
+            <Segmented testId="setup-coach-by" value={f.coachBy} onChange={(v) => set({ coachBy: v })} options={[{ value: "pace", label: "Pace" }, { value: "feel", label: "Feel" }]} />
+          </Field>
+          <div style={{ ...st.body(), fontSize: 12, marginTop: -4, marginBottom: 8 }}>
+            {f.coachBy === "pace" ? "The coach gives each part of a run a pace range. It tells you to speed up or slow down when you leave the range." : "The coach uses effort words, like slow enough to talk. It still tells you when you go too fast or too slow."}
+          </div>
           <Label>Medical note</Label>
           <Card>
             <div style={{ ...st.text(), fontSize: 13, marginBottom: 8 }}>{DISCLAIMER}</div>

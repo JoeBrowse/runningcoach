@@ -44,6 +44,11 @@ export function ModeSwitch({ mode, onModeChange }) {
             }}
           >
             {m.label}
+            {m.beta && (
+              <span data-testid={`mode-beta-${m.id}`} style={{ marginLeft: 5, fontSize: 9, letterSpacing: 0.8, verticalAlign: "super", color: active ? COLORS.onAccent : COLORS.accent }}>
+                BETA
+              </span>
+            )}
           </button>
         );
       })}

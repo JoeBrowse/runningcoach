@@ -8,7 +8,7 @@ import { isTouchDevice } from "../lib/webApp.js";
 import { listActivities } from "../shared/store.js";
 import { todayInfo } from "../plan/planState.js";
 import { RunSession, buildSegments, getActiveSession, ribbonFraction, stepProgress } from "./recorder.js";
-import { getProfile, getRunPrefs, jargonOn, runWalkLabel, runWalkWorkout, saveRunPrefs, stepLines, unitsOf, workoutForVoice } from "./runData.js";
+import { getProfile, getRunPrefs, jargonOn, paceOn, runWalkLabel, runWalkWorkout, saveRunPrefs, stepLines, unitsOf, workoutForVoice } from "./runData.js";
 import { loadTempC, warmupContext } from "./RunHome.jsx";
 import { Btn, Chip, ChipRow, Confirm, Loading, MONO, Note, OSWALD, Ribbon, S, Segmented, Toggle } from "./ui.jsx";
 
@@ -292,7 +292,7 @@ export function RecordScreen({ nav }) {
 
   const units = unitsOf(ctx && ctx.profile);
   const plan = ctx && ctx.info ? ctx.info.plan : null;
-  const showPace = ctx ? jargonOn(nav.settings, plan, ctx.acts) : false;
+  const showPace = ctx ? paceOn(nav.settings, plan, ctx.acts, undefined, ctx.profile) : false;
 
   const customList = useMemo(() => {
     const list = prefs ? prefs.workouts.map((x) => ({ id: x.id, workout: x.workout })) : [];

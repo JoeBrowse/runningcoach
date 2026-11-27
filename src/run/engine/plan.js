@@ -99,7 +99,7 @@ export function normalizeOpts(opts = {}) {
     if (!Number.isInteger(day) || day < 0 || day > 6) continue;
     const type = GYM_TYPES.has(g.type) ? g.type : 'other';
     const intensity = g.intensity === 'heavy' ? 'heavy' : 'light';
-    const entry = { day, type, intensity, note: g.note ? String(g.note) : '' };
+    const entry = { day, type, intensity, note: g.note ? String(g.note) : '', ...(g.name ? { name: String(g.name) } : {}) };
     const old = gymByDay.get(day);
     if (!old || (entry.intensity === 'heavy' && LEG_TYPES.has(entry.type))) gymByDay.set(day, entry);
   }
@@ -690,7 +690,7 @@ function attachGym(plan, o, pattern) {
   for (const wk of plan.weeks) for (const d of wk.days) {
     const g = byDay.get(d.dow);
     if (!g || d.iso < o.today) { d.gym = null; continue; }
-    const gym = { day: g.day, type: g.type, intensity: g.intensity, note: g.note, heavyLegs: g.intensity === 'heavy' && LEG_TYPES.has(g.type), advice: 'normal', reason: 'Lift as planned.' };
+    const gym = { day: g.day, type: g.type, intensity: g.intensity, note: g.note, ...(g.name ? { name: g.name } : {}), heavyLegs: g.intensity === 'heavy' && LEG_TYPES.has(g.type), advice: 'normal', reason: 'Lift as planned.' };
     const raise = (advice, reason) => { if (ADVICE_RANK[advice] > ADVICE_RANK[gym.advice]) { gym.advice = advice; gym.reason = reason; } };
     if (pattern.lightened.has(g.day) && gym.heavyLegs) raise('skip-heavy', pattern.lightened.get(g.day) + ' Do a light session today.');
     for (const r of races) {

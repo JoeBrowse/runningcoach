@@ -73,6 +73,18 @@ export function jargonOn(settings, plan, activities, iso = todayStr()) {
   return runWeeks(activities, iso) >= 4;
 }
 
+/* Pace targets on the run screens, the voice cues and the watch (version 2.4).
+   The run setup asks "Coach me by: Pace / Feel" (profile.coachBy).
+   - pace: show pace ranges, also in Simple mode.
+   - feel: effort words, unless the user turns on Advanced mode.
+   - not set (older profiles): the old rule, jargonOn. */
+export function paceOn(settings, plan, activities, iso = todayStr(), profile = null) {
+  const by = profile && profile.coachBy;
+  if (by === "pace") return true;
+  if (by === "feel") return !!(settings && settings.appMode === "advanced");
+  return jargonOn(settings, plan, activities, iso);
+}
+
 export { stepSeconds, stepClass, flattenSteps, totalSeconds, stepLines, workoutForVoice, runWalkWorkout, runWalkLabel, builderToWorkout, stepsToFitSteps, durText } from "./steps.js";
 
 /* ---------- words ---------- */

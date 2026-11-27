@@ -3,7 +3,7 @@
    joined to these in src/modes/index.js. */
 export const MODE_LIST = [
   { id: "plan", label: "Plan", desc: "Your week: run days and gym days together." },
-  { id: "run", label: "Run", desc: "The running coach: today's run, record, plan and progress." },
+  { id: "run", label: "Run", desc: "The running coach: today's run, record, plan and progress. In beta.", beta: true },
   { id: "lift", label: "Lift", desc: "The gym tracker: workouts, programmes and muscle readiness." },
 ];
 
