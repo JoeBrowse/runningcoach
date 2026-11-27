@@ -121,9 +121,11 @@ test("checkWeek: a changed day shows the rule that it breaks", () => {
   assert.deepEqual(ws.checkWeek(lowerTue, { ...a, doubles: true }), []);
   assert.equal(lowerTue.doubles.length, 1);
   assert.equal(lowerTue.doubles[0].gapHours, 6);
-  // Upper body can share a day with an easy run, but not with the long run.
+  // "No" to two sessions on one day is firm: upper body and an easy run also need it.
   const upperTue = ws.applyDayEdit(week, 2, { run: "run", gym: { type: "upper", intensity: "light" } }, a);
-  assert.deepEqual(ws.checkWeek(upperTue, a), []);
+  assert.deepEqual(ws.checkWeek(upperTue, a).map((b) => b.rule), ["doubles"]);
+  assert.match(ws.checkWeek(upperTue, a)[0].text, /You chose no training twice on one day/);
+  assert.deepEqual(ws.checkWeek(upperTue, { ...a, doubles: true }), []);
   const upperSun = ws.applyDayEdit(week, 0, { run: "long", gym: { type: "upper", intensity: "light" } }, a);
   assert.deepEqual(ws.checkWeek(upperSun, a).map((b) => b.rule), ["doubles"]);
 

@@ -30,18 +30,36 @@ const SESSION_NAME = { upper: 'an upper-body session', lower: 'a lower-body sess
 const COST = {
   pair: 100, // two sessions on one day
   pairLegs: 20, // extra: heavy or lower-body lift on a run day
-  lightLegs: 1000, // a leg session that must be light
-  noQualityGeometry: 300, // no run day is 2 or more days from the long run
-  noSecondQuality: 40, // room for only one hard run when the runner can do two
   qualityHasLift: 50, // every free hard-run day also has a lift
   runsTouch: 10, // two run days next to each other
-  runAfterLong: 4, // a run on the day after the long run
+  runsTouchNew: 40, // the same for a new runner: new runners run on alternate days
+  runStreak: 60, // each run day after 2 run days in a row
+  runAfterLong: 8, // a run on the day after the long run
+  runAfterLongNew: 60, // the same for a new runner
   sameLiftTouch: 20, // two lift days of the same kind next to each other
   liftTouch: 2, // two lift days of a different kind next to each other
   upperAfterLong: 3,
   upperBeforeLong: 2,
+  legsBeforeLong: 30, // a light leg session on the day before the long run
+  legsAfterLong: 20, // a light leg session on the day after the long run
   streak: 5, // each training day after 3 in a row
 };
+
+/* The costs that the priority sets (spec v1.1 section 3: "priority first").
+   - lightLegs: a leg session that must be light so that a hard run fits.
+   - noQuality: no run day is free for a hard run (too close to the long run or next to heavy legs).
+     noQuality3 is the same with 3 or more runs a week. Runners with 2 runs or fewer start with
+     easy weeks (docs/v1-spec.md, rule 5), so a hard run matters more with 3 runs or more.
+   - noSecondQuality: room for only one hard run when the runner can do two.
+   Running priority: a light leg day costs less than a lost hard run.
+   Lifting priority or equal: the leg days stay heavy, and the runs stay easy. */
+const PRIORITY_COST = {
+  run: { lightLegs: 200, noQuality: 600, noQuality3: 1500, noSecondQuality: 250 },
+  equal: { lightLegs: 1000, noQuality: 300, noQuality3: 1200, noSecondQuality: 40 },
+  lift: { lightLegs: 2000, noQuality: 150, noQuality3: 400, noSecondQuality: 20 },
+};
+/* New runners do no hard runs for the first weeks: a lost hard-run day costs little. */
+const NEW_RUNNER_NO_QUALITY = 60;
 
 function listDays(days) {
   const n = days.map((d) => DAY_NAMES_LONG[d]);
@@ -86,9 +104,14 @@ function normalize(input = {}) {
   const runs = use === 'lift' ? 0 : count(input.runDays);
   const lifts = use === 'run' ? 0 : count(input.liftDays);
   const pref = Number.isInteger(input.longRunDay) && input.longRunDay >= 0 && input.longRunDay <= 6 ? input.longRunDay : null;
-  // The level of a side counts only when the user does that side.
-  const beginner = (use !== 'lift' && runLevel === 'new') || (use !== 'run' && liftLevel === 'beginner');
-  return { use, avail, runLevel, liftLevel, priority, doubles: input.doubles === true, runs, lifts, pref, beginner, restMin: beginner ? 2 : 1 };
+  // 2 rest days for a new runner (impact on bones and tendons is new), or for a new lifter who
+  // only lifts. A new lifter who already runs keeps 1 rest day: the lift sessions start light.
+  const beginner = (use !== 'lift' && runLevel === 'new') || (use === 'lift' && liftLevel === 'beginner');
+  // A new lifter who also runs starts with light sessions (no heavy legs).
+  const lightStart = use === 'both' && liftLevel === 'beginner';
+  const cost = { ...PRIORITY_COST[priority] };
+  if (runLevel === 'new') { cost.noQuality = NEW_RUNNER_NO_QUALITY; cost.noQuality3 = NEW_RUNNER_NO_QUALITY; }
+  return { use, avail, runLevel, liftLevel, priority, doubles: input.doubles === true, runs, lifts, pref, beginner, lightStart, cost, restMin: beginner ? 2 : 1 };
 }
 
 /* The long-run day: the preferred day if it is available, else Sunday, else Saturday,
@@ -111,43 +134,57 @@ function evaluate(o, L, runDays, liftDays, types, R, Lf) {
   let cost = 0;
   // pairs: a lift on a run day. Never on the long-run day.
   const pairs = liftDays.filter((d) => runMask & bit(d));
+  // "No" to two sessions on one day is a firm rule. When the sessions do not fit, planWeek
+  // reduces the lower-priority side instead.
+  if (!o.doubles && pairs.length) return null;
   for (const p of pairs) {
     if (p === L) return null;
-    if (!o.doubles && typeOf.get(p) !== 'upper') return null; // without doubles: only an easy run + upper body
     cost += COST.pair + (LEG.has(typeOf.get(p)) ? COST.pairLegs : 0);
   }
-  if (!o.doubles && pairs.length && R + Lf <= o.maxTrain) return null; // pair only when the days are too few
 
   // quality room: run days 2 or more days from the long run (the same test as buildPlan)
   const geo = R >= 2 ? runDays.filter((d) => d !== L && (L == null || cd(d, L) >= 2)) : [];
   // leg days: each one is heavy or light. Try every choice (2 leg days at most).
   const legDays = liftDays.filter((d) => LEG.has(typeOf.get(d)));
   let best = null;
-  for (let mask = 0; mask < 1 << legDays.length; mask++) {
+  // A new lifter who also runs: every session is light (no heavy choice).
+  const masks = o.lightStart ? 1 : 1 << legDays.length;
+  for (let mask = 0; mask < masks; mask++) {
     const heavy = legDays.filter((_, i) => mask & (1 << i));
     if (heavy.some((h) => legsNearLong(h, L))) continue;
     if (heavy.some((h) => heavy.some((k) => k !== h && cd(h, k) === 1))) continue; // hard days must not touch
     const H = new Set(heavy);
     const clean = geo.filter((d) => !H.has(d) && !H.has((d + 6) % 7) && !H.has((d + 1) % 7));
-    if (geo.length && !clean.length) continue; // keep room for a hard run
-    let c = (legDays.length - heavy.length) * COST.lightLegs;
+    // A run day next to heavy legs is an easy run. Losing the hard-run day is a cost, not a hard rule.
+    let c = o.lightStart ? 0 : (legDays.length - heavy.length) * o.cost.lightLegs;
+    if (R >= 2 && !clean.length) c += R >= 3 ? o.cost.noQuality3 : o.cost.noQuality;
     if (clean.length && clean.every((d) => liftMask & bit(d))) c += COST.qualityHasLift;
-    if (R >= 4 && o.runLevel !== 'new' && !clean.some((a) => clean.some((b) => cd(a, b) >= 2))) c += COST.noSecondQuality;
+    if (R >= 4 && o.runLevel !== 'new' && clean.length && !clean.some((a) => clean.some((b) => cd(a, b) >= 2))) c += o.cost.noSecondQuality;
     if (!best || c < best.c) best = { c, heavy: H, clean };
   }
   if (!best) return null;
   cost += best.c;
-  if (R >= 2 && !geo.length) cost += COST.noQualityGeometry;
 
   // spread runs and lifts
-  for (let i = 0; i < runDays.length; i++) for (let j = i + 1; j < runDays.length; j++) if (cd(runDays[i], runDays[j]) === 1) cost += COST.runsTouch;
-  if (L != null && runMask & bit((L + 1) % 7)) cost += COST.runAfterLong;
+  const isNew = o.runLevel === 'new';
+  for (let i = 0; i < runDays.length; i++) for (let j = i + 1; j < runDays.length; j++) if (cd(runDays[i], runDays[j]) === 1) cost += isNew ? COST.runsTouchNew : COST.runsTouch;
+  if (L != null && runMask & bit((L + 1) % 7)) cost += isNew ? COST.runAfterLongNew : COST.runAfterLong;
+  // three or more runs in a row (also across the end of the week)
+  if (R >= 3 && R < 7) {
+    const start = WEEK.findIndex((d) => !(runMask & bit(d)));
+    let run = 0;
+    for (let k = 1; k <= 7; k++) {
+      if (runMask & bit(WEEK[(start + k) % 7])) { run++; if (run > 2) cost += COST.runStreak; } else run = 0;
+    }
+  }
   for (let i = 0; i < liftDays.length; i++) for (let j = i + 1; j < liftDays.length; j++) {
     if (cd(liftDays[i], liftDays[j]) !== 1) continue;
     const a = typeOf.get(liftDays[i]), b = typeOf.get(liftDays[j]);
     cost += a === b || (LEG.has(a) && LEG.has(b)) ? COST.sameLiftTouch : COST.liftTouch;
   }
   if (L != null) for (const d of liftDays) {
+    if (LEG.has(typeOf.get(d)) && d === (L + 6) % 7) cost += COST.legsBeforeLong;
+    if (LEG.has(typeOf.get(d)) && d === (L + 1) % 7) cost += COST.legsAfterLong;
     if (typeOf.get(d) !== 'upper') continue;
     if (d === (L + 1) % 7) cost += COST.upperAfterLong;
     if (d === (L + 6) % 7) cost += COST.upperBeforeLong;
@@ -250,12 +287,17 @@ export function planWeek(input = {}) {
   }
   if (forcedPair) { R = 1; Lf = 1; }
 
-  const why = o.restMin === 2 ? 'Beginners need at least 2 rest days a week.' : 'You need at least 1 rest day a week.';
+  const why = restWhy(o);
   const prioText = o.use !== 'both' ? '' : o.priority === 'equal' ? 'Running and lifting are equal. Each side gives one session in turn, lifting first.' : `${o.priority === 'run' ? 'Running' : 'Lifting'} is your priority.`;
   if (Lf < capL) warnings.push(`Too many sessions for your days. We reduced lifting to ${Lf}. ${prioText ? prioText + ' ' : ''}${why}`);
   if (R < capR) warnings.push(`Too many sessions for your days. We reduced running to ${R}. ${prioText ? prioText + ' ' : ''}${why}`);
 
   return describe(o, layout, R, Lf, reasons, warnings, forcedPair);
+}
+
+function restWhy(o) {
+  if (o.restMin === 2) return o.use === 'lift' ? 'Beginners need at least 2 rest days a week.' : 'New runners need at least 2 rest days a week.';
+  return 'You need at least 1 rest day a week.';
 }
 
 /* One available day, both sides, doubles allowed: the run and a light full-body lift share it. */
@@ -273,9 +315,10 @@ function describe(o, lay, R, Lf, reasons, warnings, forcedPair) {
   const gymDays = lay.liftDays.slice().sort(byWeek).map((day) => {
     const type = lay.typeOf.get(day);
     const legs = LEG.has(type);
-    const intensity = legs ? (lay.heavy.has(day) ? 'heavy' : 'light') : o.priority === 'run' ? 'light' : 'heavy';
+    const intensity = legs ? (lay.heavy.has(day) ? 'heavy' : 'light') : o.priority === 'run' || o.lightStart ? 'light' : 'heavy';
     let note = '';
     if (lay.pairs.includes(day)) note = `Same day as ${day === L ? 'the long run' : 'an easy run'}. ${firstText} Wait 6 hours or more.`;
+    else if (o.lightStart) note = 'Light session. You are new to lifting.';
     else if (legs && intensity === 'light') note = 'Light session. A heavy leg session here is too close to a key run.';
     return { day, type, intensity, note };
   });
@@ -295,12 +338,19 @@ function describe(o, lay, R, Lf, reasons, warnings, forcedPair) {
     }
   }
   if (R >= 2) {
+    const isNew = o.runLevel === 'new';
     if (lay.clean.length) {
       const q = lay.clean.slice().sort((a, b) => cd(b, L) - cd(a, L) || ahead(L, a) - ahead(L, b))[0];
-      reasons.push(lay.heavy.size
+      if (isNew) reasons.push(`New runners start with easy runs. Later in the plan, ${DAY_NAMES_LONG[q]} can have a harder run.`);
+      else reasons.push(lay.heavy.size
         ? `${DAY_NAMES_LONG[q]} can have a hard run. No heavy leg session is in the 48 hours before it.`
         : `${DAY_NAMES_LONG[q]} can have a hard run. It is 2 or more days from the long run.`);
-    } else if (!lay.geo.length) reasons.push('No run day is 2 or more days from the long run. All your runs stay easy.');
+    } else if (!lay.geo.length) reasons.push(isNew ? 'New runners start with easy runs. No run day is 2 or more days from the long run, so all your runs stay easy.' : 'No run day is 2 or more days from the long run. All your runs stay easy.');
+    else {
+      const d = lay.geo.slice().sort(byWeek)[0];
+      const why = isNew ? 'New runners start with easy runs.' : o.priority === 'lift' ? 'Lifting is your priority, so the leg days stay heavy.' : 'Running and lifting are equal, so the leg days stay heavy.';
+      reasons.push(`All your runs stay easy. A hard run on ${DAY_NAMES_LONG[d]} would be next to a heavy leg day. ${why}`);
+    }
   }
   if (split) {
     reasons.push(split === 'full' ? `${plural(Lf, 'lift day')}: full body each time.`
@@ -314,20 +364,27 @@ function describe(o, lay, R, Lf, reasons, warnings, forcedPair) {
       reasons.push(L != null ? `${name} is on ${DAY_NAMES_LONG[g.day]}. The long run is on ${DAY_NAMES_LONG[L]}, ${plural(ahead(g.day, L), 'day')} later.` : `${name} is on ${DAY_NAMES_LONG[g.day]}. It is a heavy session.`);
     } else if (forcedPair) {
       reasons.push(`${name} on ${DAY_NAMES_LONG[g.day]} is light. It is on the same day as the long run.`);
+    } else if (o.lightStart) {
+      reasons.push(`${name} on ${DAY_NAMES_LONG[g.day]} is light, because you are new to lifting.`);
     } else {
       reasons.push(`${name} on ${DAY_NAMES_LONG[g.day]} is light. A heavy leg session there is too close to the long run or to the day for a hard run.`);
     }
   }
-  if (gymDays.length && gymDays.some((g) => LEG.has(g.type) && g.intensity === 'heavy') && L != null) reasons.push('Heavy legs are 72 hours or more before the long run, and not on the day after it.');
+  const heavyLegs = gymDays.filter((g) => LEG.has(g.type) && g.intensity === 'heavy');
+  if (heavyLegs.length && L != null) {
+    reasons.push('Heavy legs are 3 or more days before the long run, and not on the day after it.');
+    const close = heavyLegs.find((g) => ahead(g.day, L) === 3);
+    if (close) reasons.push(`Lift early in the day on ${DAY_NAMES_LONG[close.day]}. Then the long run is 72 hours or more later.`);
+  }
+  if (o.lightStart && gymDays.length) reasons.push('After 6 to 8 weeks of light sessions, you can change a session to heavy.');
   const uppers = gymDays.filter((g) => g.type === 'upper').map((g) => g.day);
-  if (uppers.length) reasons.push(`Upper body is on ${listDays(uppers)}. Upper-body work has little effect on your runs.`);
+  if (uppers.length) reasons.push(o.use === 'lift' ? `Upper body is on ${listDays(uppers)}.` : `Upper body is on ${listDays(uppers)}. Upper-body work has little effect on your runs.`);
   for (const d of doubles) {
     const g = gymDays.find((x) => x.day === d.day);
     const what = d.day === L ? 'the long run' : 'an easy run';
     reasons.push(`${DAY_NAMES_LONG[d.day]} has ${what} and ${SESSION_NAME[g.type]}. ${firstText} Wait 6 hours or more before the second session.`);
   }
-  if (doubles.length && !o.doubles) reasons.push('You have more sessions than days. Only upper body shares a day with an easy run.');
-  if (restDays.length) reasons.push(`${listDays(restDays)} ${restDays.length === 1 ? 'is a rest day' : 'are rest days'}. ${o.restMin === 2 ? 'Beginners need at least 2 rest days a week.' : 'You need at least 1 rest day a week.'}`);
+  if (restDays.length) reasons.push(`${listDays(restDays)} ${restDays.length === 1 ? 'is a rest day' : 'are rest days'}. ${restWhy(o)}`);
 
   return { runDays, longRunDay: L, gymDays, doubles, restDays, split, reasons, warnings };
 }
@@ -366,7 +423,10 @@ export function recommendWeek({ use, runLevel, liftLevel, priority } = {}) {
     lifts = LIFT_PRIORITY[ll];
     reasons.push(`${lifts} lift days a week suit your level.`);
   } else {
-    band = BAND_RANK[RUN_BAND[rl]] <= BAND_RANK[ll] ? RUN_BAND[rl] : ll;
+    // A new runner is a beginner. A new lifter who already runs counts as intermediate at most
+    // (1 rest day, light lift sessions at the start), the same rule as planWeek.
+    const liftBand = ll === 'beginner' ? 'intermediate' : ll;
+    band = rl === 'new' ? 'beginner' : BAND_RANK[RUN_BAND[rl]] <= BAND_RANK[liftBand] ? RUN_BAND[rl] : liftBand;
     const max = BANDS[band].trainingDays.max;
     runs = RUN_BASE[rl]; lifts = LIFT_BASE[ll];
     const runFloor = 3, liftFloor = ll === 'beginner' ? 1 : 2;

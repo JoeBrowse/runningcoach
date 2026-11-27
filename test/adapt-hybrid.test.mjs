@@ -7,7 +7,7 @@ import { verdicts, days, QUALITY, LONG } from './engine-helpers.mjs';
 
 const TODAY = '2026-11-25'; // a Wednesday
 const LEG = new Set(['legs', 'lower', 'full']);
-const WEEK = E.planWeek({ use: 'both', availableDays: [0, 1, 2, 3, 4, 5, 6], runDays: 4, liftDays: 3, priority: 'equal', doubles: false, runLevel: 'some', liftLevel: 'intermediate' });
+const WEEK = E.planWeek({ use: 'both', availableDays: [0, 1, 2, 3, 4, 5, 6], runDays: 4, liftDays: 3, priority: 'equal', doubles: true, runLevel: 'some', liftLevel: 'intermediate' });
 const PLAN = E.buildPlan({ goal: 'half', raceDate: '2027-04-18', runDays: WEEK.runDays, longRunDay: WEEK.longRunDay, gymDays: WEEK.gymDays, currentWeeklyKm: 30, score: 42, experience: 'some', today: TODAY });
 const SNAPSHOT = JSON.stringify(PLAN);
 const PLAN0 = PLAN;

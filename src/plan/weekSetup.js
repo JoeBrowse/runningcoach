@@ -238,9 +238,8 @@ export function checkWeek(week, answers) {
       if (k >= 1 && k <= 2) out.push({ day, rule: "legs-long", text: `Heavy legs on ${name(day)} is less than 72 hours before the long run on ${name(L)}. Make it light, or move it.` });
     }
     if (runs.includes(day)) {
-      const easyShare = g.type === "upper" && L !== day;
-      if (!easyShare && !a.doubles) {
-        out.push({ day, rule: "doubles", text: `${name(day)} has a run and a gym session. Two sessions on one day are off. Only upper body can share a day with an easy run.` });
+      if (!a.doubles) {
+        out.push({ day, rule: "doubles", text: `${name(day)} has a run and a gym session. You chose no training twice on one day. Move one session, or change your answer.` });
       } else if (heavyLegs && L === day) {
         out.push({ day, rule: "legs-long", text: `${name(day)} has the long run and heavy legs. Do not do heavy legs on the day of the long run.` });
       }
@@ -248,11 +247,12 @@ export function checkWeek(week, answers) {
   }
 
   const rest = ALL_DAYS.filter((d) => !runs.includes(d) && !gyms.some((g) => Number(g.day) === d));
-  // The same rule as engine.planWeek: a beginner on either side that the user does.
-  const beginner = (usesRun(a.use) && a.runLevel === "new") || (usesLift(a.use) && a.liftLevel === "beginner");
+  // The same rule as engine.planWeek: a new runner, or a beginner who only lifts.
+  const newRunner = usesRun(a.use) && a.runLevel === "new";
+  const beginner = newRunner || (a.use === "lift" && a.liftLevel === "beginner");
   const need = beginner ? 2 : 1;
   if (rest.length < need) {
-    out.push({ day: null, rule: "rest", text: need === 2 ? "Beginners keep at least two full rest days a week." : "Keep at least one full rest day a week." });
+    out.push({ day: null, rule: "rest", text: need === 2 ? (newRunner ? "New runners keep at least two full rest days a week." : "Beginners keep at least two full rest days a week.") : "Keep at least one full rest day a week." });
   }
   return out;
 }
