@@ -413,7 +413,9 @@ export function usePlanData(nav) {
       const today = localToday();
       const units = (profile && profile.units) || "km";
       const jargon = showJargon(nav.settings, state.plan, today, runWeeks(acts, today));
-      setData({ state, plan: state.plan, profile, master, races: races || [], today, units, jargon });
+      // Pace targets follow "Coach me by" (runData.paceOn); phase names follow jargon.
+      const pace = profile && profile.coachBy === "pace" ? true : profile && profile.coachBy === "feel" ? !!(nav.settings && nav.settings.appMode === "advanced") : jargon;
+      setData({ state, plan: state.plan, profile, master, races: races || [], today, units, jargon, pace });
     })();
     return () => {
       off = true;

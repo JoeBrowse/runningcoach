@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Play, Dumbbell, Check, CalendarDays, Trophy, Activity, ClipboardList, History, Settings2, X } from "lucide-react";
+import { Play, Dumbbell, Check, CalendarDays, Trophy, ClipboardList, History } from "lucide-react";
 import { hexToRgba, COLORS } from "../theme.js";
 import { ModeHeader } from "../modes/ModeHeader.jsx";
 import * as engine from "../run/engine.js";
@@ -30,6 +30,9 @@ export const LIFE_CHIPS = [
   { kind: "feedback", label: "Too hard / too easy" },
 ];
 
+// The chips on Plan home: the common changes only. "More changes" opens the full list.
+export const HOME_LIFE_CHIPS = LIFE_CHIPS.filter((c) => ["missed", "illness", "tired", "injury"].includes(c.kind));
+
 const PHASE_WORD = { base: "Base", build: "Build", peak: "Peak", taper: "Taper", race: "Race week", recovery: "Recovery" };
 
 export function phaseName(week) {
@@ -38,8 +41,8 @@ export function phaseName(week) {
   return PHASE_WORD[week.phase] || PHASE_WORD[week.kind] || "";
 }
 
-function RunBlock({ run, units, jargon, plan, nav, testId, compact, profile, tempC }) {
-  const showPace = jargon && run.showPace;
+function RunBlock({ run, units, jargon, pace, plan, nav, testId, compact, profile, tempC }) {
+  const showPace = (pace != null ? pace : jargon) && run.showPace;
   const warm = engine.warmupFor(run, warmupContext(plan, profile, tempC));
   const target = targetMinutesNote(run, profile);
   const done = !!run.done;
@@ -123,7 +126,7 @@ function GymBlock({ gym, nav, afterRun, testId }) {
 }
 
 function TodayCard({ data, nav, afterRun, tempC }) {
-  const { plan, master, units, jargon, today, profile } = data;
+  const { plan, master, units, jargon, pace, today, profile } = data;
   const info = todayInfoFor(plan, today, master);
   const notStarted = plan && today < plan.startIso;
   const ended = plan && !info.day && !notStarted;
@@ -135,7 +138,7 @@ function TodayCard({ data, nav, afterRun, tempC }) {
       </Row>
       {notStarted && <div style={{ ...st.text(), marginBottom: 10 }}>Your plan starts on {engine.fmtDate(plan.startIso)}. Rest or do an easy activity until then.</div>}
       {ended && <div style={{ ...st.text(), marginBottom: 10 }}>Your plan has ended. Choose a new goal in Plan setup.</div>}
-      {info.run && <RunBlock run={info.run} units={units} jargon={jargon} plan={plan} nav={nav} testId="today-run" profile={profile} tempC={tempC} />}
+      {info.run && <RunBlock run={info.run} units={units} jargon={jargon} pace={pace} plan={plan} nav={nav} testId="today-run" profile={profile} tempC={tempC} />}
       {info.run && info.gym && <div style={{ height: 1, background: COLORS.line, margin: "14px 0" }} />}
       {info.gym && <GymBlock gym={info.gym} nav={nav} afterRun={afterRun} testId="today-gym" />}
       {!info.run && !info.gym && info.day && (
@@ -148,7 +151,7 @@ function TodayCard({ data, nav, afterRun, tempC }) {
       {!info.run && info.nextRun && (
         <div data-testid="next-run" style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${COLORS.line}` }}>
           <div style={{ ...st.label(), marginBottom: 6 }}>Next run · {engine.fmtDate(info.nextRun.iso)}</div>
-          <RunBlock run={info.nextRun} units={units} jargon={jargon} plan={plan} nav={nav} testId="next-run-block" compact profile={profile} tempC={tempC} />
+          <RunBlock run={info.nextRun} units={units} jargon={jargon} pace={pace} plan={plan} nav={nav} testId="next-run-block" compact profile={profile} tempC={tempC} />
         </div>
       )}
     </Card>
@@ -216,7 +219,9 @@ function ConflictNotice({ data, nav, refresh }) {
   }, [plan && plan.id]);
   if (!plan || !plan.conflicts || !plan.conflicts.length || !master) return null;
   const keyOf = (c) => `${plan.id}|${c.kind}|${c.day}`;
-  const list = plan.conflicts.filter((c) => !dismissed.includes(keyOf(c)));
+  // "Fewer quality runs" is information only while the plan still has a hard run each week (version 2.4: less noise).
+  const hasQuality = !!(plan.settings && plan.settings.qualityDays && plan.settings.qualityDays.length);
+  const list = plan.conflicts.filter((c) => !dismissed.includes(keyOf(c)) && !(c.kind === "fewer-quality" && hasQuality));
   if (!list.length) return null;
 
   function fixFor(c) {
@@ -323,106 +328,35 @@ function NiggleFollowUp({ data, nav }) {
   );
 }
 
-function ReviewPrompt({ data, nav }) {
-  const [last, setLast] = useState(undefined);
-  useEffect(() => {
-    getRunSettings().then((s) => setLast((s && s.reviewedWeek) || null));
-  }, [data.state]);
-  const dow = engine.weekdayOf(data.today);
-  if (!data.plan || last === undefined || (dow !== 0 && dow !== 1)) return null;
-  const weekStart = dow === 0 ? engine.mondayOf(data.today) : engine.addDays(engine.mondayOf(data.today), -7);
-  if (last === weekStart || weekStart < engine.mondayOf(data.plan.startIso)) return null;
-  return (
-    <Card testId="review-prompt" onClick={() => nav.go("plan:review", { weekStart })}>
-      <Row>
-        <ClipboardList size={18} color={COLORS.accent} />
-        <div style={{ flex: 1 }}>
-          <div style={st.title(15)}>Weekly review</div>
-          <div style={st.body()}>See what you did, check next week and accept it. It takes one minute.</div>
-        </div>
-      </Row>
-    </Card>
-  );
-}
-
-function GoalGapCard({ data }) {
-  const { plan, today } = data;
-  if (!plan || !data.jargon) return null;
-  const gap = engine.goalGap(plan);
-  const tt = engine.timeTrialDue(plan, today);
-  return (
-    <Card testId="goal-gap">
-      <div style={{ ...st.label(), marginBottom: 6 }}>Goal · {plan.goalName}</div>
-      {gap.hasGoal ? (
-        <Row gap={14} style={{ marginBottom: 8 }}>
-          <div>
-            <div style={st.label()}>Goal</div>
-            <div style={{ ...st.mono(18), color: COLORS.text }}>{engine.fmtTime(gap.goalSec)}</div>
-          </div>
-          <div>
-            <div style={st.label()}>Predicted</div>
-            <div style={{ ...st.mono(18), color: gap.status === "behind" ? COLORS.bad : gap.status === "on-track" ? COLORS.ok : COLORS.text }}>{engine.fmtTime(gap.predictedSec)}</div>
-          </div>
-        </Row>
-      ) : null}
-      <div style={st.text()}>{gap.text}</div>
-      <div data-testid="time-trial" style={{ ...st.body(), marginTop: 6, color: tt.due ? COLORS.accent : COLORS.textDim }}>{tt.reason}</div>
-      <div style={{ ...st.body(), fontSize: 11.5, marginTop: 6 }}>Running fitness score: {plan.score}. Predictions are estimates, not promises.</div>
-    </Card>
-  );
-}
-
-function SetupCard({ data, nav }) {
-  const [hidden, setHidden] = useState(false);
-  const [checked, setChecked] = useState(false);
-  useEffect(() => {
-    getKey("plan-setup-card-dismissed", false).then((v) => {
-      setHidden(!!v);
-      setChecked(true);
-    });
-  }, []);
-  if (!checked) return null;
-  if (hidden) {
+/* The two setup steps, in order: your week (days and programme), then your
+   running goal. Each shows until it is done. */
+function SetupSteps({ data, nav }) {
+  const hasWeek = !!(data.master && data.master.use);
+  const runs = !data.master || data.master.use !== "lift";
+  const hasGoal = !!(data.plan && data.profile && data.profile.onboarded);
+  if (!hasWeek) {
     return (
-      <LinkRow testId="setup-running-link" onClick={() => nav.go("plan:setup", {})}>
-        Set up running
-      </LinkRow>
+      <Card testId="setup-week" accent>
+        <div style={st.title(18)}>Set up your week</div>
+        <div style={{ ...st.body(), margin: "6px 0 12px" }}>Pick the days that you lift, your programme, and the days that you run.</div>
+        <Btn testId="setup-week-go" onClick={() => nav.go("plan:your-week", {})}>
+          Set up my week
+        </Btn>
+      </Card>
     );
   }
-  return (
-    <Card testId="setup-running" accent>
-      <Row style={{ alignItems: "flex-start" }}>
-        <div style={{ flex: 1 }}>
-          <div style={st.title(18)}>Set up running</div>
-          <div style={{ ...st.body(), margin: "6px 0 12px" }}>
-            Make a free running plan that fits around your gym days. Your Lift data stays as it is.
-          </div>
-        </div>
-        <button
-          aria-label="Hide"
-          data-testid="setup-running-hide"
-          onClick={async () => {
-            await setKey("plan-setup-card-dismissed", true);
-            setHidden(true);
-          }}
-          style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.textDim }}
-        >
-          <X size={18} />
-        </button>
-      </Row>
-      <Btn testId="setup-running-go" onClick={() => nav.go("plan:setup", {})}>
-        Start
-      </Btn>
-      {!(data.master && data.master.use) && (
-        <div style={{ marginTop: 8 }}>
-          <Btn kind="secondary" small testId="setup-week-go" onClick={() => nav.go("plan:your-week", { use: "both" })}>
-            Plan my week first
-          </Btn>
-        </div>
-      )}
-      {data.master && data.master.gymDays && data.master.gymDays.length > 0 && <div style={{ ...st.body(), fontSize: 12, marginTop: 8 }}>Your gym days are already in your master week.</div>}
-    </Card>
-  );
+  if (runs && !hasGoal) {
+    return (
+      <Card testId="setup-running" accent>
+        <div style={st.title(18)}>Set your running goal</div>
+        <div style={{ ...st.body(), margin: "6px 0 12px" }}>For example a half marathon. The plan builds up slowly around your gym days.</div>
+        <Btn testId="setup-running-go" onClick={() => nav.go("plan:setup", {})}>
+          Set my goal
+        </Btn>
+      </Card>
+    );
+  }
+  return null;
 }
 
 export function PlanHome({ nav }) {
@@ -447,7 +381,7 @@ export function PlanHome({ nav }) {
         <Loading />
       ) : (
         <>
-          {(!data.plan || !(data.profile && data.profile.onboarded)) && <SetupCard data={data} nav={nav} />}
+          <SetupSteps data={data} nav={nav} />
           {(data.plan || (data.master && data.master.gymDays && data.master.gymDays.length > 0)) && <TodayCard data={data} nav={nav} afterRun={afterRun} tempC={tempC} />}
           <NiggleFollowUp data={data} nav={nav} />
           <ConflictNotice data={data} nav={nav} refresh={refresh} />
@@ -455,11 +389,14 @@ export function PlanHome({ nav }) {
             <>
               <Label>Something changed?</Label>
               <div data-testid="life-chips" style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-                {LIFE_CHIPS.map((c) => (
+                {HOME_LIFE_CHIPS.map((c) => (
                   <Chip key={c.kind} testId={`life-${c.kind}`} onClick={() => nav.go("plan:life", { kind: c.kind })}>
                     {c.label}
                   </Chip>
                 ))}
+                <Chip testId="life-more" onClick={() => nav.go("plan:life", {})}>
+                  More changes
+                </Chip>
               </div>
             </>
           )}
@@ -470,21 +407,16 @@ export function PlanHome({ nav }) {
               <div style={{ ...st.body(), fontSize: 11.5, marginBottom: 12 }}>Filled mark: hard or long run. Ring: easy run. Dumbbell: gym.</div>
             </>
           )}
-          <ReviewPrompt data={data} nav={nav} />
-          <GoalGapCard data={data} />
           <Label>Plan</Label>
-          <LinkRow testId="link-week" icon={<CalendarDays size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:week", {})}>
-            Master week
+          <LinkRow testId="link-your-week" icon={<CalendarDays size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:your-week", {})}>
+            Your week: days and programme
           </LinkRow>
-          <LinkRow testId="link-races" icon={<Trophy size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:races", {})}>
-            Goals and races
-          </LinkRow>
-          <LinkRow testId="link-body" icon={<Activity size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:body", {})}>
-            Body: muscle readiness
+          <LinkRow testId="link-setup" icon={<Trophy size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:setup", {})}>
+            {data.plan ? `Your goal: ${data.plan.goalName}` : "Set your running goal"}
           </LinkRow>
           {data.plan && (
-            <LinkRow testId="link-review" icon={<ClipboardList size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:review", {})}>
-              Weekly review
+            <LinkRow testId="link-week" icon={<ClipboardList size={17} color={COLORS.accent} />} onClick={() => nav.go("run:plan", {})}>
+              All weeks of the plan
             </LinkRow>
           )}
           {data.plan && (
@@ -492,9 +424,6 @@ export function PlanHome({ nav }) {
               What changed and why
             </LinkRow>
           )}
-          <LinkRow testId="link-setup" icon={<Settings2 size={17} color={COLORS.accent} />} onClick={() => nav.go("plan:setup", {})}>
-            {data.plan ? "Change goal or plan setup" : "Make a plan"}
-          </LinkRow>
           <Label>Reminders</Label>
           <RemindersCard nav={nav} />
           <div style={{ ...st.body(), fontSize: 11.5, marginTop: 16 }}>

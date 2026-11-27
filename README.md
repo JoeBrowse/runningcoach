@@ -27,7 +27,7 @@ Use the switch at the top of the screen: **Plan · Run · Lift**.
 | Mode | What it does |
 |---|---|
 | **Plan** | Your master week. Run days and gym days are in one plan. Today's session, the week, a weekly review, races and goals, and the muscle readiness map. |
-| **Run** | The running coach. Today's run, GPS recording with voice cues, the season chart, progress, zones and race prediction, fuel, weather, routes and the coach. |
+| **Run** (beta) | The running coach. Today's run, GPS recording with voice cues for a pace range (phone and Wear OS watch), the plan weeks and progress. |
 | **Lift** | The gym tracker. Log sets, follow programmes, see 1RM progress and which muscles have recovered. Runner presets are included. |
 
 Each session goes into one shared log. A run that you record appears in all three modes and on the muscle map. You never log a session twice.

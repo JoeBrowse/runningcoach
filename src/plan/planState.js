@@ -235,7 +235,7 @@ export function planOptions(profile = {}, master = {}, races = [], { today, seed
   const goal = p.goal || (level === "new" ? "runwalk" : "keepfit");
   const runDays = Array.isArray(m.runDays) && m.runDays.length ? m.runDays : p.runDays;
   const longRunDay = Number.isInteger(m.longRunDay) ? m.longRunDay : p.longRunDay;
-  const gymDays = (Array.isArray(m.gymDays) ? m.gymDays : []).map((g) => ({ day: g.day, type: g.type, intensity: g.intensity, note: g.note || "" }));
+  const gymDays = (Array.isArray(m.gymDays) ? m.gymDays : []).map((g) => ({ day: g.day, type: g.type, intensity: g.intensity, note: g.note || "", ...(g.name ? { name: g.name } : {}) }));
   const historyMode = p.fitnessSource === "history" || p.useHistory === true;
   const useSeed = !!seed && (level !== "new" || historyMode) && p.fitnessSource !== "new";
   const typed = (value, flag) => {
@@ -356,7 +356,7 @@ export function masterGymFor(master, iso) {
   if (!master || !Array.isArray(master.gymDays)) return null;
   const dow = engine.weekdayOf(iso);
   const g = master.gymDays.find((x) => Number(x.day) === dow);
-  return g ? { day: g.day, type: g.type, intensity: g.intensity, note: g.note || "", advice: "normal", reason: "From your master week.", fromMaster: true } : null;
+  return g ? { day: g.day, type: g.type, intensity: g.intensity, note: g.note || "", ...(g.name ? { name: g.name } : {}), advice: "normal", reason: "From your master week.", fromMaster: true } : null;
 }
 
 export function todayInfoFor(plan, today, master = null) {
@@ -382,7 +382,7 @@ export const GYM_TYPE_LABEL = { upper: "Upper body", lower: "Lower body", full: 
 
 export function gymLabel(g) {
   if (!g) return "";
-  const name = GYM_TYPE_LABEL[g.type] || "Gym";
+  const name = g.name || GYM_TYPE_LABEL[g.type] || "Gym";
   // advice "rest" (illness, injury, readiness, tired): the session is a rest day.
   const light = g.advice === "rest" ? "rest" : g.advice === "skip-heavy" ? "light" : g.advice === "maintenance" ? "maintenance" : g.intensity;
   return `${name} (${light})`;

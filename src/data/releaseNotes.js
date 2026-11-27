@@ -23,6 +23,29 @@ export const LAST_SEEN_VERSION_KEY = "last-seen-version";
 
 export const RELEASE_NOTES = [
   {
+    version: "2.4.0",
+    released: "2026-11-27",
+    headline: "A simpler Plan and Run. Run is now in beta.",
+    items: [
+      {
+        title: "You pick your days",
+        body: "Your week now asks four things: the days that you lift, your programme (full body, upper and lower, or push, pull, legs), the days that you run, and your long-run day. The app puts the leg days away from your long run. Change your programme at any time in Plan, Your week.",
+      },
+      {
+        title: "Coach by pace",
+        body: "Run setup asks: coach me by pace or by feel. With pace, each part of a run has a pace range, on the phone and on the watch. The coach tells you to speed up or slow down when you leave the range.",
+      },
+      {
+        title: "Less on the screen",
+        body: "Plan shows today, your week, the common changes and your goal. Run shows today's run, the plan, progress, and the watch and data screen. The goals are 5K, 10K, half marathon, marathon, run/walk to 5K and keep fit.",
+      },
+      {
+        title: "Run is in beta",
+        body: "Run needs more real use. Tell us what does not work on GitHub. Lift has not changed.",
+      },
+    ],
+  },
+  {
     version: "2.3.0",
     released: "2026-11-27",
     headline: "A better week for people who run and lift.",

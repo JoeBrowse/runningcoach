@@ -6,18 +6,19 @@ import { KEYS, getKey, setKey } from "../shared/store.js";
 import { GYM_TYPE_LABEL, saveMasterAndRebuild, loadPlanState } from "./planState.js";
 import { Screen, Card, Btn, Chip, Row, Label, Segmented, DayPicker, Notice, Loading, st, oswald, DAY_LONG } from "./ui.jsx";
 import {
-  defaultAnswers, toPlanWeekInput, toMasterRecord, toProfilePatch, weekRows, applyDayEdit, checkWeek, usesRun, usesLift, normaliseUse,
+  toPlanWeekInput, toMasterRecord, toProfilePatch, weekRows, applyDayEdit, checkWeek, usesRun, usesLift, normaliseUse,
+  PROGRAMMES, weekFromPicks, defaultPicks, picksToAnswers,
 } from "./weekSetup.js";
 
 /* ---------------------------------------------------------------
-   YOUR WEEK (spec v1.1 section 1, step 4)
+   YOUR WEEK (version 2.4; spec v1.1 section 1, step 4)
 
-   Questions: available days, levels, runs a week, lift days a week,
-   priority and two sessions a day (Both). The app proposes a week with
-   engine.planWeek and shows it as 7 rows with the reasons and the
-   warnings. The user can tap a day to change it; the app then checks
-   the changed week against the rules and shows each rule that the
-   change breaks. Save writes the master week.
+   Picks: the lift days and the programme (full body, upper and lower,
+   or push, pull, legs), the run days and the long-run day. The app
+   places the leg days away from the long run (weekSetup.weekFromPicks)
+   and shows the week as 7 rows. The user can tap a day to change it;
+   the app then checks the changed week against the rules. Save writes
+   the master week.
 
    <YourWeek use prevMaster profile onSave={(answers, week) => ...} />
    The first-open flow and the "plan:your-week" screen (from Settings)
@@ -81,7 +82,7 @@ function Pill({ children, filled, dim, testId }) {
 }
 
 function gymText(g) {
-  return `${GYM_TYPE_LABEL[g.type] || "Gym"} · ${g.intensity === "heavy" ? "heavy" : "light"}`;
+  return `${g.name || GYM_TYPE_LABEL[g.type] || "Gym"} · ${g.intensity === "heavy" ? "heavy" : "light"}`;
 }
 
 function DayEditor({ row, use, onApply, onCancel }) {
@@ -180,7 +181,8 @@ export function WeekRows({ rows, use, onEdit, editingDay, onApply, onCancel, bro
   );
 }
 
-/* The proposed week for the answers. Returns { week, error }. */
+/* The proposed week for the answers (engine.planWeek). Kept for tests and
+   for a later "Suggest a week" button. Returns { week, error }. */
 export function proposeWeek(answers) {
   if (typeof engine.planWeek !== "function") return { week: null, error: "The app cannot plan a week in this version." };
   try {
@@ -190,35 +192,27 @@ export function proposeWeek(answers) {
   }
 }
 
-const recommend = (x) => (typeof engine.recommendWeek === "function" ? engine.recommendWeek(x) : null);
-
+/* YOUR WEEK (version 2.4): you pick the days. The app only places the leg
+   days and says when a session must be light (weekSetup.weekFromPicks). */
 export function YourWeek({ use, prevMaster, profile, onSave, saveLabel = "Save my week", busy }) {
-  const [answers, setAnswers] = useState(() =>
-    defaultAnswers(use, {
-      prev: prevMaster,
-      levels: { runLevel: profile && profile.experience, liftLevel: profile && profile.liftLevel },
-      recommend,
-    })
-  );
+  const [picks, setPicks] = useState(() => defaultPicks(use, prevMaster));
   const [edits, setEdits] = useState([]); // stack of edited weeks, newest last
   const [editingDay, setEditingDay] = useState(null);
-  const u = answers.use;
+  const u = picks.use;
+  const answers = useMemo(() => picksToAnswers(picks, profile || {}), [picks, profile]);
 
-  const { week: proposed, error } = useMemo(() => proposeWeek(answers), [answers]);
+  const proposed = useMemo(() => weekFromPicks(picks), [picks]);
   const week = edits.length ? edits[edits.length - 1] : proposed;
-  const broken = useMemo(() => (edits.length && week ? checkWeek(week, answers) : []), [edits, week, answers]);
+  const broken = useMemo(() => (edits.length && week ? checkWeek(week, { ...answers, doubles: true }) : []), [edits, week, answers]);
   const rows = week ? weekRows(week, answers) : [];
 
-  // A new answer makes a new week. Changed days are cleared.
-  function set(patch, { recount } = {}) {
+  // A new pick makes a new week. Changed days are cleared.
+  function set(patch) {
     setEdits([]);
     setEditingDay(null);
-    setAnswers((a) => {
-      let next = { ...a, ...patch };
-      if (recount) {
-        const d = defaultAnswers(next.use, { levels: { runLevel: next.runLevel, liftLevel: next.liftLevel }, prev: { priority: next.priority }, recommend });
-        next = { ...next, runDays: d.runDays, liftDays: d.liftDays };
-      }
+    setPicks((p) => {
+      const next = { ...p, ...patch };
+      if (next.runDays && !next.runDays.includes(next.longRunDay)) next.longRunDay = next.runDays.includes(6) ? 6 : next.runDays.includes(0) ? 0 : next.runDays[next.runDays.length - 1] ?? null;
       return next;
     });
   }
@@ -229,74 +223,48 @@ export function YourWeek({ use, prevMaster, profile, onSave, saveLabel = "Save m
     setEditingDay(null);
   }
 
-  const availCount = answers.availableDays.length;
-  const runMax = Math.max(1, Math.min(6, availCount));
-  const liftMax = Math.max(1, Math.min(4, availCount));
   const sessions = week ? (week.runDays || []).length + (week.gymDays || []).length : 0;
   const restCount = rows.filter((r) => !r.run && !r.gym).length;
 
   return (
     <div data-testid="your-week">
-      <Label style={{ marginTop: 0 }}>Which days can you train?</Label>
-      <DayPicker
-        testId="week-days"
-        value={answers.availableDays}
-        onChange={(v) => {
-          if (!v.length) return;
-          set({ availableDays: v, runDays: Math.min(answers.runDays, Math.max(1, Math.min(6, v.length))), liftDays: Math.min(answers.liftDays, Math.max(1, Math.min(4, v.length))) });
-        }}
-      />
-      <div style={{ ...st.body(), fontSize: 12, marginTop: 6 }}>Select every day that you can train. The app selects the rest days.</div>
+      {usesLift(u) && (
+        <>
+          <Label style={{ marginTop: 0 }}>Which days do you lift?</Label>
+          <DayPicker testId="week-lift-days" value={picks.liftDays} onChange={(v) => set({ liftDays: v })} />
+          <Label>Your programme</Label>
+          <div style={{ display: "grid", gap: 6 }}>
+            {PROGRAMMES.map((p) => (
+              <Chip key={p.id} testId={`week-programme-${p.id}`} active={picks.programme === p.id} onClick={() => set({ programme: p.id })} style={{ textAlign: "left", borderRadius: 12, padding: "10px 14px" }}>
+                <span style={{ display: "block", fontSize: 14 }}>{p.label}</span>
+                <span style={{ display: "block", ...st.body(), fontSize: 12 }}>{p.detail}</span>
+              </Chip>
+            ))}
+          </div>
+          <div style={{ ...st.body(), fontSize: 12, marginTop: 6 }}>The app puts the leg days away from your long run. Change your programme here at any time.</div>
+        </>
+      )}
 
       {usesRun(u) && (
         <>
-          <Label>How much do you run now?</Label>
-          <Segmented
-            testId="week-run-level"
-            value={answers.runLevel}
-            onChange={(v) => set({ runLevel: v }, { recount: true })}
-            options={[{ value: "new", label: "New" }, { value: "some", label: "Sometimes" }, { value: "experienced", label: "A lot" }]}
-          />
-          <Label>How many days a week can you run?</Label>
-          <Stepper testId="week-runs" value={Math.min(answers.runDays, runMax)} min={1} max={runMax} unit={answers.runDays === 1 ? "run" : "runs"} onChange={(n) => set({ runDays: n })} />
-        </>
-      )}
-
-      {usesLift(u) && (
-        <>
-          <Label>How long have you lifted?</Label>
-          <Segmented
-            testId="week-lift-level"
-            value={answers.liftLevel}
-            onChange={(v) => set({ liftLevel: v }, { recount: true })}
-            options={[{ value: "beginner", label: "Beginner" }, { value: "intermediate", label: "Intermediate" }, { value: "advanced", label: "Advanced" }]}
-          />
-          <Label>How many days a week can you lift?</Label>
-          <Stepper testId="week-lifts" value={Math.min(answers.liftDays, liftMax)} min={1} max={liftMax} unit={answers.liftDays === 1 ? "day" : "days"} onChange={(n) => set({ liftDays: n })} />
-        </>
-      )}
-
-      {u === "both" && (
-        <>
-          <Label>What matters most?</Label>
-          <Segmented
-            testId="week-priority"
-            value={answers.priority}
-            onChange={(v) => set({ priority: v }, { recount: true })}
-            options={[{ value: "run", label: "Running" }, { value: "lift", label: "Lifting" }, { value: "equal", label: "Both the same" }]}
-          />
-          <Label>Can you train twice on one day?</Label>
-          <Segmented testId="week-doubles" value={answers.doubles} onChange={(v) => set({ doubles: v })} options={[{ value: false, label: "No" }, { value: true, label: "Yes" }]} />
-          <div style={{ ...st.body(), fontSize: 12, marginTop: 6 }}>Yes: a run and a gym session can be on one day, with 6 hours or more between them.</div>
+          <Label style={usesLift(u) ? undefined : { marginTop: 0 }}>Which days do you run?</Label>
+          <DayPicker testId="week-run-days" value={picks.runDays} onChange={(v) => set({ runDays: v })} />
+          {picks.runDays.length > 0 && (
+            <>
+              <Label>Long-run day</Label>
+              <div data-testid="week-long-day" style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {picks.runDays.map((d) => (
+                  <Chip key={d} testId={`week-long-day-${d}`} active={picks.longRunDay === d} onClick={() => set({ longRunDay: d })}>
+                    {DAY_LONG[d]}
+                  </Chip>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 
       <Label>Your week</Label>
-      {error && (
-        <Notice tone="bad" title="The app cannot make the week">
-          {error}
-        </Notice>
-      )}
       {week && (
         <>
           <div data-testid="week-summary" style={{ ...st.body(), marginBottom: 8 }}>
@@ -320,19 +288,18 @@ export function YourWeek({ use, prevMaster, profile, onSave, saveLabel = "Save m
                 <Undo2 size={15} /> Take back
               </Btn>
               <Btn small kind="secondary" testId="week-reset" onClick={() => setEdits([])}>
-                Make the week again
+                Start again
               </Btn>
             </Row>
           )}
-          {(week.warnings || []).map((w, i) => (
+          {(proposed.warnings || []).map((w, i) => (
             <Notice key={i} testId="week-warning">
               {w}
             </Notice>
           ))}
-          {(proposed && proposed.reasons && proposed.reasons.length > 0) && (
+          {proposed.reasons.length > 0 && !edits.length && (
             <Card testId="week-reasons">
-              <div style={{ ...st.title(14), marginBottom: 6 }}>Why this week</div>
-              {edits.length > 0 && <div style={{ ...st.body(), fontSize: 12, marginBottom: 6 }}>You changed some days. These reasons are for the week that the app made.</div>}
+              <div style={{ ...st.title(14), marginBottom: 6 }}>About this week</div>
               {proposed.reasons.map((r, i) => (
                 <div key={i} style={{ ...st.text(), fontSize: 13, padding: "5px 0", borderTop: i ? `1px solid ${COLORS.line}` : "none" }}>
                   {r}
@@ -343,7 +310,7 @@ export function YourWeek({ use, prevMaster, profile, onSave, saveLabel = "Save m
         </>
       )}
       <div style={{ marginTop: 6 }}>
-        <Btn testId="week-save" disabled={!week || !!error || busy || sessions === 0} onClick={() => onSave(answers, week)}>
+        <Btn testId="week-save" disabled={!week || busy || sessions === 0} onClick={() => onSave(answers, week)}>
           {busy ? "Saving…" : saveLabel}
         </Btn>
         {broken.length > 0 && <div style={{ ...st.body(), fontSize: 12, marginTop: 6 }}>You can save this week. The plan then keeps each run safe, and it can make a gym session light.</div>}
@@ -391,7 +358,7 @@ export function YourWeekScreen({ nav }) {
   return (
     <Screen title="Your week" onBack={nav.back} testId="your-week-screen">
       <div style={{ ...st.body(), marginBottom: 14 }}>
-        You use Skid Marks for {use === "both" ? "running and lifting" : use === "run" ? "running" : "lifting"}. Answer the questions. The app then proposes a week.
+        You use Skid Marks for {use === "both" ? "running and lifting" : use === "run" ? "running" : "lifting"}. Pick your days. The app keeps the leg days away from your long run.
       </div>
       <YourWeek key={use} use={use} prevMaster={ctx.master} profile={ctx.profile} onSave={save} busy={busy} />
     </Screen>

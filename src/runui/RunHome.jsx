@@ -9,7 +9,7 @@ import { listActivities, getReadinessLog } from "../shared/store.js";
 import { getCachedWeather, getWeatherSettings } from "../shared/weather.js";
 import { todayInfo, gymLabel } from "../plan/planState.js";
 import { targetMinutesNote } from "../plan/planText.js";
-import { getProfile, getRunPrefs, isRunActivity, jargonOn, stepLines, unitsOf } from "./runData.js";
+import { getProfile, getRunPrefs, isRunActivity, jargonOn, paceOn, stepLines, unitsOf } from "./runData.js";
 import { Btn, Loading, MONO, Note, OSWALD, Ribbon, S } from "./ui.jsx";
 
 /* ---------------------------------------------------------------
@@ -20,20 +20,32 @@ import { Btn, Loading, MONO, Note, OSWALD, Ribbon, S } from "./ui.jsx";
    GO button. Then quick links and "Something changed?".
 --------------------------------------------------------------- */
 
+/* Version 2.4 keeps Run simple: the plan, progress, and data (import and
+   the watch). The other run screens stay in the code (src/runui/screens.js)
+   but have no link here while Run is in beta. */
 const LINKS = [
   { id: "run:plan", label: "Plan weeks", Icon: CalendarDays },
   { id: "run:progress", label: "Progress", Icon: BarChart3 },
-  { id: "run:zones", label: "Zones and prediction", Icon: Gauge },
-  { id: "plan:races", label: "Races", Icon: Flag },
-  { id: "run:fuel", label: "Fuel and race day", Icon: Soup },
-  { id: "run:weather", label: "Weather", Icon: CloudSun },
-  { id: "run:routes", label: "Routes", Icon: MapIcon },
-  { id: "run:coach", label: "Coach", Icon: MessageCircle },
-  { id: "run:shoes", label: "Shoes", Icon: Footprints },
-  { id: "run:cycle", label: "Women's health", Icon: HeartPulse },
-  { id: "run:builder", label: "Workout builder", Icon: Wrench },
-  { id: "shared:data", label: "Data", Icon: Database },
+  { id: "shared:data", label: "Watch and data", Icon: Database },
 ];
+
+export const BETA_ISSUES_URL = "https://github.com/JoeBrowse/skidmarks/issues";
+
+/* Run is in beta (version 2.4). */
+export function BetaBanner({ testId = "run-beta" }) {
+  return (
+    <div data-testid={testId} style={{ ...S.card(), borderColor: COLORS.accent, display: "flex", gap: 10, alignItems: "flex-start" }}>
+      <span style={{ background: COLORS.accent, color: COLORS.onAccent, fontFamily: OSWALD, fontSize: 11, letterSpacing: 1, borderRadius: 6, padding: "2px 6px", flexShrink: 0 }}>BETA</span>
+      <span style={{ ...S.body(), color: COLORS.text }}>
+        Run is in beta. Tell us what does not work on{" "}
+        <a href={BETA_ISSUES_URL} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }}>
+          GitHub
+        </a>
+        .
+      </span>
+    </div>
+  );
+}
 
 export async function loadTempC() {
   try {
@@ -176,7 +188,8 @@ export function RunHome({ nav }) {
   const { info, profile, acts, prefs, tempC, rlog } = data;
   const plan = info.plan;
   const units = unitsOf(profile);
-  const showPace = jargonOn(nav.settings, plan, acts, info.iso);
+  const showPace = paceOn(nav.settings, plan, acts, info.iso, profile);
+  const jargon = jargonOn(nav.settings, plan, acts, info.iso);
   const run = info.run;
   const wctx = warmupContext(plan, profile, tempC);
   const checkedIn = (rlog || []).some((r) => r.date === info.iso);
@@ -234,7 +247,7 @@ export function RunHome({ nav }) {
       <div data-testid="today-run" style={S.card()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={S.label()}>Today · {engine.fmtDate(info.iso)}</span>
-          {showPace && week && week.phase && <span style={{ ...S.label(), color: COLORS.accent }}>{week.phase}</span>}
+          {jargon && week && week.phase && <span style={{ ...S.label(), color: COLORS.accent }}>{week.phase}</span>}
         </div>
         <div style={{ ...S.title(), fontSize: 22, marginTop: 4 }} data-testid="today-title">
           {run.title}
@@ -315,6 +328,7 @@ export function RunHome({ nav }) {
   return (
     <div data-testid="run-home" style={{ paddingBottom: 40, overflowX: "hidden" }}>
       <div style={{ padding: "28px 24px 0" }}>{header}</div>
+      <BetaBanner />
       {todayCard}
       {weekLine && (
         <div data-testid="week-line" style={{ ...S.body(), padding: "0 24px 10px", fontFamily: MONO, fontSize: 12 }}>
