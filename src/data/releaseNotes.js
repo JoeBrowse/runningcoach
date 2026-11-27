@@ -23,6 +23,29 @@ export const LAST_SEEN_VERSION_KEY = "last-seen-version";
 
 export const RELEASE_NOTES = [
   {
+    version: "2.3.0",
+    released: "2026-11-27",
+    headline: "A better week for people who run and lift.",
+    items: [
+      {
+        title: "Runs spread over the week",
+        body: "The week planner no longer puts all your runs next to the long run. New runners run on alternate days and do not run the day after the long run. To see the new week, open Settings and choose your use again, or change a day in Your week.",
+      },
+      {
+        title: "What matters most now counts",
+        body: "With running as your priority, a leg day can be light so that a hard run fits. With lifting as your priority, or both the same, the leg days stay heavy and the runs stay easy. Each choice shows its reason.",
+      },
+      {
+        title: "No means no",
+        body: "If you do not want to train twice on one day, the planner never puts two sessions on one day. If your sessions do not fit, it removes one from the side that matters less and tells you.",
+      },
+      {
+        title: "New to lifting",
+        body: "If you are new to lifting but you already run, you keep 1 rest day a week. Your lift sessions start light. After 6 to 8 weeks, you can change a session to heavy.",
+      },
+    ],
+  },
+  {
     version: "2.2.0",
     released: "2026-11-26",
     headline: "Skid Marks is now also a website. Use it on an iPhone, an Android phone or a computer.",

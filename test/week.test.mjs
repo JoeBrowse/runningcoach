@@ -52,15 +52,17 @@ function cases() {
 /* What the rules expect, from the input only. */
 function expectations(c) {
   const prio = c.use === 'run' ? 'run' : c.use === 'lift' ? 'lift' : c.priority;
-  const beginner = (c.use !== 'lift' && c.runLevel === 'new') || (c.use !== 'run' && c.liftLevel === 'beginner');
+  // 2 rest days for a new runner, or for a beginner who only lifts. A new lifter who runs keeps 1.
+  const beginner = (c.use !== 'lift' && c.runLevel === 'new') || (c.use === 'lift' && c.liftLevel === 'beginner');
   const restMin = beginner ? 2 : 1;
   const maxTrain = Math.min(c.availableDays.length, 7 - restMin);
+  const lightStart = c.use === 'both' && c.liftLevel === 'beginner';
   let capR = c.use === 'lift' ? 0 : c.runDays;
   if (c.runLevel === 'new') capR = Math.min(capR, 5);
   let capL = c.use === 'run' ? 0 : c.liftDays;
   if (capL > 4) capL = prio === 'lift' ? 4 : 3;
   else if (capL === 4 && prio !== 'lift') capL = 3;
-  return { prio, restMin, maxTrain, capR, capL };
+  return { prio, restMin, maxTrain, capR, capL, lightStart };
 }
 
 /* Independent checks of one week. Returns a list of failures. */
@@ -93,11 +95,21 @@ function checkWeek(c, w) {
     if (L != null && [L, plus(L, 1), plus(L, -1), plus(L, -2)].includes(h)) f.push(`heavy legs on ${h}, long run on ${L}`);
     if (heavy.some((k) => k !== h && cdist(h, k) === 1)) f.push(`heavy leg days touch at ${h}`);
   }
-  // room for a hard run (the same test as buildPlan uses to choose quality days)
+  // room for a hard run (the same test as buildPlan uses to choose quality days).
+  // With running priority, a leg day becomes light before a hard-run day is lost.
   if (w.runDays.length >= 2) {
     const geo = w.runDays.filter((d) => d !== L && cdist(d, L) >= 2);
     const clean = geo.filter((d) => ![plus(d, -1), d, plus(d, 1)].some((x) => heavy.includes(x)));
-    if (geo.length && !clean.length) f.push('no run day is free for a hard run');
+    if (e.prio === 'run' && c.runLevel !== 'new' && geo.length && !clean.length) f.push('running priority, but no run day is free for a hard run');
+    if (geo.length && !clean.length && !w.reasons.some((r) => r.startsWith('All your runs stay easy.'))) f.push('runs stay easy with no reason');
+  }
+  // a new lifter who also runs: no heavy session
+  if (e.lightStart && w.gymDays.some((g) => g.intensity === 'heavy')) f.push('heavy session for a new lifter who runs');
+  // runs spread: no 3 runs in a row and no run the day after the long run for a new runner,
+  // when every day is free and the week has 3 runs or fewer
+  if (c.availableDays.length === 7 && w.runDays.length <= 3) {
+    for (const d of WEEK) if ([d, plus(d, 1), plus(d, 2)].every((x) => w.runDays.includes(x))) f.push(`3 runs in a row from ${d}`);
+    if (c.runLevel === 'new' && L != null && w.runDays.includes(plus(L, 1))) f.push('a new runner runs the day after the long run');
   }
   // doubles: the days with a run and a lift
   const pairs = w.runDays.filter((d) => gymDays.includes(d));
@@ -105,10 +117,9 @@ function checkWeek(c, w) {
   for (const d of w.doubles) {
     if (d.gapHours !== 6) f.push('gapHours is not 6');
     if (d.first !== (e.prio === 'lift' ? 'lift' : 'run')) f.push(`first is ${d.first}, priority ${e.prio}`);
-    const g = w.gymDays.find((x) => x.day === d.day);
-    if (!c.doubles && g.type !== 'upper') f.push(`no doubles, but ${g.type} shares ${d.day} with a run`);
   }
-  if (!c.doubles && pairs.length && w.runDays.length + w.gymDays.length <= e.maxTrain) f.push('a shared day without doubles, but the sessions fit the days');
+  // "No" to two sessions on one day is firm (one available day is the only exception, and it drops a side)
+  if (!c.doubles && pairs.length) f.push(`no doubles, but day ${pairs[0]} has a run and a lift`);
   // split matches the lift days
   const n = w.gymDays.length;
   const types = w.gymDays.map((g) => g.type).sort().join(',');
@@ -142,6 +153,10 @@ function checkWeek(c, w) {
     for (const s of r.split(/(?<=\.)\s+/)) if (s.split(/\s+/).length > 26) f.push(`long sentence: ${s}`);
   }
   if (L != null && !w.reasons.some((r) => r.includes(`long run is on ${NAMES[L]}`))) f.push('no reason for the long-run day');
+  // honest texts
+  if (w.reasons.some((r) => /72 hours or more before the long run/.test(r))) f.push('reason claims 72 hours from calendar days');
+  if (c.use === 'lift' && w.reasons.some((r) => /\bruns?\b/.test(r))) f.push('lift only, but a reason talks about runs');
+  if (c.use !== 'lift' && c.runLevel === 'new' && w.reasons.some((r) => /can have a hard run/.test(r))) f.push('a new runner is told about a hard run');
   for (const h of heavy) if (L != null && !w.reasons.some((r) => r.includes(`on ${NAMES[h]}. The long run is on ${NAMES[L]}`))) f.push(`no spacing reason for heavy legs on ${h}`);
   for (const g of w.gymDays.filter((x) => LEG.has(x.type) && x.intensity === 'light')) if (!w.reasons.some((r) => r.includes(`on ${NAMES[g.day]} is light`))) f.push(`no reason for light legs on ${g.day}`);
   if (w.restDays.length && !w.reasons.some((r) => /rest day/.test(r))) f.push('no rest-day reason');
@@ -192,19 +207,20 @@ test('planWeek: the plans that buildPlan makes from the weeks keep every safety 
     // room for a hard run: when the run days allow a quality day with no gym days, they still allow one
     const fk = `${c.runLevel}|${w.runDays}|${w.longRunDay}`;
     if (!free.has(fk)) free.set(fk, buildPlan({ ...opts, gymDays: [] }).settings.qualityDays.length);
-    if (free.get(fk) >= 1 && plan.settings.qualityDays.length < 1) bad.push(`${tag} :: no quality day is left`);
+    if (expectations(c).prio === 'run' && c.runLevel !== 'new' && free.get(fk) >= 1 && plan.settings.qualityDays.length < 1) bad.push(`${tag} :: running priority, but no quality day is left`);
   }
   assert.deepEqual(bad.slice(0, 10), [], `${bad.length} failures`);
 });
 
 test('planWeek: an example week with reasons', () => {
-  const w = planWeek({ use: 'both', availableDays: [0, 1, 2, 3, 4, 5, 6], runDays: 4, liftDays: 3, priority: 'run', doubles: false, runLevel: 'some', liftLevel: 'intermediate' });
+  const w = planWeek({ use: 'both', availableDays: [0, 1, 2, 3, 4, 5, 6], runDays: 4, liftDays: 3, priority: 'equal', doubles: true, runLevel: 'some', liftLevel: 'intermediate' });
   assert.equal(w.longRunDay, 0);
   assert.equal(w.split, 'upper-lower-upper');
   const lower = w.gymDays.find((g) => g.type === 'lower');
   assert.equal(lower.intensity, 'heavy');
-  assert.ok(![6, 5, 0, 1].includes(lower.day), 'lower body is 72 hours or more before the long run');
+  assert.ok(![6, 5, 0, 1].includes(lower.day), 'lower body is 3 or more days before the long run');
   assert.ok(w.reasons.some((r) => r === `Lower body is on ${NAMES[lower.day]}. The long run is on Sunday, ${(7 - lower.day) % 7} days later.`), w.reasons.join('\n'));
+  assert.ok(w.reasons.includes('Heavy legs are 3 or more days before the long run, and not on the day after it.'));
   assert.ok(w.restDays.length >= 1);
   assert.deepEqual(w.warnings, []);
 });
@@ -239,7 +255,7 @@ test('planWeek: too many sessions reduce the lower-priority side first', () => {
   assert.ok(two.warnings.some((x) => /reduced lifting/.test(x)) && two.warnings.some((x) => /reduced running/.test(x)));
 });
 
-test('planWeek: 4 lift days only with lifting priority; upper body shares a day with an easy run only when needed', () => {
+test('planWeek: 4 lift days only with lifting priority; no doubles means no shared day', () => {
   const w4 = planWeek({ use: 'both', availableDays: [0, 1, 2, 3, 4, 5, 6], runDays: 3, liftDays: 4, priority: 'equal', doubles: false, runLevel: 'some', liftLevel: 'advanced' });
   assert.equal(w4.gymDays.length, 3);
   assert.match(w4.warnings.join(' '), /4 lift days are only for people who make lifting the priority/);
@@ -249,11 +265,12 @@ test('planWeek: 4 lift days only with lifting priority; upper body shares a day 
   assert.equal(l4.longRunDay, null);
   const fit = planWeek({ use: 'both', availableDays: [0, 1, 2, 3, 4, 5, 6], runDays: 3, liftDays: 3, priority: 'run', doubles: false, runLevel: 'some', liftLevel: 'intermediate' });
   assert.deepEqual(fit.doubles, [], 'the sessions fit, so no day has two sessions');
+  // 6 sessions on 5 days with no doubles: one session goes (lifting, because running is the priority). No shared day.
   const tight = planWeek({ use: 'both', availableDays: [1, 2, 3, 4, 5], runDays: 3, liftDays: 3, priority: 'run', doubles: false, runLevel: 'some', liftLevel: 'intermediate' });
-  assert.equal(tight.doubles.length, 1);
-  const shared = tight.gymDays.find((g) => g.day === tight.doubles[0].day);
-  assert.equal(shared.type, 'upper');
-  assert.deepEqual(tight.doubles[0], { day: shared.day, first: 'run', gapHours: 6 });
+  assert.deepEqual(tight.doubles, []);
+  assert.deepEqual([tight.runDays.length, tight.gymDays.length], [3, 2]);
+  assert.ok(tight.warnings.some((x) => x.startsWith('Too many sessions for your days. We reduced lifting to 2.')));
+  assert.ok(!tight.reasons.some((r) => /shares a day/.test(r)));
 });
 
 test('planWeek: doubles let a lower-body session share a day with an easy run; the priority goes first', () => {
@@ -311,4 +328,84 @@ test('recommendWeek: the Starting weeks table', () => {
     const w = planWeek({ use, runLevel: rl, liftLevel: ll, priority: x.priority, availableDays: WEEK, runDays: x.runDays, liftDays: x.liftDays, doubles: false });
     assert.deepEqual(w.warnings, [], `${use} ${rl} ${ll} ${p}`);
   }
+});
+
+/* ---------- personas (the review of 27 November 2026) ----------
+   Each persona had a fault in the old planner. The comment says which one. */
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
+const SUN = 0, MON = 1, TUE = 2, WED = 3, THU = 4, FRI = 5, SAT = 6;
+const inRow3 = (runs) => WEEK.some((d) => [d, plus(d, 1), plus(d, 2)].every((x) => runs.includes(x)));
+const heavyLegDays = (w) => w.gymDays.filter((g) => LEG.has(g.type) && g.intensity === 'heavy').map((g) => g.day);
+const qualityDays = (w) => w.runDays.filter((d) => d !== w.longRunDay && cdist(d, w.longRunDay) >= 2 && ![plus(d, -1), d, plus(d, 1)].some((x) => heavyLegDays(w).includes(x)));
+
+test('persona: runner who lifts, 2 runs and 2 lifts, equal priority (runs were back to back before the long run)', () => {
+  const base = { use: 'both', availableDays: ALL_DAYS, runDays: 2, liftDays: 2, priority: 'equal', doubles: true, runLevel: 'some', liftLevel: 'intermediate', longRunDay: SAT };
+  const w = planWeek(base);
+  assert.deepEqual(w.runDays, [TUE, SAT]);
+  assert.deepEqual(w.gymDays.map((g) => [g.day, g.type, g.intensity]), [[MON, 'full', 'heavy'], [WED, 'full', 'heavy']]);
+  assert.ok(w.reasons.some((r) => r.startsWith('All your runs stay easy. A hard run on Tuesday would be next to a heavy leg day.')));
+  assert.ok(w.reasons.includes('Lift early in the day on Wednesday. Then the long run is 72 hours or more later.'));
+  // the priority changes the week: with running priority, one leg day is light and a hard run fits
+  const run = planWeek({ ...base, priority: 'run' });
+  assert.equal(qualityDays(run).length, 1);
+  assert.ok(run.gymDays.some((g) => g.intensity === 'light'));
+  assert.notDeepEqual(run.gymDays, w.gymDays);
+  // 3 runs: spread over the week, not 3 in a row
+  const three = planWeek({ ...base, runDays: 3 });
+  assert.ok(!inRow3(three.runDays), `runs ${three.runDays}`);
+  assert.ok(!three.runDays.includes(SUN), 'no run the day after the long run');
+});
+
+test('persona: returning runner aged 55, new runner and new lifter (3 runs in a row and heavy lifts before)', () => {
+  const w = planWeek({ use: 'both', availableDays: ALL_DAYS, runDays: 3, liftDays: 2, priority: 'run', doubles: false, runLevel: 'new', liftLevel: 'beginner' });
+  assert.ok(!inRow3(w.runDays), `runs ${w.runDays}`);
+  for (const a of w.runDays) for (const b of w.runDays) if (a !== b) assert.ok(cdist(a, b) >= 2, `runs on alternate days: ${w.runDays}`);
+  assert.ok(w.gymDays.every((g) => g.intensity === 'light'));
+  assert.ok(w.restDays.length >= 2);
+  assert.ok(w.reasons.some((r) => r.includes('because you are new to lifting')));
+  assert.ok(w.reasons.some((r) => r.startsWith('New runners start with easy runs.')));
+});
+
+test('persona: experienced runner who is new to the gym keeps 6 runs and 1 rest day (lost a run before)', () => {
+  const w = planWeek({ use: 'both', availableDays: ALL_DAYS, runDays: 6, liftDays: 2, priority: 'run', doubles: true, runLevel: 'experienced', liftLevel: 'beginner', longRunDay: SUN });
+  assert.equal(w.runDays.length, 6);
+  assert.equal(w.gymDays.length, 2);
+  assert.equal(w.restDays.length, 1);
+  assert.ok(w.gymDays.every((g) => g.intensity === 'light'), 'the first lift sessions are light');
+  assert.ok(qualityDays(w).length >= 2);
+  assert.deepEqual(w.warnings, []);
+});
+
+test('persona: gym regular who starts to run, "no" to two sessions on one day (a shared day was planned before)', () => {
+  const w = planWeek({ use: 'both', availableDays: ALL_DAYS, runDays: 2, liftDays: 4, priority: 'lift', doubles: false, runLevel: 'new', liftLevel: 'advanced' });
+  assert.deepEqual(w.doubles, []);
+  assert.equal(w.gymDays.length, 4, 'lifting is the priority');
+  assert.equal(w.runDays.length, 1);
+  assert.ok(w.warnings.some((x) => x.startsWith('Too many sessions for your days. We reduced running to 1. Lifting is your priority. New runners need at least 2 rest days a week.')));
+});
+
+test('persona: marathon runner with running priority gets 2 hard-run days', () => {
+  const w = planWeek({ use: 'both', availableDays: ALL_DAYS, runDays: 5, liftDays: 2, priority: 'run', doubles: false, runLevel: 'experienced', liftLevel: 'intermediate', longRunDay: SUN });
+  assert.equal(w.runDays.length, 5);
+  const q = qualityDays(w);
+  assert.ok(q.some((a) => q.some((b) => cdist(a, b) >= 2)), `hard-run days ${q}`);
+});
+
+test('persona: the other weeks of the review stay as good as before', () => {
+  // Couch to 5K: runs on alternate days
+  const c25 = planWeek({ use: 'run', availableDays: [MON, WED, FRI, SAT, SUN], runDays: 3, runLevel: 'new' });
+  assert.deepEqual(c25.runDays, [WED, FRI, SUN]);
+  assert.ok(!c25.reasons.some((r) => /can have a hard run/.test(r)));
+  // Hybrid race athlete: the shared day is an easy run and upper body, run first
+  const hyb = planWeek({ use: 'both', availableDays: ALL_DAYS, runDays: 4, liftDays: 3, priority: 'equal', doubles: true, runLevel: 'experienced', liftLevel: 'advanced' });
+  assert.equal(hyb.doubles.length, 1);
+  assert.equal(hyb.gymDays.find((g) => g.day === hyb.doubles[0].day).type, 'upper');
+  assert.equal(qualityDays(hyb).length >= 1, true);
+  // Busy parent: 3 days, one lift is cut with a warning
+  const bp = planWeek({ use: 'both', availableDays: [TUE, THU, SAT], runDays: 2, liftDays: 2, priority: 'equal', doubles: false, runLevel: 'some', liftLevel: 'intermediate' });
+  assert.deepEqual([bp.runDays, bp.gymDays.map((g) => g.day)], [[THU, SAT], [TUE]]);
+  // Lifter only: no text about runs
+  const lo = planWeek({ use: 'lift', availableDays: [MON, TUE, WED, THU, FRI], liftDays: 4, liftLevel: 'intermediate' });
+  assert.ok(!lo.reasons.some((r) => /\bruns?\b/.test(r)), lo.reasons.join(' '));
+  assert.ok(cdist(...lo.gymDays.filter((g) => g.type === 'lower').map((g) => g.day)) >= 2);
 });

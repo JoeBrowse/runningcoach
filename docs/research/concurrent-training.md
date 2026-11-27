@@ -22,11 +22,11 @@ This note sums up the research that sets how Skid Marks plans a week for people 
 These rules come from the findings above. Rules 6 and 7 are common coaching practice, not tested in the cited papers.
 
 1. Heavy legs counts as a hard day. No heavy legs within 48 hours before a quality run or 72 hours before the long run or a race.
-2. Upper body can share a day with an easy run.
+2. Upper body can share a day with an easy run, when the user allows two sessions a day.
 3. A hard run and a heavy leg session can share a day only when the user allows two sessions a day: the priority first, then a gap of 6 hours or more. This keeps the next day easy.
 4. Two lift sessions a week is the default for people who run. One is enough for beginners. Three or four only when lifting is the priority.
 5. Lift split by lift days: 1 or 2 days: full body. 3 days: upper, lower, upper (one leg day). 4 days: upper, lower, upper, lower (lifting priority only).
-6. At least one full rest day a week. Beginners get at least two.
+6. At least one full rest day a week. New runners, and beginners who only lift, get at least two. A new lifter who already runs keeps one, and the first lift sessions are light.
 7. Easy days stay easy. On a day with two sessions, both are easy, or one is the priority session and the other is easy.
 8. Near an A race: maintenance lifting in the last 10 days, no heavy lifting in race week.
 9. An unplanned session changes the plan. An unplanned heavy leg session or hard run eases the next hard session in the following 48 hours. An unplanned easy session counts towards the week, and the next easy run can get shorter.

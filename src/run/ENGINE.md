@@ -92,22 +92,22 @@ Output: `{runDays, longRunDay, gymDays: [{day, type, intensity, note}], doubles:
 How it works:
 
 1. Caps. New runners: 5 runs or fewer. Lift days: 4 or fewer, and 4 only with lifting priority (else 3). Each cap gives a warning.
-2. Rest days. At least 1 rest day, 2 for beginners (`runLevel: 'new'` when the user runs, or `liftLevel: 'beginner'` when the user lifts). Unavailable days are always rest days. So the training days are at most `min(available days, 7 - minimum rest days)`.
+2. Rest days. At least 1 rest day. 2 for a new runner (`runLevel: 'new'` when the user runs), or for a beginner who only lifts (`use: 'lift'`, `liftLevel: 'beginner'`). A new lifter who already runs keeps 1 rest day, and all the lift sessions are light (`lightStart`). Unavailable days are always rest days. So the training days are at most `min(available days, 7 - minimum rest days)`.
 3. Long run first. The preferred `longRunDay` when it is available, else Sunday, else Saturday, else the last available day of the week.
 4. Search. The engine tests every layout of the other runs and the lift days on the available days and keeps the valid layout with the lowest cost.
    - Hard rules (a layout that breaks one is not valid):
      - No lift on the long-run day.
-     - Heavy legs (lower or full body, heavy) are not on the day after the long run or on the 2 days before it (72 hours).
+     - Heavy legs (lower or full body, heavy) are not on the day after the long run or on the 2 days before it. The engine counts calendar days, so the reason says "3 or more days". When heavy legs are exactly 3 days before, a reason says to lift early in the day.
      - Heavy leg days do not touch.
-     - Room for a hard run: with 2 or more runs, one run day 2 or more days from the long run has no heavy legs on that day, the day before or the day after. This is the same test that `buildPlan` uses to choose quality days. (When no run day is 2 or more days from the long run, there is no room. The cost is then high.)
-     - A run and a lift share a day only on a day that is not the long-run day. With `doubles: false`, only an easy run and upper body share a day, and only when the sessions are more than the training days.
-   - Costs (lower is better): a shared day, a leg session that must be light (only when no heavy place is valid), no room for a second hard run (4 or more runs, not a new runner), run days or lift days next to each other, more than 3 training days in a row.
+     - A run and a lift share a day only with `doubles: true`, and never on the long-run day. With `doubles: false`, no day has two sessions: the reductions in step 5 apply.
+   - Costs (lower is better): a shared day; run days next to each other (more for a new runner); each run after 2 runs in a row; a run on the day after the long run (more for a new runner); lift days next to each other; a light leg session on the day before or after the long run; more than 3 training days in a row.
+   - Costs that the priority sets (`PRIORITY_COST`): a leg session that must be light; no run day free for a hard run (a run day 2 or more days from the long run, with no heavy legs on that day, the day before or the day after: the same test that `buildPlan` uses); no room for a second hard run (4 or more runs). Running priority: a light leg day costs less than a lost hard run. Equal or lifting priority: the leg days stay heavy, and the runs stay easy, with a reason. With 3 runs or more, a lost hard run costs more (`noQuality3`). For a new runner, a lost hard run costs little, because new runners start with easy runs.
 5. Reductions. When no layout is valid, the lower-priority side loses one session and the search runs again. Run priority: lifting goes down to 1, then running. Lift priority: running goes down to 1, then lifting. Equal: one session from each side in turn, lifting first. A side that the user chose never goes below 1. Each reduction gives a warning, for example "Too many sessions for your days. We reduced lifting to 2."
    - Only 1 available day for both sides: with doubles, the run and a light full-body lift share the day. With no doubles, the lower-priority side (lifting for equal) goes to 0, with a warning.
 6. Split: 1 or 2 lift days: full body. 3: upper, lower, upper. 4: upper, lower, upper, lower.
-7. Intensity: lower and full body are heavy (light only when no heavy place is valid, with a reason). Upper body is light for run priority, heavy for the other priorities.
+7. Intensity: lower and full body are heavy, or light with a reason (too close to the long run, a hard run with running priority, or a new lifter who runs). Upper body is light for run priority or a new lifter who runs, heavy for the other priorities.
 
-The plan engine then builds the plan with `buildPlan({runDays, longRunDay, gymDays, ...})`, as before. The tests build a plan from each different week and check that every safety check passes, that `buildPlan` does not move the long run or make a gym day light, and that a quality day is still possible.
+The plan engine then builds the plan with `buildPlan({runDays, longRunDay, gymDays, ...})`, as before. The tests build a plan from each different week and check that every safety check passes, that `buildPlan` does not move the long run or make a gym day light, and, with running priority, that a quality day is still possible. Persona tests (the review of 27 November 2026) check the spread of runs, the firm "no" to two sessions on one day and the effect of the priority.
 
 ### `recommendWeek({use, runLevel, liftLevel, priority})`
 
